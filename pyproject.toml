@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "attempt_this_online"
+version = "0.1.0"
+description = "Try It Online clone"
+authors = ["pxeger <_@pxeger.com>"]
+license = "Artistic License 2.0"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+starlette = "^0.14.2"
+
+[tool.poetry.dev-dependencies]
+uvicorn = "^0.13.4"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
