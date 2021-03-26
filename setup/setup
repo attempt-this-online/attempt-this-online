@@ -1,0 +1,247 @@
+#!/bin/sh
+
+# try to remove any existing installation
+# if false; then
+if true; then
+sed -i '/^overlay/d' /etc/fstab
+umount /usr/local/lib/ATO/rootfs/*
+pkill -9 uvicorn
+userdel api
+userdel sandbox
+systemctl disable --now ATO.service nginx.service
+rm -rf \
+    /var/cache/ATO \
+    /run/lock/ATO \
+    /var/lib/ATO_home \
+    /usr/local/lib/ATO \
+    /usr/local/share/ATO \
+    /usr/local/bin/ATO_run \
+    /usr/local/bin/ATO_sandbox \
+    /etc/sudoers.d/40_ATO \
+    /usr/local/lib/systemd/system/ATO.service \
+    /usr/local/lib/systemd/system/ATO.socket
+fi
+
+set -e
+
+VERSION="0.1.0"
+
+error() {
+    echo "$@" >&2; exit 2
+}
+
+# make sure this is arch linux
+# shellcheck disable=SC1091
+[ -f /etc/arch-release ] || error this script only works on Arch Linux
+
+# make sure a valid domain name was provided (this isn't perfect validation, but it's good enough to check that it's not
+# just garbage)
+echo "$1" | grep -xEq '([0-9A-Za-z\-]+\.)+[0-9A-Za-z]+' || error you must provide a valid domain name as the first command-line argument
+
+whoami | grep -xFq root || error you must run this script as root
+
+# check for apparmor kernel parameter TODO
+# [ -e /sys/kernel/security/apparmor/profiles ] || error you must enable apparmor in the kernel - see 'https://wiki.archlinux.org/index.php/AppArmor'
+
+# install dependencies
+# - base-devel: to install libcgroup
+# - bubblewrap: primary sandboxing mechanism
+# - certbot: generate SSL certificates for nginx
+# - cronie: automate renewal of certbot certificates, cache cleaning, etc.
+# - fuse-overlayfs: union filesystem
+# - docker: to extract images of the various languages
+# - git: to download libcgroup
+# - nginx: web server
+# - nginx-mod-modsecurity: web application firewall
+# - python: runtime for API
+# - python-pip: package manager for Python
+# - sed: configuration editing on installation
+# - sudo: privilege management for sandboxing
+# - zsh: for running the runner scripts
+pacman -Syu --noconfirm --needed \
+    base-devel \
+    bubblewrap \
+    certbot \
+    cronie \
+    docker \
+    git \
+    nginx \
+    nginx-mod-modsecurity \
+    python \
+    python-pip \
+    sed \
+    sudo \
+    zsh
+
+original_cwd="$(pwd)"
+# don't use /tmp because it has weird permissions
+mkdir -p /var/cache/ATO
+cd /var/cache/ATO
+
+# install libcgroup
+git clone https://aur.archlinux.org/libcgroup.git
+# makepkg doesn't allow running as root, so use `nobody`
+chown -R nobody:nobody libcgroup
+cd libcgroup
+sudo -u nobody makepkg
+pacman -U --noconfirm --needed libcgroup-*.pkg.tar.zst
+cd ..
+
+if [ "$2" = --manual-package ]; then
+    cd "$original_cwd"
+    cp "$3" /var/cache/ATO
+    cd /var/cache/ATO
+else
+    curl "https://github.com/pxeger/attempt_this_online/releases/download/$VERSION/attempt_this_online.tar.gz"
+fi
+tar -xzf attempt_this_online.tar.gz # fun fact: you don't need the -v option to tar
+cd attempt_this_online
+
+mkdir -p \
+    /usr/local/lib/ATO \
+    /usr/local/share/ATO
+
+# configure sandbox and api users
+useradd -rs /usr/bin/nologin -md /var/lib/ATO_home/sandbox sandbox
+useradd -rs /usr/bin/nologin -md /var/lib/ATO_home/api api
+
+# install runners
+cp -RT runners /usr/local/share/ATO/runners
+chown -R sandbox:sandbox /usr/local/share/ATO/runners
+chmod -R a+rX-w /usr/local/share/ATO/runners
+
+# setup apparmor TODO
+# systemctl enable --now apparmor.service
+
+# setup sandbox access with sudo
+install -m 500 -o sandbox -g sandbox sandbox /usr/local/bin/ATO_sandbox
+install -m 500 -o sandbox -g sandbox wrapper /usr/local/bin/ATO_wrapper
+install -m 500 -o sandbox -g sandbox setup/rm /usr/local/bin/ATO_rm
+install -m 440 -o root -g root setup/sudo.conf /etc/sudoers.d/40_ATO
+
+# install API
+sed -i 's/TRUST_PROXY_HEADER = False/TRUST_PROXY_HEADER = True/' api/api.py
+cp -RT api /usr/local/share/ATO/api
+chown -R api:api /usr/local/share/ATO/api
+chmod -R a+rX-w /usr/local/share/ATO/api
+# Poetry needs write access
+chmod u+w /usr/local/share/ATO/api/pyproject.toml /usr/local/share/ATO/api/poetry.lock
+
+# setup Python environment
+cd /usr/local/share/ATO/api
+python -m pip install poetry
+sudo -u api python -m poetry install --no-dev
+# reset permissions
+chmod u-w /usr/local/share/ATO/api/pyproject.toml /usr/local/share/ATO/api/poetry.lock
+cd /var/cache/ATO/attempt_this_online
+
+# install static files
+cp -RT public /usr/local/share/ATO/public
+chown -R http:http /usr/local/share/ATO/public
+chmod -R a+rX-w /usr/local/share/ATO/public
+
+# configure nginx
+sed -i "s/{ato.pxeger.com}/$1/g" setup/nginx.conf
+install -m 644 -o root -g root setup/nginx.conf /etc/nginx/
+install -m 644 -o root -g root setup/modsecurity.conf /etc/nginx/
+# don't waste time generating DH params unless necessary
+[ -f /etc/nginx/dhparam.pem ] || openssl dhparam -out /etc/nginx/dhparam.pem 2048
+systemctl enable nginx.service
+
+# configure Let's Encrypt
+install -dm 750 -o root -g http /var/www/_letsencrypt
+# we can't start nginx because the certificate isn't there, but we can't obtain a certificate if nginx isn't running
+# so start a temporary Python web server
+python -m http.server --directory /var/www/_letsencrypt 80 & PYSERVERPID="$!"
+# TODO get option for email
+certbot certonly -n --webroot -w /var/www/_letsencrypt -d "$1" -d "www.$1" --agree-tos --register-unsafely-without-email
+# end that Python web server
+kill -TERM "$PYSERVERPID"
+# configure cronie to automatically renew certificates
+# (every day at 10:07)
+echo "7 10 * * * certbot renew && systemctl reload nginx" >> /var/spool/cron/root
+systemctl enable --now cronie.service
+
+# install yargs
+install -m 555 -o root -g root yargs /usr/local/bin/ATO_yargs
+
+# steal a statically linked bash from Debian
+systemctl start docker.service
+docker run --rm debian bash -c '{ apt-get update; apt-get install bash-static; } >/dev/null 2>&1; cat /bin/bash-static' > /usr/local/bin/ATO_bash
+chown root:root /usr/local/bin/ATO_bash
+chmod 555 /usr/local/bin/ATO_bash
+systemctl stop docker.service
+
+# configure service
+install -m 555 -o root -g root setup/ATO /usr/local/bin/
+mkdir -p /usr/local/lib/systemd/system/
+install -m 644 -o root -g root setup/ATO.service /usr/local/lib/systemd/system/
+systemctl enable ATO.service
+
+# generate flags to be used as proof of compromise
+flag() {
+    tr < /dev/urandom -dc a-z | head -c 32 > "$1"
+    chown "$2" "$1"
+    chmod 400 "$1"
+}
+flag /root/flag root:root
+flag /var/lib/ATO_home/sandbox/flag sandbox:sandbox
+flag /var/lib/ATO_home/api/flag api:api
+
+# Create upper layer filesystem for overlayfs which contains the mount point /ATO pre-made for bwrap - see
+# https://github.com/containers/bubblewrap/issues/413
+mkdir -p /usr/local/share/ATO/overlayfs_upper/ATO /usr/local/share/ATO/overlayfs_upper/proc /usr/local/share/ATO/overlayfs_upper/dev
+
+echo Finished system setup.
+echo Now extracting Docker images - this will take a long time...
+
+systemctl start docker.service
+
+mkdir -p /var/cache/ATO/images
+grep -m1 '^#:image: ' runners/* |
+cut -d ' ' -f 2 |
+sort -u |
+    while read -r image
+    do
+        # ignore blank lines or comments
+        [ -z "$image" ] || [ "$image" = "#" ] && continue
+        echo "$image"
+        # replace slash with plus so that it can be used as an individual filename
+        image_pathsafe="$(echo "$image" | tr '/' '+')"
+        docker pull "$image"
+        docker save "$image" | tar -xC /var/cache/ATO/images
+        mv /var/cache/ATO/images/manifest.json /var/cache/ATO/images/"manifest_$image_pathsafe".json
+    done
+
+# shellcheck disable=SC2010
+ls /var/cache/ATO/images | 
+grep -Ex '[0-9a-f]+' |
+    while read -r layer
+    do
+        mkdir -p "/usr/local/lib/ATO/layers/$layer"
+        tar -xf "/var/cache/ATO/images/$layer/layer.tar" -C \
+            "/usr/local/lib/ATO/layers/$layer"
+    done
+
+# shellcheck disable=SC2010
+ls /var/cache/ATO/images |
+grep -Ex 'manifest_.+\.json' |
+    while read -r manifest
+    do
+        setup/overlayfs_genfstab "$manifest" >> /etc/fstab
+    done
+
+echo Finished extracting images.
+echo Clearing up...
+
+docker image prune -af
+systemctl disable --now docker.service docker.socket
+cd "$original_cwd"
+rm -rf /var/cache/ATO
+
+echo Starting up services...
+# mount all overlayfs
+mount -a
+systemctl start nginx.service ATO.service
+
+echo Finished!

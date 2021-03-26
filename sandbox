@@ -1,0 +1,110 @@
+#!/usr/bin/zsh
+# Note that this script is written in zsh, so we can use all of its -isms, such as unquoted variable expansions.
+
+# We *should* be able to trust that this script is only run from by the trusted API process, but if an attacker somehow
+# got RCE as the API user, they might be able to LPE using this + bwrap, so make sure everything is written securely!
+
+setopt errexit
+
+client_id=$1
+invocation_id=$2
+language=$3
+
+# check that the runner exists (also prevents directory traversal)
+ls /usr/local/share/ATO/runners | grep -Fqx $language
+
+# find what image the runner needs from the file
+grep -m1 '^#:image: ' /usr/local/share/ATO/runners/$language | read _ image _
+
+# ensure minimum lengths
+[[ $#client_id -gt 16 ]]
+[[ $#invocation_id -gt 16 ]]
+
+# make sure IDs are path-safe by getting a hashed version in hex
+echo -n $client_id | sha256sum | read client_id _
+echo -n $invocation_id | sha256sum | read invocation_id _
+
+mkdir /run/ATO_o/$invocation_id
+
+# Create a control group for this client and this invocation to manage resource usage. I'm not sure why this needs a
+# lock, but TIO uses one :shrug: (https://github.com/TryItOnline/tryitonline/blob/898a41f69eeeff915b579bf4602b3ed9aea07910/bin/run#L19)
+flock -s /run/lock/ATO/$client_id \
+    cgcreate -g memory,cpu,pids:ATO/$client_id/$invocation_id
+
+# Limit the available resources to the process
+#
+# - Memory "soft" limit: allow the process to use as much memory as it likes, as long as there is plenty available. If
+#   the system begins to get low on memory, it will be limited to 256M per client (connecting IP address), and 128M per
+#   individual invocation by that user.
+#
+# - CPU shares: similarly, allow the process as much CPU usage as it wants, unless the system starts to get overloaded.
+#   In these cases, each client will be limited to 128 "shares" and each process to 64 "shares". "Shares" are a
+#   proportional but arbitrary sized chunk of CPU resources which is used to determine the priority assigned to a given
+#   process. Typically, systemd assigns 1024 shares to each process "slice".
+#
+# - PIDs: pretty simple - prevent the process from hoovering up all kernel resources with fork bombs and the like by
+#   limiting to 64 processes per invocation and 256 per client.
+#
+# Further reading:
+#
+# - man cgroups(7)
+# - https://www.kernel.org/doc/html/latest/admin-guide/cgroup-v1/memory.html
+# - https://www.kernel.org/doc/html/latest/scheduler/sched-design-CFS.html
+# - https://engineering.squarespace.com/blog/2017/understanding-linux-container-scheduling
+cgset -r memory.soft_limit_in_bytes=256M ATO/$client_id
+cgset -r memory.soft_limit_in_bytes=128M ATO/$client_id
+cgset -r cpu.shares=64 ATO/$client_id
+cgset -r cpu.shares=16 ATO/$client_id/$invocation_id
+cgset -r pids.max=256 ATO/$client_id
+cgset -r pids.max=64 ATO/$client_id/$invocation_id
+
+# Open a file descriptor where we will write all the status information. See zshmisc(1) § Opening File Descriptors
+# Using Parameters for more details.
+exec {status_fd}>/run/ATO_o/$invocation_id/status
+
+# Start the JSON object containing the status information
+printf '{' >&$status_fd
+
+# The `time` keyword will output its information as part of the JSON status object. For more info on TIMEFMT see
+# zshparam(1) § Parameters used by the shell § TIMEFMT.
+# I'm pretty sure this format will always be less than PIPE_BUF and hence the write to FD 46 will be atomic, but TODO!
+TIMEFMT='"user":"%uU","kernel":"%uS","real":"%uE","swaps":%W,"shared":%X,"unshared":%D,"max_mem":%M,"major_page_faults":%F,"minor_page_faults":%R,"input_ops":%O,"output_ops":%O,"socket_recv":%r,"socket_sent":%s,"signals_recv":%k,"waits":%w,"preemptions":%c,'
+
+# (I wish it was possible to add comments between line continuations)
+2>&$status_fd time \
+timeout --preserve-status --signal KILL 60 \
+cgexec -g memory,cpu,pids:ATO/$client_id/$invocation_id \
+bwrap \
+    --ro-bind /usr/local/lib/ATO/rootfs/$image / \
+    --proc /proc \
+    --dev /dev \
+    --tmpfs /ATO \
+    --ro-bind /usr/local/bin/ATO_bash /ATO/bash \
+    --ro-bind /usr/local/bin/ATO_yargs /ATO/yargs \
+    --ro-bind /usr/local/bin/ATO_wrapper /ATO/wrapper \
+    --ro-bind /usr/local/share/ATO/runners/$language /ATO/runner \
+    --dir /ATO/context \
+    --chdir /ATO \
+    --setenv PATH /bin:/usr/bin:/usr/local/bin \
+    --unshare-all \
+    --die-with-parent \
+    --hostname ATO_sandbox \
+    --ro-bind /run/ATO_i/$invocation_id/input /ATO/input \
+    --ro-bind /run/ATO_i/$invocation_id/code /ATO/code \
+    --ro-bind /run/ATO_i/$invocation_id/arguments /ATO/arguments \
+    --ro-bind /run/ATO_i/$invocation_id/options /ATO/options \
+    /ATO/wrapper $status_fd \
+    1> >(head -c 128k > /run/ATO_o/$invocation_id/stdout) \
+    2> >(head -c 32k > /run/ATO_o/$invocation_id/stderr)
+
+# We don't (necessarily) know which order the two writes (by `time` and `ATO_wrapper`) will occur, so we have a comma
+# at the end of both. However, JSON doesn't allow trailing commas, so we need a dummy item to consume it before the
+# closing `}`
+printf '"_dummy":null}\n' >&$status_fd
+
+# close status FD
+exec {status_fd}>&-
+
+# clean up cgroups
+flock -w 0 /run/lock/ATO/$client_id \
+    cgdelete -rg memory,cpu,pids:ATO/$client_id/$invocation_id

@@ -1,0 +1,3 @@
+#!/bin/sh -e
+printf %s "$1" | sha256sum | read id _
+rm -rf "/run/ATO_o/$id"

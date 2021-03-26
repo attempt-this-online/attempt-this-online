@@ -1,0 +1,5 @@
+#!/bin/sh
+#:name: Python
+#:image: python:3-buster
+cd /ATO/context
+/ATO/yargs %1 /ATO/options /ATO/yargs %2 /ATO/arguments python %1 /ATO/code %2 < /ATO/input

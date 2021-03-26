@@ -1,0 +1,19 @@
+#!/bin/sh -e
+# Start script for the Attempt This Online server - to be run as root
+
+# create lock directory
+mkdir -p /run/lock/ATO
+chown sandbox:sandbox /run/lock/ATO
+chmod 750 /run/lock/ATO
+
+# create control groups
+cgcreate -a sandbox:sandbox -t sandbox:sandbox -g memory,cpu,pids:ATO
+
+# initialise IPC directories
+mkdir -p /run/ATO_i /run/ATO_o
+chown api:api /run/ATO_i
+chown sandbox:sandbox /run/ATO_o
+chmod 755 /run/ATO_i /run/ATO_o
+
+cd /usr/local/share/ATO/api/
+sudo -u api python -m poetry run uvicorn --port 4568 --host 127.0.0.1 api:app
