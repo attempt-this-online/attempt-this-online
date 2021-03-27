@@ -12,6 +12,7 @@ import msgpack
 from pydantic import BaseModel, validator, ValidationError
 from starlette.applications import Starlette
 from starlette.concurrency import run_in_threadpool
+from starlette.exceptions import HTTPException
 from starlette.requests import Request
 from starlette.responses import RedirectResponse, Response
 from starlette.routing import Route
@@ -50,6 +51,10 @@ def execute(ip_hash: str, invocation_id: str, invocation: Invocation) -> dict:
             f.write(invocation.code)
         with (dir_i / "input").open("wb") as f:
             f.write(invocation.input)
+
+        if any("b\0" in arg for arg in invocation.arguments) or any(b"\0" in opt for opt in invocation.options):
+            raise HTTPException("arguments and options cannot contain null bytes", 400)
+
         with (dir_i / "arguments").open("wb") as f:
             f.write(b"".join(arg + b"\0" for arg in invocation.arguments))
         with (dir_i / "options").open("wb") as f:
