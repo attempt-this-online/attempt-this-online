@@ -72,7 +72,6 @@ TIMEFMT='"user":"%uU","kernel":"%uS","real":"%uE","swaps":%W,"shared":%X,"unshar
 
 # (I wish it was possible to add comments between line continuations)
 2>&$status_fd time \
-timeout --preserve-status --signal KILL 60 \
 cgexec -g memory,cpu,pids:ATO/$client_id/$invocation_id \
 bwrap \
     --ro-bind /usr/local/lib/ATO/rootfs/$image / \

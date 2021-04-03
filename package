@@ -10,7 +10,7 @@ cd ..
 mkdir -p build/attempt_this_online
 cd build
 
-gcc -Wall -Werror -static ../wrapper.c -o attempt_this_online/wrapper
+gcc -Wall -Werror ../wrapper.c -static -lrt -lpthread -o attempt_this_online/wrapper
 gcc -Wall -Werror -static ../yargs.c -o attempt_this_online/yargs
 
 echo Building tarball... >&2
