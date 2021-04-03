@@ -2,6 +2,7 @@
 A clone of [Try It Online!](https://github.com/TryItOnline/tryitonline).
 
 - [Installation](docs/installation.md)
+- [REST API](docs/api.md)
 - [Architecture](docs/architecture.md)
 - [Contributing](docs/contributing.md)
 - [Security Policy](docs/security.md)
