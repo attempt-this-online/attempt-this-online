@@ -3,12 +3,12 @@
 # try to remove any existing installation
 # if false; then
 if true; then
+systemctl disable --now ATO.service nginx.service
 sed -i '/^overlay/d' /etc/fstab
 umount /usr/local/lib/ATO/rootfs/*
 pkill -9 uvicorn
 userdel api
 userdel sandbox
-systemctl disable --now ATO.service nginx.service
 rm -rf \
     /var/cache/ATO \
     /run/lock/ATO \
