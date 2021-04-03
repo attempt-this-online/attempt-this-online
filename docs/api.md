@@ -16,14 +16,17 @@ A [msgpack]-encoded payload - a map with the following string keys:
 - `stdout`: the standard output from the program and compilation (limited to 128 KiB)
 - `stderr`: the standard error from the program and compilation (limited to 32 KiB)
 - `status_type`: the reason the process ended - one of:
-    - `exited` (terminated normally by returning from `main` or calling `exit`)
-    - `killed` (terminated by a signal; only happens on timeout or if the process killed itself for some reason)
-    - `dumped` (core dumped, e.g. due to a segmentation fault)
-    - `stopped` (interrupted by job control; should never normally happen)
-    - `continued` (allowed to continue by job control; should never normally happen)
-    - `trapped` (interrupted by a debugger; should never normally happen)
-    - `unknown` (meaning of the value is not known; should never normally happen)
-- `status_value`: exit code, or signal ID of the reason the process ended (interpretation depends on `status_type`)
+    - `exited`: terminated normally by returning from `main` or calling `exit`
+    - `killed`: terminated by a signal; only happens on timeout or if the process killed itself for some reason
+    - `core_dumped`: core dumped, e.g. due to a segmentation fault
+    - `unknown`: meaning of the value is not known; should never normally happen
+- `status_value`: the status code of the end of the process. Its exact meaning depends on `status_type`:
+    - `exited`: the exit code that the program returned
+    - `killed`: the number of the signal that killed the process (see [`signal(7)`])
+    - `core_dumped`: the number of the signal that caused the process to dump its core (see [`signal(7)`], [`core(5)`])
+    - `unknown`: always `-1`
+- `timed_out`: whether the process had to be killed because it overran its 60 second timeout. If this is the case,
+  the process will have been killed by `SIGKILL` (ID 9)
 - `real`: real elapsed time in microseconds
 - `kernel`: CPU microseconds spent in kernel mode
 - `user`: CPU microseconds spent in user mode
@@ -42,3 +45,5 @@ A [msgpack]-encoded payload - a map with the following string keys:
 - `socket_sent`: number of socket messages sent (always 0 since network access is not allowed)
 
 [msgpack]: https://msgpack.org
+[`signal(7)`]: https://man.archlinux.org/man/core/man-pages/signal.7.en
+[`core(5)`]: https://man.archlinux.org/man/core/man-pages/core.5.en
