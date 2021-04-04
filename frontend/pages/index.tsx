@@ -9,7 +9,7 @@ export default function Home() {
       <Head>
         <title>Attempt This Online</title>
       </Head>
-      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-black dark:text-white py-8 relative">
+      <div className="min-h-screen bg-white dark:bg-gray-900 text-black dark:text-white py-8 relative">
         <main className="mb-3 mx-4 md:container md:mx-auto text-lg">
           <h1 className="mb-3 -mt-3 md:pt-3 text-4xl md:text-center font-bold">Attempt This Online</h1>
           <p className="my-4 text-justify">
@@ -27,7 +27,7 @@ export default function Home() {
           <p className="my-4 text-center sm:text-left">
             <Link href="/run">
               <a>
-                <button className="rounded px-4 py-2 bg-blue-500">Run</button>
+                <button className="rounded px-4 py-2 bg-blue-500 text-white">Run</button>
               </a>
             </Link>
           </p>
