@@ -14,8 +14,8 @@ module.exports = {
     // if you don't use these rules you're dangerous and must be locked up
     'comma-dangle': ['error', 'always-multiline'],
     curly: ['error', 'all'],
-    'space-before-function-paren': ['error', {anonymous: 'always', named: 'never', asyncArrow: 'always'}],
+    'space-before-function-paren': ['error', { anonymous: 'always', named: 'never', asyncArrow: 'always' }],
     'react/react-in-jsx-scope': 'off',
 
-  }
-}
+  },
+};
