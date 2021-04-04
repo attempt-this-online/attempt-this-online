@@ -1,6 +1,8 @@
 import Head from 'next/head'
 import Link from 'next/link'
 
+import Footer from 'components/footer.tsx'
+
 export default function Home() {
   return (
     <>
@@ -16,12 +18,12 @@ export default function Home() {
             increasingly out-of-date <a href="https://tio.run" className="text-blue-400 underline">Try It Online</a> service.
           </p>
           <p className="my-4 text-justify">
-            To get started, click the button below to create a new snippet.
+            To get started, click the button below to run some code.
           </p>
           <p className="my-4 text-center sm:text-left">
-            <Link href="/create">
+            <Link href="/run">
               <a>
-                <button className="rounded px-4 py-2 bg-blue-500">Create</button>
+                <button className="rounded px-4 py-2 bg-blue-500">Run</button>
               </a>
             </Link>
           </p>
@@ -45,10 +47,7 @@ export default function Home() {
             You can also discuss ATO in the dedicated <a href="https://chat.stackexchange.com/rooms/122645/attempt-this-online" className="text-blue-400 underline">Stack Exchange chatroom</a>.
           </p>
         </main>
-        <footer className="px-4 py-2 w-screen bg-black bg-opacity-5 dark:bg-opacity-20 absolute bottom-0">
-          <span>© {new Date().getUTCFullYear()} Patrick Reader and contributors</span>
-          <a href="https://github.com/pxeger/attempt_this_online" className="float-right">{buildId}</a>
-        </footer>
+        <Footer/>
       </div>
     </>
   )
