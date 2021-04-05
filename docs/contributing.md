@@ -26,7 +26,7 @@ guide](https://guides.github.com/introduction/flow/) on the matter.
 
 # There are no minimal requirements for the Docker image, as long as it doesn't contain a /ATO directory. If the Docker
 # image you're using doesn't have a POSIX shell, it is always available as `/ATO/bash`. If you need to use it, make sure
-# to change the `#!` # (shebang) line to match that.
+# to change the `#!` (shebang) line to match that.
 
 # Do whatever is necessary to compile and run the code.
 # - code is saved in /ATO/code
