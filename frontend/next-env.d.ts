@@ -1,3 +1,3 @@
 /// <reference types="next" />
 /// <reference types="next/types/global" />
-declare const buildId: string
+declare const buildId: string;
