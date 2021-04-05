@@ -1,18 +1,24 @@
 #!/bin/sh -e
 # Build a package to be used by the setup script when installing.
 
-rm -rf build
+rm -rf dist
+mkdir -p dist/attempt_this_online
 
 cd api
 python -m poetry update
 cd ..
 
-mkdir -p build/attempt_this_online
-cd build
+echo Building frontend... >&2
+cd frontend
+npm run build
+cd ..
 
-gcc -Wall -Werror ../wrapper.c -static -lrt -lpthread -o attempt_this_online/wrapper
-gcc -Wall -Werror -static ../yargs.c -o attempt_this_online/yargs
+echo Compiling binaries... >&2
+gcc -Wall -Werror wrapper.c -static -lrt -lpthread -o dist/attempt_this_online/wrapper
+gcc -Wall -Werror -static yargs.c -o dist/attempt_this_online/yargs
 
 echo Building tarball... >&2
-cp -R ../public ../api ../setup ../sandbox ../runners attempt_this_online/
+cp -R frontend/out dist/attempt_this_online/public
+cp -R api setup sandbox runners dist/attempt_this_online/
+cd dist
 tar -czf attempt_this_online.tar.gz attempt_this_online
