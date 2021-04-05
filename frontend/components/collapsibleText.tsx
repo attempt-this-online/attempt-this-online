@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 export default function CollapsibleText({
   state: [value, setValue], id, text, disabled = false,
-}: { state: [string, (value: string) => void], id: string, text: string, disabled: boolean }) {
+}: { state: [string, (value: string) => void], id: string, text: string, disabled?: boolean }) {
   const [open, setOpen] = useState(true);
   return (
     <details open={open} className="my-4">

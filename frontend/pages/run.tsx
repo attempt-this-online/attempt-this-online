@@ -1,18 +1,42 @@
 import * as msgpack from '@msgpack/msgpack';
 import Head from 'next/head';
-import { useState } from 'react';
+import { SyntheticEvent, useState } from 'react';
 
 import CollapsibleText from 'components/collapsibleText';
 import Footer from 'components/footer';
 
 const BASE_URL = 'https://ato.pxeger.com';
 
+interface APIResponse {
+  stdout: Uint8Array;
+  stderr: Uint8Array;
+  status_type: 'exited' | 'killed' | 'core_dumped' | 'unknown';
+  status_value: number;
+  timed_out: boolean;
+  real: number;
+  kernel: number;
+  user: number;
+  max_mem: number;
+  unshared: number;
+  shared: number;
+  waits: number;
+  preemptions: number;
+  major_page_faults: number;
+  minor_page_faults: number;
+  swaps: number;
+  signals_recv: number;
+  input_ops: number;
+  output_ops: number;
+  socket_recv: number;
+  socket_sent: number;
+}
+
 export default function Run() {
   const [code, setCode] = useState('');
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const submit = async (event) => {
+  const submit = async (event: SyntheticEvent) => {
     event.preventDefault();
     setSubmitting(true);
     const codeBytes = new TextEncoder().encode(code);
@@ -27,10 +51,24 @@ export default function Run() {
         arguments: [],
       }),
     });
-    const data = await msgpack.decodeAsync(response.body);
-    data.stdout = new TextDecoder().decode(data.stdout);
-    data.stderr = new TextDecoder().decode(data.stderr);
-    setOutput(JSON.stringify(data, null, 2));
+    if (!response.ok || !response.body) {
+      alert("an error occured");
+      setSubmitting(false);
+      return;
+    }
+    let data;
+    try {
+      data = await msgpack.decodeAsync(response.body) as APIResponse;
+    } catch (e) {
+      alert("an error occured");
+      setSubmitting(false);
+      return;
+    }
+    const stdout = new TextDecoder().decode(data.stdout);
+    const stderr = new TextDecoder().decode(data.stderr);
+    console.log(data);
+    console.log(stderr);
+    setOutput(stdout);
     setSubmitting(false);
   };
   return (
