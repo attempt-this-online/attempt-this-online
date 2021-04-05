@@ -13,6 +13,8 @@ from pydantic import BaseModel, validator, ValidationError
 from starlette.applications import Starlette
 from starlette.concurrency import run_in_threadpool
 from starlette.exceptions import HTTPException
+from starlette.middleware import Middleware
+from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 from starlette.responses import RedirectResponse, Response
 from starlette.routing import Route
@@ -122,4 +124,7 @@ app = Starlette(
     exception_handlers={
         404: not_found_handler,
     },
+    middleware=[
+        Middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["POST"]),
+    ],
 )
