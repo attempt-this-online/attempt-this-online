@@ -10,6 +10,8 @@ cd ..
 
 echo Building frontend... >&2
 cd frontend
+# clean up previous build artefacts; otherwise nothing seems to properly update
+rm -rf .next out
 npm run build
 cd ..
 
