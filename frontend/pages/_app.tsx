@@ -6,7 +6,7 @@ import { Provider } from 'react-redux';
 import { useStore } from 'lib/store';
 
 function MyApp({ Component, pageProps }: { Component: React.ComponentType, pageProps: object }) {
-  const store = useStore(pageProps.initialReduxState)
+  const store = useStore(pageProps.initialReduxState);
   return (
     <Provider store={store}>
       {/* eslint-disable-next-line react/jsx-props-no-spreading */}

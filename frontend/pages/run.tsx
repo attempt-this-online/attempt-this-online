@@ -1,5 +1,5 @@
 import * as msgpack from '@msgpack/msgpack';
-import { AdjustmentsIcon, HomeIcon } from '@heroicons/react/outline'
+import { AdjustmentsIcon, HomeIcon } from '@heroicons/react/outline';
 import Head from 'next/head';
 import Link from 'next/link';
 import { SyntheticEvent, useState } from 'react';

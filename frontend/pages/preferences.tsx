@@ -11,9 +11,9 @@ export default function Preferences() {
   const [theme, setTheme] = useState('system');
   const [submitting, setSubmitting] = useState('false');
   const systemThemePreference = useSystemThemePreference();
-  const handle = setState => event => setState(event.target.value);
+  const handle = (setState) => (event) => setState(event.target.value);
   const onSubmit = async (event) => {
-    event.preventDefault(); 
+    event.preventDefault();
     setSubmitting(true);
     await localForage.setItem('ATO_theme', theme);
     // TODO get redux in here and stop with this direct DOM kerfuddling
@@ -24,7 +24,7 @@ export default function Preferences() {
     }
     setSubmitting(false);
   };
-  useEffect(() => localForage.getItem('ATO_theme').then(v => setTheme(v || 'system')), []);
+  useEffect(() => localForage.getItem('ATO_theme').then((v) => setTheme(v || 'system')), []);
   return (
     <>
       <Head>
@@ -44,10 +44,16 @@ export default function Preferences() {
             <div className="w-12 h-12 inline" />
           </header>
           <form onSubmit={onSubmit}>
-            <select className="text-black block" value={theme} onChange={e => setTheme(e.target.value)}>
-              { systemThemePreference !== null && (<option value='system'>System Default ({ systemThemePreference })</option>) }
-              <option value='dark'>Dark</option>
-              <option value='light'>Light</option>
+            <select className="text-black block" value={theme} onChange={(e) => setTheme(e.target.value)}>
+              { systemThemePreference !== null && (
+              <option value="system">
+                System Default (
+                { systemThemePreference }
+                )
+              </option>
+              ) }
+              <option value="dark">Dark</option>
+              <option value="light">Light</option>
             </select>
             <button type="submit" className="block rounded px-4 py-2 bg-blue-500 text-white">Save</button>
           </form>
