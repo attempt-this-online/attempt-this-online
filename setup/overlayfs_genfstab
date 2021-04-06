@@ -15,7 +15,7 @@ with open("/var/cache/ATO/images/" + manifest) as f:
     layers = json.load(f)[0]["Layers"]
 
 # TODO: does this need to be reversed?
-layers = ":".join("/usr/local/lib/ATO/layers/" + layer.removesuffix("/layer.tar") for layer in layers)
+layers = ":".join("/usr/local/lib/ATO/layers/" + layer.removesuffix("/layer.tar") for layer in layers[::-1])
 
 image = manifest.removeprefix("manifest_").removesuffix(".json")
 
