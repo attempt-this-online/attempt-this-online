@@ -1,5 +1,7 @@
 import * as msgpack from '@msgpack/msgpack';
+import { HomeIcon } from '@heroicons/react/outline'
 import Head from 'next/head';
+import Link from 'next/link';
 import { SyntheticEvent, useState } from 'react';
 
 import CollapsibleText from 'components/collapsibleText';
@@ -86,7 +88,14 @@ export default function Run() {
       <Head>
         <title>Run &ndash; Attempt This Online</title>
       </Head>
-      <div className="min-h-screen bg-white dark:bg-gray-900 text-black dark:text-white pt-8 relative flex flex-col">
+      <div className="min-h-screen bg-white dark:bg-gray-900 text-black dark:text-white relative flex flex-col">
+        <nav className="flex bg-gray-100 dark:bg-gray-800 w-full px-4 py-2 mb-4">
+          <Link href="/">
+            <a className="p-2 transition hover:bg-gray-300 dark:hover:bg-gray-600 rounded-full">
+              <HomeIcon className="w-6 h-6" />
+            </a>
+          </Link>
+        </nav>
         <div className="flex-grow relative">
           <div className="absolute top-0 z-20 w-full flex flex-col">
             {notifications.map(

@@ -4,7 +4,7 @@ export default function Notification(
   { children, onClick }: { children: React.ReactNode, onClick: () => void },
 ) {
   return (
-    <div className="rounded p-3 bg-gray-200 dark:bg-gray-700 shadow-md mx-auto mb-4 flex max-w-full w-80">
+    <div className="rounded p-3 bg-gray-200 dark:bg-gray-700 shadow-md mx-auto mt-4 flex max-w-full w-80">
       <div className="flex-grow">
         {children}
       </div>
