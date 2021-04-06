@@ -1,0 +1,5 @@
+#!/usr/bin/python
+from attempt_this_online.metadata import languages
+
+for language, metadata in languages:
+    print(metadata["image"])

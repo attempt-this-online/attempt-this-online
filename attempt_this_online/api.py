@@ -19,6 +19,8 @@ from starlette.requests import Request
 from starlette.responses import RedirectResponse, Response
 from starlette.routing import Route
 
+from attempt_this_online import metadata
+
 # Change to True if running behind a trusted reverse proxy
 TRUST_PROXY_HEADER = True
 
@@ -35,13 +37,10 @@ class Invocation(BaseModel):
 
     @validator("language")
     def validate_language(cls, value: str):
-        if value not in languages:
+        if value not in metadata.languages:
             raise ValueError("no such language")
         else:
             return value
-
-
-languages = {l.name for l in Path("/usr/local/share/ATO/runners").iterdir()}
 
 
 def execute(ip_hash: str, invocation_id: str, invocation: Invocation) -> dict:

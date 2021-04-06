@@ -199,8 +199,7 @@ systemctl start docker.service
 
 mkdir -p /usr/local/lib/ATO/env
 mkdir -p /var/cache/ATO/images
-grep -m1 '^#:image: ' runners/* |
-cut -d ' ' -f 2 |
+setup/list_images |
 sort -u |
     while read -r image
     do
