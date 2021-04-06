@@ -2,9 +2,9 @@
 The best way to see how Attempt This Online works is by listing the steps taken between user button-press and output
 display. This assumes ATO is being run with the default full setup.
 
-- <s>User clicks run on the webpage</s>
+- User clicks run on the webpage
 - <s>Frontend concatenates header, body, and footer of program</s>
-- <s>Browser</s> sends `POST` request to `https://ato.pxeger.com/api`
+- Browser sends `POST` request to `https://ato.pxeger.com/api`
     - Request contains [msgpack](https://msgpack.org)-encoded data, which is a dictionary containing:
         - `language` (string): the name/identifier of the language
         - `code` (bytes): the program code to run
@@ -12,7 +12,7 @@ display. This assumes ATO is being run with the default full setup.
         - `arguments` (bytes): the command-line arguments to run the program with
         - `options` (bytes): the command-line arguments to give to the language compiler or interpreter
 - `nginx` server receives the request
-- `nginx` scans the request for malicious content using `modsecurity`
+- <s>`nginx` scans the request for malicious content using `modsecurity`</s>
 - `nginx` forwards the request to the Python API server over the local port `4568`
 - `uvicorn` interprets the request and calls the `starlette` server using [ASGI](https://asgi.readthedocs.io)
 - `starlette` API server runs the `execute_route` endpoint
