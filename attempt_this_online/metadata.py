@@ -7,13 +7,14 @@ __all__ = ["languages"]
 
 languages = {}
 for path in Path("/usr/local/share/ATO/runners").iterdir():
+# for path in (Path(__file__).parents[1] / "runners").iterdir():
     if not access(path, R_OK | X_OK):    
         # not executable
         continue
     metadata = {}
     with path.open("r") as f:
         for line in f:
-            if match := re.match(r"^#:(?P<key>): (?P<value>.*)", line):
+            if match := re.match(r"^#:(?P<key>\w+): (?P<value>.*)", line):
                 if match["key"] in metadata:
                     raise Exception(f"duplicate metadata item {key} in runner {runner.name}")
                 metadata[match["key"]] = match["value"]
