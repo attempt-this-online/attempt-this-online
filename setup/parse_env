@@ -1,0 +1,9 @@
+#!/usr/bin/python
+import json
+import sys
+
+for string in json.load(sys.stdin):
+    # Put environment variables from `docker inspect` into the format for `yargs` to pass to `bwrap` to set environment
+    # variables in the container
+    key, value = string.split("=", maxsplit=1)
+    sys.stdout.write(f"--setenv\0{key}\0{value}\0")
