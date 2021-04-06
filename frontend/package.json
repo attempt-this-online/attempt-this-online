@@ -8,6 +8,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@heroicons/react": "^1.0.0",
     "@msgpack/msgpack": "^2.5.1",
     "next": "10.1.3",
     "next-build-id": "^3.0.0",
