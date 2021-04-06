@@ -121,18 +121,19 @@ install -m 440 -o root -g root setup/sudo.conf /etc/sudoers.d/40_ATO
 
 # install API
 sed -i 's/TRUST_PROXY_HEADER = False/TRUST_PROXY_HEADER = True/' attempt_this_online/api.py
-cp -RT attempt_this_online /usr/local/share/ATO/attempt_this_online
-chown -R api:api /usr/local/share/ATO/attempt_this_online
-chmod -R a+rX-w /usr/local/share/ATO/attempt_this_online
+mkdir -p /usr/local/share/ATO/api
+cp -R pyproject.toml poetry.lock attempt_this_online /usr/local/share/ATO/api/
+chown -R api:api /usr/local/share/ATO/api
+chmod -R o+rX-w /usr/local/share/ATO/api
 # Poetry needs write access
-chmod u+w /usr/local/share/ATO/attempt_this_online/pyproject.toml /usr/local/share/ATO/attempt_this_online/poetry.lock
+chmod u+w /usr/local/share/ATO/api/pyproject.toml /usr/local/share/ATO/api/poetry.lock
 
 # setup Python environment
-cd /usr/local/share/ATO/attempt_this_online
+cd /usr/local/share/ATO/api
 python -m pip install poetry
 sudo -u api python -m poetry install --no-dev
 # reset permissions
-chmod u-w /usr/local/share/ATO/attempt_this_online/pyproject.toml /usr/local/share/ATO/attempt_this_online/poetry.lock
+chmod u-w /usr/local/share/ATO/api/pyproject.toml /usr/local/share/ATO/api/poetry.lock
 cd /var/cache/ATO/attempt_this_online
 
 # install static files
