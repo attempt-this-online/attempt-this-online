@@ -1,5 +1,5 @@
 import * as msgpack from '@msgpack/msgpack';
-import { HomeIcon } from '@heroicons/react/outline'
+import { AdjustmentsIcon, HomeIcon } from '@heroicons/react/outline'
 import Head from 'next/head';
 import Link from 'next/link';
 import { SyntheticEvent, useState } from 'react';
@@ -89,10 +89,16 @@ export default function Run() {
         <title>Run &ndash; Attempt This Online</title>
       </Head>
       <div className="min-h-screen bg-white dark:bg-gray-900 text-black dark:text-white relative flex flex-col">
-        <nav className="flex bg-gray-100 dark:bg-gray-800 w-full px-4 py-2 mb-4">
+        <nav className="flex bg-gray-100 dark:bg-gray-800 w-full px-4 py-2 mb-4 justify-between">
           <Link href="/">
             <a className="p-2 transition hover:bg-gray-300 dark:hover:bg-gray-600 rounded-full">
               <HomeIcon className="w-6 h-6" />
+            </a>
+          </Link>
+          <h2 className="hidden sm:block font-bold text-xl my-auto">Attempt This Online</h2>
+          <Link href="/preferences">
+            <a className="p-2 transition hover:bg-gray-300 dark:hover:bg-gray-600 rounded-full">
+              <AdjustmentsIcon className="w-6 h-6" />
             </a>
           </Link>
         </nav>
