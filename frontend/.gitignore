@@ -32,3 +32,6 @@ yarn-error.log*
 
 # vercel
 .vercel
+
+# lib/ is ignored by Python gitignore (which is at the root), but we don't want that in the frontend
+!lib/
