@@ -9,8 +9,8 @@ export default function Home() {
       <Head>
         <title>Attempt This Online</title>
       </Head>
-      <div className="min-h-screen bg-white dark:bg-gray-900 text-black dark:text-white py-8 relative">
-        <main className="mb-3 mx-4 md:container md:mx-auto text-lg">
+      <div className="min-h-screen bg-white dark:bg-gray-900 text-black dark:text-white pt-8 relative flex flex-col">
+        <main className="mb-3 mx-4 md:container md:mx-auto flex-grow">
           <h1 className="mb-3 -mt-3 md:pt-3 text-4xl md:text-center font-bold">Attempt This Online</h1>
           <p className="my-4 text-justify">
             Attempt This Online is an online sandbox environment for running code in an ever-growing

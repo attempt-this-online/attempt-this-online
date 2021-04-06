@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-export default function CollapsibleText({
+function CollapsibleText({
   state: [value, setValue], id, text, disabled = false,
 }: { state: [string, (value: string) => void], id: string, text: string, disabled?: boolean }) {
   const [open, setOpen] = useState(true);
@@ -28,3 +28,9 @@ export default function CollapsibleText({
     </details>
   );
 }
+
+CollapsibleText.defaultProps = {
+  disabled: false,
+};
+
+export default CollapsibleText;

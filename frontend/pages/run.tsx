@@ -4,6 +4,7 @@ import { SyntheticEvent, useState } from 'react';
 
 import CollapsibleText from 'components/collapsibleText';
 import Footer from 'components/footer';
+import Notification from 'components/notification';
 
 const BASE_URL = 'https://ato.pxeger.com';
 
@@ -36,6 +37,13 @@ export default function Run() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const dismissNotification = (target) => {
+    setNotifications(notifications.filter(({ id }) => id !== target));
+  };
+  const notify = (text) => {
+    setNotifications([{ id: Math.random(), text }, ...notifications]);
+  };
   const submit = async (event: SyntheticEvent) => {
     event.preventDefault();
     setSubmitting(true);
@@ -52,7 +60,8 @@ export default function Run() {
       }),
     });
     if (!response.ok || !response.body) {
-      alert("an error occured");
+      notify('An error occured');
+      console.error(await response.text);
       setSubmitting(false);
       return;
     }
@@ -60,14 +69,15 @@ export default function Run() {
     try {
       data = await msgpack.decodeAsync(response.body) as APIResponse;
     } catch (e) {
-      alert("an error occured");
+      notify('An error occured');
+      console.error(e);
       setSubmitting(false);
       return;
     }
     const stdout = new TextDecoder().decode(data.stdout);
-    const stderr = new TextDecoder().decode(data.stderr);
-    console.log(data);
-    console.log(stderr);
+    // const stderr = new TextDecoder().decode(data.stderr);
+    // console.log(data);
+    // console.log(stderr);
     setOutput(stdout);
     setSubmitting(false);
   };
@@ -76,24 +86,38 @@ export default function Run() {
       <Head>
         <title>Run &ndash; Attempt This Online</title>
       </Head>
-      <div className="min-h-screen bg-white dark:bg-gray-900 text-black dark:text-white py-8 relative">
-        <main className="mb-3 mx-4 -mt-4 md:container md:mx-auto text-lg">
-          <form onSubmit={submit}>
-            <CollapsibleText state={[code, setCode]} id="code" text="Code" />
-            <CollapsibleText state={[input, setInput]} id="input" text="Input" />
-            <button type="submit" className="mt-6 rounded px-4 py-2 bg-blue-500 text-white flex">
-              <span>Execute</span>
-              {submitting && (
-              /* this SVG is taken from https://git.io/JYHot, under the MIT licence https://git.io/JYHoh */
-              <svg className="animate-spin my-auto -mr-1 ml-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-              </svg>
-              )}
-            </button>
-          </form>
-          <CollapsibleText state={[output, setOutput]} id="output" text="Output" disabled />
-        </main>
+      <div className="min-h-screen bg-white dark:bg-gray-900 text-black dark:text-white pt-8 relative flex flex-col">
+        <div className="flex-grow relative">
+          <div className="absolute top-0 z-20 w-full flex flex-col">
+            {notifications.map(
+              (notification) => (
+                <Notification
+                  key={notification.id}
+                  onClick={() => dismissNotification(notification.id)}
+                >
+                  {notification.text}
+                </Notification>
+              ),
+            )}
+          </div>
+          <main className="mb-3 mx-4 -mt-4 md:container md:mx-auto">
+            <form onSubmit={submit}>
+              <CollapsibleText state={[code, setCode]} id="code" text="Code" />
+              <CollapsibleText state={[input, setInput]} id="input" text="Input" />
+              <button type="submit" className="mt-6 rounded px-4 py-2 bg-blue-500 text-white flex">
+                <span>Execute</span>
+                {submitting && (
+                /* this SVG is taken from https://git.io/JYHot, under the MIT licence https://git.io/JYHoh */
+                <svg className="animate-spin my-auto -mr-1 ml-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+                )}
+              </button>
+            </form>
+            <CollapsibleText state={[output, setOutput]} id="output" text="Output" disabled />
+          </main>
+        </div>
         <Footer />
       </div>
     </>
