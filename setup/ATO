@@ -15,5 +15,5 @@ chown api:api /run/ATO_i
 chown sandbox:sandbox /run/ATO_o
 chmod 755 /run/ATO_i /run/ATO_o
 
-cd /usr/local/share/ATO/api/
-sudo -u api python -m poetry run uvicorn --port 4568 --host 127.0.0.1 api:app
+cd /usr/local/share/ATO/
+sudo -u api python -m poetry run uvicorn --port 4568 --host 127.0.0.1 attempt_this_online.api:app
