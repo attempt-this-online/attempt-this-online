@@ -1,10 +1,18 @@
+import 'tailwindcss/tailwind.css';
 import PropTypes from 'prop-types';
 import * as React from 'react';
-import 'tailwindcss/tailwind.css';
+import { Provider } from 'react-redux';
+
+import { useStore } from 'lib/store';
 
 function MyApp({ Component, pageProps }: { Component: React.ComponentType, pageProps: object }) {
-  // eslint-disable-next-line react/jsx-props-no-spreading
-  return <Component {...pageProps} />;
+  const store = useStore(pageProps.initialReduxState)
+  return (
+    <Provider store={store}>
+      {/* eslint-disable-next-line react/jsx-props-no-spreading */}
+      <Component {...pageProps} />
+    </Provider>
+  );
 }
 MyApp.propTypes = {
   Component: PropTypes.elementType.isRequired,
