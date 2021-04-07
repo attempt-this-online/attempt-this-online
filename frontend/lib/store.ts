@@ -1,9 +1,9 @@
 // copied from https://github.com/vercel/next.js/blob/5eafc1e92a5effa24bb6ac3c1d9e23065a16496b/examples/with-redux/store.js
 import { useMemo } from 'react';
-import { createStore, applyMiddleware } from 'redux';
+import { Store, createStore, applyMiddleware } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
 
-let store;
+let store: Store | undefined;
 
 const initialState = {
   lastUpdate: 0,
@@ -11,12 +11,12 @@ const initialState = {
   count: 0,
 };
 
-const reducer = (state = initialState, action) => {
+const reducer = (state = initialState, action: any) => {
   switch (action.type) {
     case 'setTheme':
       return {
         ...state,
-        theme: action.theme,
+        theme: action.theme!,
       };
     default:
       return state;
@@ -31,7 +31,7 @@ function initStore(preloadedState = initialState) {
   );
 }
 
-export const initializeStore = preloadedState => {
+export const initializeStore = (preloadedState: typeof initialState) => {
   let newStore = store ?? initStore(preloadedState);
 
   // After navigating to a page with an initial Redux state, merge that state
@@ -57,6 +57,6 @@ export const initializeStore = preloadedState => {
   return newStore;
 };
 
-export function useStore(state) {
+export function useStore(state: any) {
   return useMemo(() => initializeStore(state), [state]);
 }

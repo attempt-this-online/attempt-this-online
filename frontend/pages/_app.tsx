@@ -2,26 +2,26 @@ import 'tailwindcss/tailwind.css';
 import localForage from 'localforage';
 import PropTypes from 'prop-types';
 import * as React from 'react';
-import { Provider, connect } from 'react-redux';
+import { Provider, connect, useDispatch } from 'react-redux';
 
 import useSystemThemePreference from 'lib/useSystemThemePreference';
 import { useStore } from 'lib/store';
 import 'styles/select.css';
 
-const ThemeWrapper = connect(state => ({ theme: state.theme }))(({ Component, pageProps, theme }: { Component: React.ComponentType, theme: ('light' | 'dark' | 'system'), pageProps: object }) => {
-  const store = useStore(pageProps.initialReduxState);
-  React.useEffect(async () => {
+const ThemeWrapper = connect((state: any) => ({ theme: state.theme }))(({ Component, pageProps, theme }: { Component: React.ComponentType, theme: ('light' | 'dark' | 'system'), pageProps: any }) => {
+  const dispatch = useDispatch();
+  React.useEffect((async () => {
     const storedTheme = await localForage.getItem('ATO_theme');
     if (storedTheme) {
-      store.dispatch({ type: 'setTheme', theme: storedTheme });
+      dispatch({ type: 'setTheme', theme: storedTheme });
     }
-  }, []);
+  }) as (() => void), []);
   const systemThemePreference = useSystemThemePreference();
   return (
     <div
       className={
         (theme === 'light' || (theme === 'system' && systemThemePreference === 'light'))
-          ? null : 'dark'
+          ? undefined : 'dark'
     }
     >
       {/* eslint-disable-next-line react/jsx-props-no-spreading */}
@@ -30,7 +30,7 @@ const ThemeWrapper = connect(state => ({ theme: state.theme }))(({ Component, pa
   );
 });
 
-function MyApp({ Component, pageProps }: { Component: React.ComponentType, pageProps: object }) {
+function MyApp({ Component, pageProps }: { Component: React.ComponentType, pageProps: any }) {
   const store = useStore(pageProps.initialReduxState);
   return (
     <Provider store={store}>

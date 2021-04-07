@@ -1,23 +1,21 @@
 import { ArrowLeftIcon } from '@heroicons/react/outline';
-import { ChevronDownIcon } from '@heroicons/react/solid';
 import Head from 'next/head';
 import Link from 'next/link';
 import localForage from 'localforage';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useDispatch } from 'react-redux';
 
 import useSystemThemePreference from 'lib/useSystemThemePreference';
-import { useStore } from 'lib/store';
 import Footer from 'components/footer';
 
 export default function Preferences() {
-  const store = useStore();
+  const dispatch = useDispatch();
   const [theme, setTheme] = useState('system');
-  const [submitting, setSubmitting] = useState(false);
   const systemThemePreference = useSystemThemePreference();
-  const handleThemeChange = async event => {
+  const handleThemeChange = async (event: any) => {
     event.preventDefault();
     setTheme(event.target.value);
-    store.dispatch({ type: 'setTheme', theme: event.target.value });
+    dispatch({ type: 'setTheme', theme: event.target.value });
     await localForage.setItem('ATO_theme', event.target.value);
   };
   return (

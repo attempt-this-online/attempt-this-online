@@ -39,11 +39,11 @@ export default function Run() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [notifications, setNotifications] = useState([]);
-  const dismissNotification = target => {
+  const [notifications, setNotifications] = useState<{ id: number, text: string }[]>([]);
+  const dismissNotification = (target: number) => {
     setNotifications(notifications.filter(({ id }) => id !== target));
   };
-  const notify = text => {
+  const notify = (text: string) => {
     setNotifications([{ id: Math.random(), text }, ...notifications]);
   };
   const submit = async (event: SyntheticEvent) => {

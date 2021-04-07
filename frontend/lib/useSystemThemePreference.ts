@@ -2,19 +2,20 @@
 import { useState, useEffect } from 'react';
 
 export default function useSystemThemePreference() {
-  const [systemThemePreference, setSystemThemePreference] = useState(null);
+  const [systemThemePreference, setSystemThemePreference] = useState<'dark'| 'light' | null>(null);
 
   useEffect(() => {
     if (!window.matchMedia) {
       // no browser support
-      return null;
+      setSystemThemePreference(null);
+      return;
     }
 
-    const darkListener = event => event && event.matches && setSystemThemePreference('dark');
+    const darkListener = (event: any) => event && event.matches && setSystemThemePreference('dark');
     const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
     darkQuery.addListener(darkListener);
     darkListener(darkQuery);
-    const lightListener = event => event && event.matches && setSystemThemePreference('light');
+    const lightListener = (event: any) => event && event.matches && setSystemThemePreference('light');
     const lightQuery = window.matchMedia('(prefers-color-scheme: light)');
     lightQuery.addListener(lightListener);
     lightListener(lightQuery);
