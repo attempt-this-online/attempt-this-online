@@ -6,6 +6,7 @@ import { Provider, connect } from 'react-redux';
 
 import useSystemThemePreference from 'lib/useSystemThemePreference';
 import { useStore } from 'lib/store';
+import 'styles/select.css';
 
 const ThemeWrapper = connect(state => ({ theme: state.theme }))(({ Component, pageProps, theme }: { Component: React.ComponentType, theme: ('light' | 'dark' | 'system'), pageProps: object }) => {
   const store = useStore(pageProps.initialReduxState);
