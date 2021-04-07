@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, ReactNode } from 'react';
 
 function CollapsibleText({
-  state: [value, setValue], id, text, disabled = false,
-}: { state: [string, (value: string) => void], id: string, text: string, disabled?: boolean }) {
+  state: [value, setValue], id, disabled = false, children
+}: { state: [string, (value: string) => void], id: string, disabled?: boolean, children: ReactNode }) {
   const [open, setOpen] = useState(true);
   return (
     <details open={open} className="my-4">
@@ -13,7 +13,7 @@ function CollapsibleText({
             onClick={() => { setOpen(!open); }}
             className="select-none focus:outline-none"
           >
-            {text}
+            {children}
           </button>
         </label>
       </summary>

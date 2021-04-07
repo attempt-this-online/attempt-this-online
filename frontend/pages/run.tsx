@@ -38,6 +38,7 @@ export default function Run() {
   const [code, setCode] = useState('');
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
+  const [stderr, setStderr] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [notifications, setNotifications] = useState<{ id: number, text: string }[]>([]);
   const dismissNotification = (target: number) => {
@@ -77,9 +78,11 @@ export default function Run() {
       return;
     }
     const stdout = new TextDecoder().decode(data.stdout);
-    // const stderr = new TextDecoder().decode(data.stderr);
-    // console.log(data);
-    // console.log(stderr);
+    const stderr = new TextDecoder().decode(data.stderr);
+    if (data.timed_out) {
+      notify('The program ran for over 60 seconds and timed out');
+    }
+    setStderr(stderr);
     setOutput(stdout);
     setSubmitting(false);
   };
@@ -117,8 +120,12 @@ export default function Run() {
           </div>
           <main className="mb-3 mx-4 -mt-4 md:container md:mx-auto">
             <form onSubmit={submit}>
-              <CollapsibleText state={[code, setCode]} id="code" text="Code" />
-              <CollapsibleText state={[input, setInput]} id="input" text="Input" />
+              <CollapsibleText state={[code, setCode]} id="code">
+                Code
+              </CollapsibleText>
+              <CollapsibleText state={[input, setInput]} id="input">
+                Input
+              </CollapsibleText>
               <button type="submit" className="mt-6 rounded px-4 py-2 bg-blue-500 text-white flex">
                 <span>Execute</span>
                 {submitting && (
@@ -130,7 +137,12 @@ export default function Run() {
                 )}
               </button>
             </form>
-            <CollapsibleText state={[output, setOutput]} id="output" text="Output" disabled />
+            <CollapsibleText state={[output, setOutput]} id="output" disabled>
+              <code>stdout</code> output
+            </CollapsibleText>
+            <CollapsibleText state={[stderr, setStderr]} id="stderr" disabled>
+              <code>stderr</code> output
+            </CollapsibleText>
           </main>
         </div>
         <Footer />
