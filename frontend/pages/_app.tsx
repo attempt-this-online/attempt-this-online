@@ -1,4 +1,5 @@
 import 'tailwindcss/tailwind.css';
+import localForage from 'localforage';
 import PropTypes from 'prop-types';
 import * as React from 'react';
 import { Provider, connect } from 'react-redux';
@@ -7,6 +8,13 @@ import useSystemThemePreference from 'lib/useSystemThemePreference';
 import { useStore } from 'lib/store';
 
 const ThemeWrapper = connect(state => ({ theme: state.theme }))(({ Component, pageProps, theme }: { Component: React.ComponentType, theme: ('light' | 'dark' | 'system'), pageProps: object }) => {
+  const store = useStore(pageProps.initialReduxState);
+  React.useEffect(async () => {
+    const storedTheme = await localForage.getItem('ATO_theme');
+    if (storedTheme) {
+      store.dispatch({ type: 'setTheme', theme: storedTheme });
+    }
+  }, []);
   const systemThemePreference = useSystemThemePreference();
   return (
     <div

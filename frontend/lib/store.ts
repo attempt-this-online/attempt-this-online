@@ -14,6 +14,7 @@ const initialState = {
 const reducer = (state = initialState, action) => {
   switch (action.type) {
     case 'setTheme':
+      console.log(action);
       return {
         ...state,
         theme: action.theme,
