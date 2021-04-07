@@ -24,7 +24,7 @@ export default function Preferences() {
         <title>Prefences &ndash; Attempt This Online</title>
       </Head>
       <div className="min-h-screen bg-white dark:bg-gray-900 text-black dark:text-white pt-8 relative flex flex-col">
-        <main className="mb-3 mx-4 md:container md:mx-auto flex-grow">
+        <main className="mb-3 px-4 md:container md:mx-auto flex-grow">
           <header className="flex mb-2">
             <Link href="/run">
               <a className="my-auto p-2 transition hover:bg-gray-300 dark:hover:bg-gray-600 rounded-full">

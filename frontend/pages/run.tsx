@@ -118,7 +118,7 @@ export default function Run() {
               ),
             )}
           </div>
-          <main className="mb-3 mx-4 -mt-4 md:container md:mx-auto">
+          <main className="mb-3 px-4 -mt-4 md:container md:mx-auto">
             <form onSubmit={submit}>
               <CollapsibleText state={[code, setCode]} id="code">
                 Code
