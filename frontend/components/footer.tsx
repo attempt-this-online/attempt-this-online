@@ -18,7 +18,7 @@ export default function Footer() {
       <div className="order-1 md:order-3 md:flex md:flex-grow md:justify-center md:w-0">
         <div className="ml-auto">
           Version:&nbsp;
-          <a className="font-mono overflow-ellipsis" href="https://github.com/pxeger/attempt_this_online">{buildId}</a>
+          <a className="font-mono truncate" href="https://github.com/pxeger/attempt_this_online">{buildId}</a>
         </div>
       </div>
     </footer>
