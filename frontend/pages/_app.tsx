@@ -6,7 +6,7 @@ import { Provider, connect, useDispatch } from 'react-redux';
 
 import useSystemThemePreference from 'lib/useSystemThemePreference';
 import { useStore } from 'lib/store';
-import 'styles/select.css';
+import 'styles/ATO.css';
 
 const ThemeWrapper = connect((state: any) => ({ theme: state.theme }))(({ Component, pageProps, theme }: { Component: React.ComponentType, theme: ('light' | 'dark' | 'system'), pageProps: any }) => {
   const dispatch = useDispatch();
