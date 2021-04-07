@@ -94,13 +94,13 @@ export default function Run() {
       <div className="min-h-screen bg-white dark:bg-gray-900 text-black dark:text-white relative flex flex-col">
         <nav className="flex bg-gray-100 dark:bg-gray-800 w-full px-4 py-2 mb-4 justify-between">
           <Link href="/">
-            <a className="p-2 transition hover:bg-gray-300 dark:hover:bg-gray-600 rounded-full">
+            <a className="p-2 transition hover:bg-gray-300 dark:hover:bg-gray-600 rounded-full focus:ring">
               <HomeIcon className="w-6 h-6" />
             </a>
           </Link>
           <h2 className="hidden sm:block font-bold text-xl my-auto">Attempt This Online</h2>
           <Link href="/preferences">
-            <a className="p-2 transition hover:bg-gray-300 dark:hover:bg-gray-600 rounded-full">
+            <a className="p-2 transition hover:bg-gray-300 dark:hover:bg-gray-600 rounded-full focus:ring">
               <AdjustmentsIcon className="w-6 h-6" />
             </a>
           </Link>
@@ -126,7 +126,7 @@ export default function Run() {
               <CollapsibleText state={[input, setInput]} id="input">
                 Input
               </CollapsibleText>
-              <button type="submit" className="mt-6 rounded px-4 py-2 bg-blue-500 text-white flex">
+              <button type="submit" className="mt-6 rounded px-4 py-2 bg-blue-500 text-white flex focus:outline-none focus:ring">
                 <span>Execute</span>
                 {submitting && (
                 /* this SVG is taken from https://git.io/JYHot, under the MIT licence https://git.io/JYHoh */

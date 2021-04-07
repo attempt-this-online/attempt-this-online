@@ -27,7 +27,7 @@ export default function Home() {
           <p className="my-4 text-center sm:text-left">
             <Link href="/run">
               <a>
-                <button type="button" className="rounded px-4 py-2 bg-blue-500 text-white">Run</button>
+                <button type="button" className="rounded px-4 py-2 bg-blue-500 text-white focus:outline-none focus:ring">Run</button>
               </a>
             </Link>
           </p>

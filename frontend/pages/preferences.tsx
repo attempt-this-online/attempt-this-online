@@ -45,7 +45,7 @@ export default function Preferences() {
               <label htmlFor="themeSelector" className="my-auto mr-2">Theme:</label>
               <select
                 id="themeSelector"
-                className="appearance-none p-2 rounded bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 transition cursor-pointer ATO_select"
+                className="appearance-none p-2 rounded bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 transition cursor-pointer ATO_select focus:outline-none focus:ring"
                 value={theme}
                 onChange={handleThemeChange}
               >
