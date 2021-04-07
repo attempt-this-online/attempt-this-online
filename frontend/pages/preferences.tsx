@@ -5,23 +5,20 @@ import localForage from 'localforage';
 import { useEffect, useState } from 'react';
 
 import useSystemThemePreference from 'lib/useSystemThemePreference';
+import { useStore } from 'lib/store';
 import Footer from 'components/footer';
 
 export default function Preferences() {
+  const store = useStore();
   const [theme, setTheme] = useState('system');
-  const [submitting, setSubmitting] = useState('false');
+  const [submitting, setSubmitting] = useState(false);
   const systemThemePreference = useSystemThemePreference();
   const handle = (setState) => (event) => setState(event.target.value);
   const onSubmit = async (event) => {
     event.preventDefault();
     setSubmitting(true);
+    store.dispatch({ type: 'setTheme', theme });
     await localForage.setItem('ATO_theme', theme);
-    // TODO get redux in here and stop with this direct DOM kerfuddling
-    if (theme === 'light' || (theme === 'system' && systemThemePreference === 'light')) {
-      document.documentElement.classList.remove('dark');
-    } else {
-      document.documentElement.classList.add('dark');
-    }
     setSubmitting(false);
   };
   useEffect(() => localForage.getItem('ATO_theme').then((v) => setTheme(v || 'system')), []);
