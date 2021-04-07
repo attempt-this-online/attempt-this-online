@@ -40,10 +40,10 @@ export default function Run() {
   const [output, setOutput] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [notifications, setNotifications] = useState([]);
-  const dismissNotification = (target) => {
+  const dismissNotification = target => {
     setNotifications(notifications.filter(({ id }) => id !== target));
   };
-  const notify = (text) => {
+  const notify = text => {
     setNotifications([{ id: Math.random(), text }, ...notifications]);
   };
   const submit = async (event: SyntheticEvent) => {
@@ -105,7 +105,7 @@ export default function Run() {
         <div className="flex-grow relative">
           <div className="absolute top-0 z-20 w-full flex flex-col">
             {notifications.map(
-              (notification) => (
+              notification => (
                 <Notification
                   key={notification.id}
                   onClick={() => dismissNotification(notification.id)}

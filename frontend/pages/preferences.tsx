@@ -13,15 +13,15 @@ export default function Preferences() {
   const [theme, setTheme] = useState('system');
   const [submitting, setSubmitting] = useState(false);
   const systemThemePreference = useSystemThemePreference();
-  const handle = (setState) => (event) => setState(event.target.value);
-  const onSubmit = async (event) => {
+  const handle = setState => event => setState(event.target.value);
+  const onSubmit = async event => {
     event.preventDefault();
     setSubmitting(true);
     store.dispatch({ type: 'setTheme', theme });
     await localForage.setItem('ATO_theme', theme);
     setSubmitting(false);
   };
-  useEffect(() => localForage.getItem('ATO_theme').then((v) => setTheme(v || 'system')), []);
+  useEffect(() => localForage.getItem('ATO_theme').then(v => setTheme(v || 'system')), []);
   return (
     <>
       <Head>
@@ -41,7 +41,7 @@ export default function Preferences() {
             <div className="w-12 h-12 inline" />
           </header>
           <form onSubmit={onSubmit}>
-            <select className="text-black block" value={theme} onChange={(e) => setTheme(e.target.value)}>
+            <select className="text-black block" value={theme} onChange={e => setTheme(e.target.value)}>
               { systemThemePreference !== null && (
               <option value="system">
                 System Default (

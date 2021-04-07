@@ -17,5 +17,6 @@ module.exports = {
     curly: ['error', 'all'],
     'space-before-function-paren': ['error', { anonymous: 'always', named: 'never', asyncArrow: 'always' }],
     'react/react-in-jsx-scope': 'off',
+    'arrow-parens': ['error', 'as-needed'],
   },
 };

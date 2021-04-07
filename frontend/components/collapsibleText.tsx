@@ -21,7 +21,7 @@ function CollapsibleText({
         id={id}
         value={value}
         disabled={disabled}
-        onChange={(event) => setValue(event.target.value)}
+        onChange={event => setValue(event.target.value)}
         className="block w-full my-4 p-2 rounded bg-gray-100 dark:bg-gray-800 font-mono text-base resize-y cursor-text"
         style={{ minHeight: '6rem' }}
       />
