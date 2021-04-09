@@ -1,5 +1,6 @@
 import Link from 'next/link';
 
+// eslint-disable-next-line react/require-default-props
 export default function Footer({ noLegalLink = false }: { noLegalLink?: boolean }) {
   return (
     <footer className="px-4 py-2 bg-black bg-opacity-5 dark:bg-opacity-20 w-100 flex flex-col text-center md:flex-row">

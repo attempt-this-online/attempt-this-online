@@ -21,6 +21,7 @@ export default function useSystemThemePreference() {
     lightListener(lightQuery);
 
     // cleanup
+    // eslint-disable-next-line consistent-return
     return () => {
       darkQuery.removeListener(darkListener);
       lightQuery.removeListener(lightListener);

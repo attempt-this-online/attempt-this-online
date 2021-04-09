@@ -77,13 +77,11 @@ export default function Run() {
       setSubmitting(false);
       return;
     }
-    const stdout = new TextDecoder().decode(data.stdout);
-    const stderr = new TextDecoder().decode(data.stderr);
+    setOutput(new TextDecoder().decode(data.stdout));
+    setStderr(new TextDecoder().decode(data.stderr));
     if (data.timed_out) {
       notify('The program ran for over 60 seconds and timed out');
     }
-    setStderr(stderr);
-    setOutput(stdout);
     setSubmitting(false);
   };
   return (

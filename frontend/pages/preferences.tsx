@@ -37,11 +37,13 @@ export default function Preferences() {
             <div className="w-12 h-12 inline" />
           </header>
           <p className="mb-3">
-            Attempt This Online stores your preferences locally in your browser, and they are never shared with anyone.
+            Attempt This Online stores your preferences locally in your browser, and they are never
+            shared with anyone.
           </p>
           <fieldset className="border border-black dark:border-white rounded pt-2 pb-4 px-4">
             <legend className="px-2">Appearance</legend>
             <div className="flex">
+              {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
               <label htmlFor="themeSelector" className="my-auto mr-2">Theme:</label>
               <select
                 id="themeSelector"
