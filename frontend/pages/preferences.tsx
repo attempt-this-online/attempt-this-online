@@ -2,7 +2,7 @@ import { ArrowLeftIcon } from '@heroicons/react/outline';
 import Head from 'next/head';
 import Link from 'next/link';
 import localForage from 'localforage';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import useSystemThemePreference from 'lib/useSystemThemePreference';
@@ -18,6 +18,9 @@ export default function Preferences() {
     dispatch({ type: 'setTheme', theme: event.target.value });
     await localForage.setItem('ATO_theme', event.target.value);
   };
+  useEffect(() => {
+    localForage.getItem('ATO_theme').then(v => setTheme(v as string));
+  });
   return (
     <>
       <Head>
