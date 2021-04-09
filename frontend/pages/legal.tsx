@@ -10,6 +10,47 @@ export default function Home() {
       </Head>
       <div className="min-h-screen bg-white dark:bg-gray-900 text-black dark:text-white pt-8 relative flex flex-col">
         <main className="mb-3 px-8 md:container md:mx-auto flex-grow pb-2">
+          <article id="privacy-policy">
+            <h1 className="mb-4 text-4xl font-bold">Privacy Policy</h1>
+            <aside className="text-justify italic mb-3">
+              <a href="https://github.com/pxeger/attempt_this_online/commits/main/frontend/pages/legal.tsx" className="underline text-blue-500">
+                Last Updated: April 9th, 2021
+              </a>
+            </aside>
+            <p className="text-justify mb-3">
+              When you visit the website, the following data are collected:
+            </p>
+            <ul className="list-disc ml-6 my-2">
+              <li>
+                Your IP address. This is used to implement rate-limiting to prevent exhaustion of
+                resources. A unique, hashed, and salted version of your IP address is stored for up
+                to 1 year, and is never associated with any data except the amount of resources you
+                use. Your IP address in an unhashed form may be stored for up to 1 month for
+                security reasons.
+              </li>
+              <li>
+                Any data you submit in the Run form (code, input, etc.). These are only used to
+                process your code execution request, and immediately deleted after execution has
+                completed.
+              </li>
+            </ul>
+            <p className="text-justify mb-3">
+              Any information you save on the Preferences page is stored locally in your browser
+              and never shared with anyone.
+            </p>
+            <p className="text-justify mb-3">
+              This Privacy Policy may change from time to time. If/when it does, a notification dot
+              will be displayed next to the &quot;Legal&quot; link in the footer for a few weeks
+              before and after. (if I remember, that is - I can&apos;t guarantee anything). You can
+              also check the history of this policy page at any time
+              {' '}
+              <a href="https://github.com/pxeger/attempt_this_online/commits/main/frontend/pages/legal.tsx" className="underline text-blue-500">
+                on GitHub
+              </a>
+              , and there&apos;s probably a way to get email updates there as well I reckon.
+            </p>
+          </article>
+          <hr className="border-gray-400 dark:border-gray-700 my-4" />
           <article id="terms-of-use">
             <h1 className="mb-4 text-4xl font-bold">Terms of Use</h1>
             <aside className="text-justify italic mb-3">
@@ -429,10 +470,6 @@ export default function Home() {
                 for more information.
               </li>
             </ol>
-          </article>
-          <hr className="border-gray-400 dark:border-gray-700 my-4" />
-          <article>
-            <h1 className="mb-4 text-4xl font-bold">Privacy Policy</h1>
           </article>
         </main>
         <Footer noLegalLink />

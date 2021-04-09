@@ -36,7 +36,7 @@ export default function Home() {
             {' '}
             <Link href="/legal">
               <a className="underline text-blue-500">
-                Terms of Use
+                Privacy Policy and Terms of Use
               </a>
             </Link>
             .
