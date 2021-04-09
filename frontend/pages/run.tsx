@@ -1,11 +1,10 @@
 import * as msgpack from '@msgpack/msgpack';
-import { AdjustmentsIcon, HomeIcon } from '@heroicons/react/outline';
 import Head from 'next/head';
-import Link from 'next/link';
 import { SyntheticEvent, useState } from 'react';
 
 import CollapsibleText from 'components/collapsibleText';
 import Footer from 'components/footer';
+import Navbar from 'components/navbar';
 import Notification from 'components/notification';
 
 const BASE_URL = 'https://ato.pxeger.com';
@@ -90,19 +89,7 @@ export default function Run() {
         <title>Run &ndash; Attempt This Online</title>
       </Head>
       <div className="min-h-screen bg-white dark:bg-gray-900 text-black dark:text-white relative flex flex-col">
-        <nav className="flex bg-gray-100 dark:bg-gray-800 w-full px-4 py-2 mb-4 justify-between">
-          <Link href="/">
-            <a className="p-2 transition hover:bg-gray-300 dark:hover:bg-gray-600 rounded-full focus:ring">
-              <HomeIcon className="w-6 h-6" />
-            </a>
-          </Link>
-          <h2 className="hidden sm:block font-bold text-xl my-auto">Attempt This Online</h2>
-          <Link href="/preferences">
-            <a className="p-2 transition hover:bg-gray-300 dark:hover:bg-gray-600 rounded-full focus:ring">
-              <AdjustmentsIcon className="w-6 h-6" />
-            </a>
-          </Link>
-        </nav>
+        <Navbar />
         <div className="flex-grow relative">
           <div className="absolute top-0 z-20 w-full flex flex-col">
             {notifications.map(

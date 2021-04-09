@@ -1,6 +1,7 @@
 import Head from 'next/head';
 
 import Footer from 'components/footer';
+import Navbar from 'components/navbar';
 
 export default function Home() {
   return (
@@ -8,8 +9,9 @@ export default function Home() {
       <Head>
         <title>Legal &ndash; Attempt This Online</title>
       </Head>
-      <div className="min-h-screen bg-white dark:bg-gray-900 text-black dark:text-white pt-8 relative flex flex-col">
-        <main className="mb-3 px-8 md:container md:mx-auto flex-grow pb-2">
+      <div className="min-h-screen bg-white dark:bg-gray-900 text-black dark:text-white relative flex flex-col">
+        <Navbar />
+        <main className="my-3 px-8 md:container md:mx-auto flex-grow pb-2">
           <article id="privacy-policy">
             <h1 className="mb-4 text-4xl font-bold">Privacy Policy</h1>
             <aside className="text-justify italic mb-3">
