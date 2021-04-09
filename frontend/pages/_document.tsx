@@ -14,10 +14,7 @@ class MyDocument extends Document {
         <Head>
           <link rel="preconnect" href="https://fonts.gstatic.com" />
           <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fira+Code&display=swap" />
-          <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Code&display=swap" media="none" onLoad="this.media='all'" />
-          <noscript>
-            <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Code&display=swap" />
-          </noscript>
+          <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Code&display=swap" />
         </Head>
         <body>
           <Main />
