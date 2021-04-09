@@ -138,10 +138,14 @@ export default function Run() {
               </button>
             </form>
             <CollapsibleText state={[output, setOutput]} id="output" disabled>
-              <code>stdout</code> output
+              <code>stdout</code>
+              {' '}
+              output
             </CollapsibleText>
             <CollapsibleText state={[stderr, setStderr]} id="stderr" disabled>
-              <code>stderr</code> output
+              <code>stderr</code>
+              {' '}
+              output
             </CollapsibleText>
           </main>
         </div>
