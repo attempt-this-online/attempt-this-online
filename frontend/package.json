@@ -11,6 +11,7 @@
     "@heroicons/react": "^1.0.0",
     "@msgpack/msgpack": "^2.5.1",
     "@reduxjs/toolkit": "^1.5.1",
+    "@types/lodash": "^4.14.168",
     "localforage": "^1.9.0",
     "lodash": "^4.17.21",
     "next": "10.1.3",

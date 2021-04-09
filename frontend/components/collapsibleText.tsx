@@ -1,6 +1,8 @@
 import localforage from 'localforage';
 import { debounce } from 'lodash';
-import { useEffect, useMemo, useState, ReactNode } from 'react';
+import {
+  useEffect, useMemo, useState, ReactNode,
+} from 'react';
 
 // milliseconds
 const DEBOUNCE = 100;
@@ -16,24 +18,23 @@ function CollapsibleText({
   const [open, setOpen] = useState(true);
   // don't recreate the debouncer on every render
   const save = useMemo(
-    () =>
-      // don't save too quickly
-      debounce(
-        async v => {
-          await localforage.setItem('ATO_saved_' + id, v); 
-        },
-        DEBOUNCE),
-    [id]
+    () => debounce( // don't save too quickly
+      async v => {
+        await localforage.setItem(`ATO_saved_${id}`, v);
+      },
+      DEBOUNCE,
+    ),
+    [id],
   );
   // restore saved code
   useEffect(() => {
-    localforage.getItem('ATO_saved_' + id)
-      .then(v => { setValue(v || ''); });
+    localforage.getItem(`ATO_saved_${id}`)
+      .then((v: string) => { setValue(v || ''); });
   }, [id]);
-  const handleChange = event => {
+  const handleChange = (event: any) => {
     setValue(event.target.value);
     save(event.target.value);
-  }
+  };
   return (
     <details open={open} className="my-4">
       <summary className="cursor-pointer">
