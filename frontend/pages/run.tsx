@@ -34,7 +34,9 @@ interface APIResponse {
 }
 
 export default function Run() {
+  const [header, setHeader] = useState('');
   const [code, setCode] = useState('');
+  const [footer, setFooter] = useState('');
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const [stderr, setStderr] = useState('');
@@ -49,7 +51,7 @@ export default function Run() {
   const submit = async (event: SyntheticEvent) => {
     event.preventDefault();
     setSubmitting(true);
-    const codeBytes = new TextEncoder().encode(code);
+    const codeBytes = new TextEncoder().encode((header && `${header}\n`) + code + (footer && `\n${footer}`));
     const inputBytes = new TextEncoder().encode(input);
     const response = await fetch(`${BASE_URL}/api/v0/execute`, {
       method: 'POST',
@@ -105,8 +107,14 @@ export default function Run() {
           </div>
           <main className="mb-3 px-4 -mt-4 md:container md:mx-auto">
             <form onSubmit={submit}>
+              <CollapsibleText state={[header, setHeader]} id="header">
+                Header
+              </CollapsibleText>
               <CollapsibleText state={[code, setCode]} id="code">
                 Code
+              </CollapsibleText>
+              <CollapsibleText state={[footer, setFooter]} id="footer">
+                Footer
               </CollapsibleText>
               <CollapsibleText state={[input, setInput]} id="input">
                 Input
