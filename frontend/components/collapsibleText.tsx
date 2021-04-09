@@ -23,13 +23,13 @@ function CollapsibleText({
           await localforage.setItem('ATO_saved_' + id, v); 
         },
         DEBOUNCE),
-    []
+    [id]
   );
   // restore saved code
   useEffect(() => {
     localforage.getItem('ATO_saved_' + id)
       .then(v => { setValue(v || ''); });
-  }, []);
+  }, [id]);
   const handleChange = event => {
     setValue(event.target.value);
     save(event.target.value);
