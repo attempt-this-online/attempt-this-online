@@ -31,6 +31,16 @@ export default function Home() {
               </a>
             </Link>
           </p>
+          <p className="my-4 text-justify">
+            By using this website, you agree to be bound by our
+            {' '}
+            <Link href="/legal">
+              <a className="underline text-blue-500">
+                Terms of Use
+              </a>
+            </Link>
+            .
+          </p>
           <h2 className="mt-6 text-2xl font-bold">Why ATO?</h2>
           <ul className="list-disc ml-6 my-4">
             <li className="text-justify">It&apos;s completely free of charge</li>
