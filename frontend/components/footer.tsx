@@ -17,9 +17,12 @@ export default function Footer({ noLegalLink = false }: { noLegalLink?: boolean 
         { noLegalLink ? null : <Link href="/legal"><a className="underline text-blue-500">Legal</a></Link>}
       </div>
       <div className="order-1 md:order-3 md:flex md:flex-grow md:justify-center md:w-0">
-        <div className="ml-auto">
-          Version:&nbsp;
-          <a className="font-mono truncate" href="https://github.com/pxeger/attempt_this_online">{buildId}</a>
+        <div className="ml-auto md:max-w-qu truncate">
+          <a href="https://github.com/pxeger/attempt_this_online">
+            Version:
+            {' '}
+            <code>{buildId}</code>
+          </a>
         </div>
       </div>
     </footer>

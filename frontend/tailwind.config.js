@@ -8,6 +8,9 @@ module.exports = {
       fontFamily: {
         mono: ['Fira Code', ...defaultTheme.fontFamily.sans],
       },
+      maxWidth: {
+        qu: '25vw',
+      }
     },
   },
   variants: {
