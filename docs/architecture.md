@@ -3,7 +3,7 @@ The best way to see how Attempt This Online works is by listing the steps taken 
 display. This assumes ATO is being run with the default full setup.
 
 - User clicks run on the webpage
-- <s>Frontend concatenates header, body, and footer of program</s>
+- Frontend concatenates header, body, and footer of program
 - Browser sends `POST` request to `https://ato.pxeger.com/api`
     - Request contains [msgpack](https://msgpack.org)-encoded data, which is a dictionary containing:
         - `language` (string): the name/identifier of the language
