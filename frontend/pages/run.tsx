@@ -38,7 +38,7 @@ export default function Run() {
   const [code, setCode] = useState('');
   const [footer, setFooter] = useState('');
   const [input, setInput] = useState('');
-  const [output, setOutput] = useState('');
+  const [stdout, setStdout] = useState('');
   const [stderr, setStderr] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [notifications, setNotifications] = useState<{ id: number, text: string }[]>([]);
@@ -78,12 +78,17 @@ export default function Run() {
       setSubmitting(false);
       return;
     }
-    setOutput(new TextDecoder().decode(data.stdout));
+    setStdout(new TextDecoder().decode(data.stdout));
     setStderr(new TextDecoder().decode(data.stderr));
     if (data.timed_out) {
       notify('The program ran for over 60 seconds and timed out');
     }
     setSubmitting(false);
+  };
+  const keyDownHandler = e => {
+    if (e.ctrlKey && !e.shiftKey && !e.metaKey && !e.altKey && e.key === 'Enter') {
+      submit(e);
+    }
   };
   return (
     <>
@@ -107,19 +112,19 @@ export default function Run() {
           </div>
           <main className="mb-3 px-4 -mt-4 md:container md:mx-auto">
             <form onSubmit={submit}>
-              <CollapsibleText state={[header, setHeader]} id="header">
+              <CollapsibleText state={[header, setHeader]} id="header" onKeyDown={keyDownHandler}>
                 Header
               </CollapsibleText>
-              <CollapsibleText state={[code, setCode]} id="code">
+              <CollapsibleText state={[code, setCode]} id="code" onKeyDown={keyDownHandler}>
                 Code
               </CollapsibleText>
-              <CollapsibleText state={[footer, setFooter]} id="footer">
+              <CollapsibleText state={[footer, setFooter]} id="footer" onKeyDown={keyDownHandler}>
                 Footer
               </CollapsibleText>
-              <CollapsibleText state={[input, setInput]} id="input">
+              <CollapsibleText state={[input, setInput]} id="input" onKeyDown={keyDownHandler}>
                 Input
               </CollapsibleText>
-              <button type="submit" className="mt-6 rounded px-4 py-2 bg-blue-500 text-white flex focus:outline-none focus:ring">
+              <button type="submit" className="mt-6 rounded px-4 py-2 bg-blue-500 text-white flex focus:outline-none focus:ring" onKeyDown={keyDownHandler}>
                 <span>Execute</span>
                 {submitting && (
                 /* this SVG is taken from https://git.io/JYHot, under the MIT licence https://git.io/JYHoh */
@@ -130,12 +135,12 @@ export default function Run() {
                 )}
               </button>
             </form>
-            <CollapsibleText state={[output, setOutput]} id="output" disabled>
+            <CollapsibleText state={[stdout, setStdout]} id="stdout" disabled onKeyDown={keyDownHandler}>
               <code>stdout</code>
               {' '}
               output
             </CollapsibleText>
-            <CollapsibleText state={[stderr, setStderr]} id="stderr" disabled>
+            <CollapsibleText state={[stderr, setStderr]} id="stderr" disabled onKeyDown={keyDownHandler}>
               <code>stderr</code>
               {' '}
               output

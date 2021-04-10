@@ -8,12 +8,13 @@ import {
 const DEBOUNCE = 100;
 
 function CollapsibleText({
-  state: [value, setValue], id, disabled = false, children,
+  state: [value, setValue], id, disabled = false, children, onKeyDown,
 }: {
   state: [string, (value: string) => void],
   id: string,
   disabled?: boolean,
   children: ReactNode,
+  onKeyDown: (event: any) => void,
 }) {
   const [open, setOpen] = useState(true);
   // don't recreate the debouncer on every render
@@ -53,6 +54,7 @@ function CollapsibleText({
         value={value}
         disabled={disabled}
         onChange={handleChange}
+        onKeyDown={onKeyDown}
         className="block w-full my-4 p-2 rounded bg-gray-100 dark:bg-gray-800 font-mono text-base resize-y cursor-text focus:outline-none focus:ring min-h-6"
       />
     </details>
