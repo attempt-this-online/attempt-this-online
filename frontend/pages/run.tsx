@@ -85,7 +85,8 @@ export default function Run() {
     }
     setSubmitting(false);
   };
-  const keyDownHandler = e => {
+
+  const keyDownHandler = (e: any) => {
     if (e.ctrlKey && !e.shiftKey && !e.metaKey && !e.altKey && e.key === 'Enter') {
       submit(e);
     }
