@@ -10,7 +10,10 @@ module.exports = {
       },
       maxWidth: {
         qu: '25vw',
-      }
+      },
+      minHeight: {
+        6: '6rem',
+      },
     },
   },
   variants: {
