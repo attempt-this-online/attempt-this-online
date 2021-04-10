@@ -33,13 +33,30 @@ interface APIResponse {
   socket_sent: number;
 }
 
+const ENCODERS: Record<string, ((s: string) => Uint8Array)> = {
+  'utf-8': s => new TextEncoder().encode(s),
+};
+
+const DECODERS: Record<string, ((b: Uint8Array) => string)> = {
+  'utf-8': b => new TextDecoder().decode(b),
+};
+
+const NEWLINE = '\n'.charCodeAt(0);
+
 export default function Run() {
   const [header, setHeader] = useState('');
+  const [headerEncoding, setHeaderEncoding] = useState('utf-8');
   const [code, setCode] = useState('');
+  const [codeEncoding, setCodeEncoding] = useState('utf-8');
   const [footer, setFooter] = useState('');
+  const [footerEncoding, setFooterEncoding] = useState('utf-8');
   const [input, setInput] = useState('');
+  const [inputEncoding, setInputEncoding] = useState('utf-8');
   const [stdout, setStdout] = useState('');
+  const [stdoutEncoding, setStdoutEncoding] = useState('utf-8');
   const [stderr, setStderr] = useState('');
+  const [stderrEncoding, setStderrEncoding] = useState('utf-8');
+
   const [submitting, setSubmitting] = useState(false);
   const [notifications, setNotifications] = useState<{ id: number, text: string }[]>([]);
   const dismissNotification = (target: number) => {
@@ -48,16 +65,28 @@ export default function Run() {
   const notify = (text: string) => {
     setNotifications([{ id: Math.random(), text }, ...notifications]);
   };
+
   const submit = async (event: SyntheticEvent) => {
     event.preventDefault();
     setSubmitting(true);
-    const codeBytes = new TextEncoder().encode((header && `${header}\n`) + code + (footer && `\n${footer}`));
-    const inputBytes = new TextEncoder().encode(input);
+
+    const headerBytes = ENCODERS[headerEncoding](header);
+    const footerBytes = ENCODERS[footerEncoding](footer);
+    const codeBytes = ENCODERS[codeEncoding](code);
+    const combined = new Uint8Array([
+      ...headerBytes,
+      ...(headerBytes.length === 0 ? [] : [NEWLINE]),
+      ...codeBytes,
+      ...(footerBytes.length === 0 ? [] : [NEWLINE]),
+      ...footerBytes,
+    ]);
+    const inputBytes = ENCODERS[inputEncoding](input);
+
     const response = await fetch(`${BASE_URL}/api/v0/execute`, {
       method: 'POST',
       body: msgpack.encode({
         language: 'python',
-        code: codeBytes,
+        code: combined,
         input: inputBytes,
         options: [],
         arguments: [],
@@ -78,8 +107,10 @@ export default function Run() {
       setSubmitting(false);
       return;
     }
-    setStdout(new TextDecoder().decode(data.stdout));
-    setStderr(new TextDecoder().decode(data.stderr));
+
+    setStdout(DECODERS[stdoutEncoding](data.stdout));
+    setStderr(DECODERS[stderrEncoding](data.stderr));
+
     if (data.timed_out) {
       notify('The program ran for over 60 seconds and timed out');
     }
@@ -113,16 +144,16 @@ export default function Run() {
           </div>
           <main className="mb-3 px-4 -mt-4 md:container md:mx-auto">
             <form onSubmit={submit}>
-              <CollapsibleText state={[header, setHeader]} id="header" onKeyDown={keyDownHandler}>
+              <CollapsibleText state={[header, setHeader]} encodingState={[headerEncoding, setHeaderEncoding]} id="header" onKeyDown={keyDownHandler}>
                 Header
               </CollapsibleText>
-              <CollapsibleText state={[code, setCode]} id="code" onKeyDown={keyDownHandler}>
+              <CollapsibleText state={[code, setCode]} encodingState={[codeEncoding, setCodeEncoding]} id="code" onKeyDown={keyDownHandler}>
                 Code
               </CollapsibleText>
-              <CollapsibleText state={[footer, setFooter]} id="footer" onKeyDown={keyDownHandler}>
+              <CollapsibleText state={[footer, setFooter]} encodingState={[footerEncoding, setFooterEncoding]} id="footer" onKeyDown={keyDownHandler}>
                 Footer
               </CollapsibleText>
-              <CollapsibleText state={[input, setInput]} id="input" onKeyDown={keyDownHandler}>
+              <CollapsibleText state={[input, setInput]} encodingState={[inputEncoding, setInputEncoding]} id="input" onKeyDown={keyDownHandler}>
                 Input
               </CollapsibleText>
               <button type="submit" className="mt-6 rounded px-4 py-2 bg-blue-500 text-white flex focus:outline-none focus:ring" onKeyDown={keyDownHandler}>
@@ -136,12 +167,12 @@ export default function Run() {
                 )}
               </button>
             </form>
-            <CollapsibleText state={[stdout, setStdout]} id="stdout" disabled onKeyDown={keyDownHandler}>
+            <CollapsibleText state={[stdout, setStdout]} encodingState={[stdoutEncoding, setStdoutEncoding]} id="stdout" disabled onKeyDown={keyDownHandler}>
               <code>stdout</code>
               {' '}
               output
             </CollapsibleText>
-            <CollapsibleText state={[stderr, setStderr]} id="stderr" disabled onKeyDown={keyDownHandler}>
+            <CollapsibleText state={[stderr, setStderr]} encodingState={[stderrEncoding, setStderrEncoding]} id="stderr" disabled onKeyDown={keyDownHandler}>
               <code>stderr</code>
               {' '}
               output
