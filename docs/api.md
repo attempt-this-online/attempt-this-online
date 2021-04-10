@@ -1,6 +1,6 @@
 # API Reference
 The official instance uses the base url `https://ato.pxeger.com`. Note that use of the API on the
-official instance must abide by the [`Terms of Use`](https://ato.pxeger.com/legal#terms-of-use):
+official instance must abide by the [Terms of Use](https://ato.pxeger.com/legal#terms-of-use):
 **you must have explicit permission from me to use the API**.
 
 ## POST `/api/v0/execute`
