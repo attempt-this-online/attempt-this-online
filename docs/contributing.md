@@ -68,5 +68,7 @@ cd /ATO/context
 /ATO/yargs %1 /ATO/options /ATO/yargs %2 /ATO/arguments python %1 /ATO/code %2 < /ATO/input
 ```
 
+Make sure you've made the runner script executable (`chmod +x runners/path`)
+
 3. Test your runner! It's not helpful if you submit a broken runner.
 4. Make a [Pull Request](https://github.com/pxeger/attempt_this_online/pulls)
