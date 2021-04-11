@@ -67,7 +67,7 @@
 
 // #define AUTHORS proper_name("Padraig Brady")
 
-#define TIMEOUT_SECS 60
+#define TIMEOUT_SECS 2
 
 static int timed_out;
 static int term_signal = SIGKILL; /* same default as kill command.  */
@@ -215,18 +215,6 @@ block_cleanup_and_chld(int sigterm, sigset_t* old_set)
         perror("warning: sigprocmask");
 }
 
-/* Try to disable core dumps for this process.
-   Return TRUE if successful, FALSE otherwise.  */
-static bool
-disable_core_dumps(void)
-{
-    if (prctl(PR_SET_DUMPABLE, 0) == 0)
-        return true;
-
-    perror("warning: disabling core dumps failed");
-    return false;
-}
-
 int main(int argc, char** argv)
 {
     if (argc != 2) {
@@ -310,19 +298,10 @@ int main(int argc, char** argv)
                 status_type = "exited";
                 status = WEXITSTATUS(status);
             } else if (WIFSIGNALED(status)) {
-                int sig = WTERMSIG(status);
                 status_type = "killed";
                 if (WCOREDUMP(status))
                     status_type = "core_dump";
-
-                // TODO(pxeger): what is this for? I think it might be to check that raising the signal won't produce a core dump
-                if (!timed_out && disable_core_dumps()) {
-                    /* exit with the signal flag set.  */
-                    signal(sig, SIG_DFL);
-                    unblock_signal(sig);
-                    raise(sig);
-                }
-                status = sig;
+                status = WTERMSIG(status);
             } else {
                 /* shouldn't happen.  */
                 status = -1;

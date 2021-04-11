@@ -116,9 +116,14 @@ async def execute_route(request: Request) -> Response:
     return Response(msgpack.dumps(status), 200)
 
 
+async def get_metadata(_request) -> Response:
+    return Response(msgpack.dumps(metadata.languages))
+
+
 app = Starlette(
     routes=[
         Route("/api/v0/execute", methods=["POST"], endpoint=execute_route),
+        Route("/api/v0/metadata", methods=["GET"], endpoint=get_metadata),
     ],
     exception_handlers={
         404: not_found_handler,

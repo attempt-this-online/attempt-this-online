@@ -7,7 +7,7 @@ official instance must abide by the [Terms of Use](https://ato.pxeger.com/legal#
 ### Request
 A [msgpack]-encoded payload - a map with the following string keys:
 - `language`: the identifier of the language interpreter or compiler to use. The identifier is a filename from the
-  `runners` directory
+  [`runners/` directory]
 - `code`: a binary containing the program data
 - `input`: a binary containing the data to be passed to the standard input of the program
 - `options`: an array of binaries - command-line arguments to be passed to the **interpreter or compiler**
@@ -46,6 +46,24 @@ A [msgpack]-encoded payload - a map with the following string keys:
 - `socket_recv`: number of socket messages received (always 0 since network access is not allowed)
 - `socket_sent`: number of socket messages sent (always 0 since network access is not allowed)
 
+## GET `/api/v0/metadata`
+### Request
+No parameters required.
+
+### Response
+A [msgpack]-encoded payload - a map from language IDs to a dictionary of their properties. For example (in JSON):
+
+```json
+{ "python": { "name": "Python", "image": "python:3-buster" } }
+```
+
+The language ID is the filename of a script in the [`runners/` directory], to be passed to the execute endpoint.
+
+Currently recognised proprties are:
+- `name` (string): human-readable name of the language
+- `image` (string): Docker image used for execution of the language
+
 [msgpack]: https://msgpack.org
+[`runners/` directory]: https://github.com/pxeger/attempt_this_online/tree/main/runners
 [`signal(7)`]: https://man.archlinux.org/man/core/man-pages/signal.7.en
 [`core(5)`]: https://man.archlinux.org/man/core/man-pages/core.5.en
