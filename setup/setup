@@ -138,6 +138,9 @@ cd /var/cache/ATO/attempt_this_online
 
 # install static files
 cp -RT public /usr/local/share/ATO/public
+for format in woff woff2 ttf; do
+    curl "https://raw.githubusercontent.com/tonsky/FiraCode/master/distr/$format/FiraCode-Regular.$format" -o "/usr/local/share/ATO/public/FiraCode-Regular.$format"
+done
 chown -R http:http /usr/local/share/ATO/public
 chmod -R a+rX-w /usr/local/share/ATO/public
 
