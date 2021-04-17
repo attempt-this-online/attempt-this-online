@@ -1,6 +1,7 @@
 import * as msgpack from '@msgpack/msgpack';
+import localforage from 'localforage';
 import Head from 'next/head';
-import { SyntheticEvent, useState } from 'react';
+import { SyntheticEvent, useState, useEffect } from 'react';
 
 import CollapsibleText from 'components/collapsibleText';
 import Footer from 'components/footer';
@@ -44,6 +45,7 @@ const DECODERS: Record<string, ((b: Uint8Array) => string)> = {
 const NEWLINE = '\n'.charCodeAt(0);
 
 export default function Run() {
+  const [language, setLanguage] = useState('');
   const [header, setHeader] = useState('');
   const [headerEncoding, setHeaderEncoding] = useState('utf-8');
   const [code, setCode] = useState('');
@@ -85,7 +87,7 @@ export default function Run() {
     const response = await fetch(`${BASE_URL}/api/v0/execute`, {
       method: 'POST',
       body: msgpack.encode({
-        language: 'python',
+        language,
         code: combined,
         input: inputBytes,
         options: [],
@@ -117,8 +119,17 @@ export default function Run() {
     setSubmitting(false);
   };
 
+  useEffect(() => {
+    localforage.getItem('ATO_saved_language').then((l: any) => l && setLanguage(l));
+  }, []);
+
+  const languageChangeHandler = (e: any) => {
+    setLanguage(e.target.value);
+    localforage.setItem('ATO_saved_language', e.target.value);
+  };
+
   const keyDownHandler = (e: any) => {
-    if (e.ctrlKey && !e.shiftKey && !e.metaKey && !e.altKey && e.key === 'Enter') {
+    if (!submitting && language && e.ctrlKey && !e.shiftKey && !e.metaKey && !e.altKey && e.key === 'Enter') {
       submit(e);
     }
   };
@@ -144,6 +155,18 @@ export default function Run() {
           </div>
           <main className="mb-3 px-4 -mt-4 md:container md:mx-auto">
             <form onSubmit={submit}>
+              <div className="flex items-center mt-4 pb-1">
+                <label htmlFor="languageSelector">Language:</label>
+                <select
+                  id="languageSelector"
+                  className="appearance-none ml-2 p-2 w-80 rounded bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 transition cursor-pointer ATO_select focus:outline-none focus:ring"
+                  value={language}
+                  onChange={languageChangeHandler}
+                >
+                  <option value=""></option>
+                  <option value="python">Python</option>
+                </select>
+              </div>
               <CollapsibleText state={[header, setHeader]} encodingState={[headerEncoding, setHeaderEncoding]} id="header" onKeyDown={keyDownHandler}>
                 Header
               </CollapsibleText>
@@ -156,7 +179,7 @@ export default function Run() {
               <CollapsibleText state={[input, setInput]} encodingState={[inputEncoding, setInputEncoding]} id="input" onKeyDown={keyDownHandler}>
                 Input
               </CollapsibleText>
-              <button type="submit" className="mb-6 rounded px-4 py-2 bg-blue-500 text-white flex focus:outline-none focus:ring" onKeyDown={keyDownHandler}>
+              <button type="submit" className="mb-6 rounded px-4 py-2 bg-blue-500 text-white flex focus:outline-none focus:ring disabled:cursor-not-allowed" onKeyDown={keyDownHandler} disabled={submitting || !language}>
                 <span>Execute</span>
                 {submitting && (
                 /* this SVG is taken from https://git.io/JYHot, under the MIT licence https://git.io/JYHoh */
