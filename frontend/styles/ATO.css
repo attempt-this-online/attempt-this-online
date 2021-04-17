@@ -2,7 +2,10 @@
   font-family: "Fira Code";
   src: url("/FiraCode-Regular.woff2") format("woff2"),
        url("/FiraCode-Regular.woff") format("woff"),
-       url("/FiraCode-Regular.ttf") format("ttf");
+       url("/FiraCode-Regular.ttf") format("ttf"),
+       local("Fira Code Regular"),
+       local("Fira Code"),
+       local("Fira Mono");
 }
 
 code {
