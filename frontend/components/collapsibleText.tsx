@@ -50,12 +50,12 @@ function CollapsibleText({
   };
   return (
     <div className="relative">
-      <details open={open} className="my-4">
-        <summary className="cursor-pointer">
+      <details open={open} className="my-6">
+        <summary className="cursor-pointer focus-within:ring rounded pl-2 hover:bg-gray-200 dark:hover:bg-gray-700 transition py-1 -mt-3 -mb-1">
           <label htmlFor={`textarea:${id}`}>
             <button
               type="button"
-              onClick={() => { setOpen(!open); }}
+              onClick={e => { setOpen(!open); }}
               className="select-none focus:outline-none"
             >
               {children}
@@ -70,7 +70,7 @@ function CollapsibleText({
           onKeyDown={onKeyDown}
           className="block w-full my-4 p-2 rounded bg-gray-100 dark:bg-gray-800 font-mono text-base resize-y cursor-text focus:outline-none focus:ring min-h-6"
         />
-        <div className="absolute -top-1 right-0">
+        <div className="absolute top-0 right-0">
           <label htmlFor={`encodingSelect:${id}`}>
             Encoding:
           </label>
@@ -79,7 +79,7 @@ function CollapsibleText({
             value={encoding}
             onChange={handleChangeEncoding}
             id={`encodingSelect:${id}`}
-            className="appearance-none p-1 rounded bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 transition cursor-pointer ATO_select focus:outline-none focus:ring"
+            className="appearance-none ml-1 p-1 rounded bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 transition cursor-pointer ATO_select focus:outline-none focus:ring"
           >
             <option value="utf-8">UTF-8</option>
           </select>

@@ -156,7 +156,7 @@ export default function Run() {
               <CollapsibleText state={[input, setInput]} encodingState={[inputEncoding, setInputEncoding]} id="input" onKeyDown={keyDownHandler}>
                 Input
               </CollapsibleText>
-              <button type="submit" className="mt-6 rounded px-4 py-2 bg-blue-500 text-white flex focus:outline-none focus:ring" onKeyDown={keyDownHandler}>
+              <button type="submit" className="mb-6 rounded px-4 py-2 bg-blue-500 text-white flex focus:outline-none focus:ring" onKeyDown={keyDownHandler}>
                 <span>Execute</span>
                 {submitting && (
                 /* this SVG is taken from https://git.io/JYHot, under the MIT licence https://git.io/JYHoh */
