@@ -1,7 +1,7 @@
 import localforage from 'localforage';
 import Head from 'next/head';
 import Link from 'next/link';
-import { useRouter } from 'next/router'
+import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 
 import Footer from 'components/footer';
@@ -10,7 +10,6 @@ export default function Home() {
   const router = useRouter();
   useEffect(() => {
     localforage.getItem('ATO_greeted').then(greeted => {
-      console.log('greeted: ', greeted);
       if (!greeted) {
         localforage.setItem('ATO_greeted', true);
       }

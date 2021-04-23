@@ -22,7 +22,7 @@ const reducer = (state = initialState, action: any) => {
       return {
         ...state,
         fontLigaturesEnabled: action.fontLigaturesEnabled!,
-      }
+      };
     default:
       return state;
   }

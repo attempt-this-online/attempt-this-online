@@ -26,7 +26,7 @@ export default function Preferences() {
   };
   useEffect(() => {
     localForage.getItem('ATO_theme').then(v => setTheme(v as string));
-    localForage.getItem('ATO_font_ligatures').then(v => { console.log(v); setFontLigaturesEnabled(v as boolean) });
+    localForage.getItem('ATO_font_ligatures').then(v => setFontLigaturesEnabled(v as boolean));
   }, []);
   return (
     <>

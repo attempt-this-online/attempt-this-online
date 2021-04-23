@@ -163,7 +163,7 @@ export default function Run() {
                   value={language}
                   onChange={languageChangeHandler}
                 >
-                  <option value=""></option>
+                  <option value="" />
                   <option value="python">Python</option>
                 </select>
               </div>

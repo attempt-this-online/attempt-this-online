@@ -8,7 +8,16 @@ import useSystemThemePreference from 'lib/useSystemThemePreference';
 import { useStore } from 'lib/store';
 import 'styles/ATO.css';
 
-const ThemeWrapper = connect((state: any) => ({ theme: state.theme, fontLigaturesEnabled: state.fontLigaturesEnabled }))(({ Component, pageProps, theme, fontLigaturesEnabled }: { Component: React.ComponentType, theme: ('light' | 'dark' | 'system'), pageProps: any, fontLigaturesEnabled: boolean }) => {
+const ThemeWrapper = connect(
+  (state: any) => ({ theme: state.theme, fontLigaturesEnabled: state.fontLigaturesEnabled }),
+)(({
+  Component, pageProps, theme, fontLigaturesEnabled,
+}: {
+  Component: React.ComponentType,
+  theme: ('light' | 'dark' | 'system'),
+  pageProps: any,
+  fontLigaturesEnabled: boolean
+}) => {
   const dispatch = useDispatch();
   React.useEffect((async () => {
     const storedTheme = await localForage.getItem('ATO_theme');
@@ -25,7 +34,7 @@ const ThemeWrapper = connect((state: any) => ({ theme: state.theme, fontLigature
     <div
       className={
         ((theme === 'light' || (theme === 'system' && systemThemePreference === 'light'))
-        ? '' : 'dark ')
+          ? '' : 'dark ')
         + (fontLigaturesEnabled ? 'ATO_font_ligatures' : 'ATO_no_font_ligatures')
     }
     >

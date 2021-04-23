@@ -55,7 +55,7 @@ function CollapsibleText({
           <label htmlFor={`textarea:${id}`}>
             <button
               type="button"
-              onClick={e => { setOpen(!open); }}
+              onClick={() => { setOpen(!open); }}
               className="select-none focus:outline-none"
             >
               {children}
