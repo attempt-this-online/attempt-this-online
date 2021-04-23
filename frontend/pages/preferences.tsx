@@ -18,9 +18,16 @@ export default function Preferences() {
     dispatch({ type: 'setTheme', theme: event.target.value });
     await localForage.setItem('ATO_theme', event.target.value);
   };
+  const [fontLigaturesEnabled, setFontLigaturesEnabled] = useState(true);
+  const handleFontLigaturesChange = async (event: any) => {
+    setFontLigaturesEnabled(event.target.checked);
+    dispatch({ type: 'setFontLigaturesEnabled', fontLigaturesEnabled: event.target.checked });
+    await localForage.setItem('ATO_font_ligatures', event.target.checked);
+  };
   useEffect(() => {
     localForage.getItem('ATO_theme').then(v => setTheme(v as string));
-  });
+    localForage.getItem('ATO_font_ligatures').then(v => { console.log(v); setFontLigaturesEnabled(v as boolean) });
+  }, []);
   return (
     <>
       <Head>
@@ -39,11 +46,11 @@ export default function Preferences() {
             </h1>
             <div className="w-12 h-12 inline" />
           </header>
-          <p className="mb-3">
+          <p>
             Attempt This Online stores your preferences locally in your browser, and they are never
             shared with anyone.
           </p>
-          <fieldset className="border border-black dark:border-white rounded pt-2 pb-4 px-4">
+          <fieldset className="mt-3 border border-gray-400 dark:border-gray-700 rounded pt-2 pb-4 px-4">
             <legend className="px-2">Appearance</legend>
             <div className="flex">
               {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
@@ -64,6 +71,18 @@ export default function Preferences() {
                 <option value="dark">Dark</option>
                 <option value="light">Light</option>
               </select>
+            </div>
+            <div className="flex mt-3">
+              <label className="flex">
+                <input type="checkbox" className="mr-2" checked={fontLigaturesEnabled} onChange={handleFontLigaturesChange} />
+                Font Ligatures
+              </label>
+              <span className="ml-1">
+                (demo:
+                {' '}
+                <code className="bg-gray-200 dark:bg-gray-800 px-2 py-px rounded">{'<-> </> :: ||> #! ++ /* */ 0xFF != www'}</code>
+                )
+              </span>
             </div>
           </fieldset>
         </main>

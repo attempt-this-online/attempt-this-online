@@ -18,6 +18,11 @@ const reducer = (state = initialState, action: any) => {
         ...state,
         theme: action.theme!,
       };
+    case 'setFontLigaturesEnabled':
+      return {
+        ...state,
+        fontLigaturesEnabled: action.fontLigaturesEnabled!,
+      }
     default:
       return state;
   }
