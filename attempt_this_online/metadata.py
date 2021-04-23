@@ -6,8 +6,8 @@ import re
 __all__ = ["languages"]
 
 languages = {}
-# for path in Path("/usr/local/share/ATO/runners").iterdir():
-for path in (Path(__file__).parents[1] / "runners").iterdir():
+for path in Path("/usr/local/share/ATO/runners").iterdir():
+# for path in (Path(__file__).parents[1] / "runners").iterdir():
     if not access(path, R_OK | X_OK):    
         # not executable
         continue
