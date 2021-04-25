@@ -2,18 +2,22 @@ import { useState, useRef, useEffect } from 'react';
 
 export default function ResizeableText(
   {
-    value, onChange, disabled, id, onKeyDown,
+    value,
+    onChange = _ => undefined,
+    disabled,
+    id = undefined,
+    onKeyDown = _ => undefined,
   }: {
     value: string,
-    onChange: (e: any) => void,
+    onChange?: (e: any) => void,
     disabled: boolean,
-    id: string,
-    onKeyDown: (e: any) => void,
+    id?: string,
+    onKeyDown?: (e: any) => void,
   },
 ) {
-  const dummy = useRef(null);
+  const dummy = useRef<any>(null);
   const [height, setHeight] = useState(24);
-  const handleChange = event => {
+  const handleChange = (event: any) => {
     onChange(event);
     if (dummy.current) {
       dummy.current.value = event.target.value;

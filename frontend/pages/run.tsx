@@ -107,8 +107,8 @@ export default function Run() {
   const [stderr, setStderr] = useState('');
   const [stderrEncoding, setStderrEncoding] = useState('utf-8');
 
-  const [statusType, setStatusType] = useState(null);
-  const [statusValue, setStatusValue] = useState(null);
+  const [statusType, setStatusType] = useState<'exited' | 'killed' | 'core_dumped' | 'unknown' | null>(null);
+  const [statusValue, setStatusValue] = useState<number | null>(null);
   const [timing, setTiming] = useState('');
   const [timingOpen, setTimingOpen] = useState(false);
 
@@ -269,7 +269,7 @@ export default function Run() {
                 </button>
                 {statusType && (
                 <p className="ml-4">
-                  {statusToString(statusType, statusValue)}
+                  {statusToString(statusType, statusValue!)}
                 </p>
                 )}
               </div>
@@ -296,7 +296,6 @@ export default function Run() {
               </summary>
               <ResizeableText
                 disabled
-                className="block w-full my-4 p-2 rounded bg-gray-100 dark:bg-gray-800 text-base resize-y cursor-text focus:outline-none focus:ring min-h-6"
                 value={timing}
               />
             </details>
