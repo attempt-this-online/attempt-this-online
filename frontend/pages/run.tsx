@@ -4,6 +4,7 @@ import Head from 'next/head';
 import { SyntheticEvent, useState, useEffect } from 'react';
 
 import CollapsibleText from 'components/collapsibleText';
+import ResizeableText from 'components/resizeableText';
 import Footer from 'components/footer';
 import Navbar from 'components/navbar';
 import Notification from 'components/notification';
@@ -44,6 +45,53 @@ const DECODERS: Record<string, ((b: Uint8Array) => string)> = {
 
 const NEWLINE = '\n'.charCodeAt(0);
 
+const STATUS: Record<number, string> = {
+  1: 'SIGHUP',
+  2: 'SIGINT',
+  3: 'SIGQUIT',
+  4: 'SIGILL',
+  5: 'SIGTRAP',
+  6: 'SIGABRT',
+  7: 'SIGBUS',
+  8: 'SIGFPE',
+  9: 'SIGKILL',
+  10: 'SIGUSR1',
+  11: 'SIGSEGV',
+  12: 'SIGUSR2',
+  13: 'SIGPIPE',
+  14: 'SIGALRM',
+  15: 'SIGTERM',
+  // 16 unused
+  17: 'SIGCHLD',
+  18: 'SIGCONT',
+  19: 'SIGSTOP',
+  20: 'SIGTSTP',
+  21: 'SIGTTIN',
+  22: 'SIGTTOU',
+  23: 'SIGURG',
+  24: 'SIGXCPU',
+  25: 'SIGXFSZ',
+  26: 'SIGVTALRM',
+  27: 'SIGPROF',
+  28: 'SIGWINCH',
+  29: 'SIGIO',
+  30: 'SIGPWR',
+  31: 'SIGSYS',
+};
+
+const statusToString = (type: 'exited' | 'killed' | 'core_dumped' | 'unknown', value: number) => {
+  switch (type) {
+    case 'exited':
+      return `Exited with status code ${value}`;
+    case 'killed':
+      return `Killed by ${SIGNALS[value] || 'unknown signal'}`;
+    case 'core_dumped':
+      return `Killed by ${SIGNALS[value] || 'unknown signal'} and dumped core`;
+    default:
+      return `Unknown status`;
+  }
+}
+
 export default function Run() {
   const [language, setLanguage] = useState('');
   const [header, setHeader] = useState('');
@@ -58,6 +106,11 @@ export default function Run() {
   const [stdoutEncoding, setStdoutEncoding] = useState('utf-8');
   const [stderr, setStderr] = useState('');
   const [stderrEncoding, setStderrEncoding] = useState('utf-8');
+
+  const [statusType, setStatusType] = useState(null);
+  const [statusValue, setStatusValue] = useState(null);
+  const [timing, setTiming] = useState('');
+  const [timingOpen, setTimingOpen] = useState(false);
 
   const [submitting, setSubmitting] = useState(false);
   const [notifications, setNotifications] = useState<{ id: number, text: string }[]>([]);
@@ -112,6 +165,30 @@ export default function Run() {
 
     setStdout(DECODERS[stdoutEncoding](data.stdout));
     setStderr(DECODERS[stderrEncoding](data.stderr));
+
+    setStatusType(data.status_type);
+    setStatusValue(data.status_value);
+
+    setTiming(
+      `
+      Real time: ${data.real / 1e6} s
+      Kernel time: ${data.kernel / 1e6} s
+      User time: ${data.kernel / 1e6} s
+      Maximum lifetime memory usage: ${data.max_mem} KiB
+      Average unshared memory usage: ${data.unshared} KiB
+      Average shared memory usage: ${data.shared} KiB
+      Waits (volunatry context switches): ${data.waits}
+      Preemptions (involuntary context switches): ${data.preemptions}
+      Swaps: ${data.swaps}
+      Minor page faults: ${data.minor_page_faults}
+      Major page faults: ${data.major_page_faults}
+      Signals received: ${data.signals_recv}
+      Input operations: ${data.input_ops}
+      Output operations: ${data.output_ops}
+      Socket messages sent: ${data.socket_sent}
+      Socket messages received: ${data.socket_recv}
+      `.trim().split('\n').map(s => s.trim()).join('\n')
+    );
 
     if (data.timed_out) {
       notify('The program ran for over 60 seconds and timed out');
@@ -179,16 +256,21 @@ export default function Run() {
               <CollapsibleText state={[input, setInput]} encodingState={[inputEncoding, setInputEncoding]} id="input" onKeyDown={keyDownHandler}>
                 Input
               </CollapsibleText>
-              <button type="submit" className="mb-6 rounded px-4 py-2 bg-blue-500 text-white flex focus:outline-none focus:ring disabled:cursor-not-allowed" onKeyDown={keyDownHandler} disabled={submitting || !language}>
-                <span>Execute</span>
-                {submitting && (
-                /* this SVG is taken from https://git.io/JYHot, under the MIT licence https://git.io/JYHoh */
-                <svg className="animate-spin my-auto -mr-1 ml-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                </svg>
-                )}
-              </button>
+              <div className="flex mb-6 items-center">
+                <button type="submit" className="rounded px-4 py-2 bg-blue-500 text-white flex focus:outline-none focus:ring disabled:cursor-not-allowed" onKeyDown={keyDownHandler} disabled={submitting || !language}>
+                  <span>Execute</span>
+                  {submitting && (
+                  /* this SVG is taken from https://git.io/JYHot, under the MIT licence https://git.io/JYHoh */
+                  <svg className="animate-spin my-auto -mr-1 ml-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  )}
+                </button>
+                {statusType && (<p className="ml-4">
+                  {statusToString(statusType, statusValue)}
+                </p>)}
+              </div>
             </form>
             <CollapsibleText state={[stdout, setStdout]} encodingState={[stdoutEncoding, setStdoutEncoding]} id="stdout" disabled onKeyDown={keyDownHandler}>
               <code>stdout</code>
@@ -200,6 +282,22 @@ export default function Run() {
               {' '}
               output
             </CollapsibleText>
+            <details open={timingOpen} className="my-6">
+              <summary className="cursor-pointer focus-within:ring rounded pl-2 hover:bg-gray-200 dark:hover:bg-gray-700 transition py-1 -mt-3 -mb-1">
+                <button
+                  type="button"
+                  onClick={() => { setTimingOpen(!timingOpen); }}
+                  className="select-none focus:outline-none"
+                >
+                  Timing details
+                </button>
+              </summary>
+              <ResizeableText
+                disabled
+                className="block w-full my-4 p-2 rounded bg-gray-100 dark:bg-gray-800 text-base resize-y cursor-text focus:outline-none focus:ring min-h-6"
+                value={timing}
+              />
+            </details>
           </main>
         </div>
         <Footer />
