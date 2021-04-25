@@ -1,7 +1,7 @@
 import localforage from 'localforage';
 import { debounce } from 'lodash';
 import {
-  useEffect, useMemo, useRef, useState, ReactNode,
+  useEffect, useMemo, useState, ReactNode,
 } from 'react';
 
 import ResizeableText from 'components/resizeableText';
@@ -25,7 +25,6 @@ function CollapsibleText({
   onKeyDown: (event: any) => void,
 }) {
   const [open, setOpen] = useState(true);
-  const dummy = useRef(null);
   // don't recreate the debouncer on every render
   const save = useMemo(
     () => debounce( // don't save too quickly

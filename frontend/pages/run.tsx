@@ -45,7 +45,7 @@ const DECODERS: Record<string, ((b: Uint8Array) => string)> = {
 
 const NEWLINE = '\n'.charCodeAt(0);
 
-const STATUS: Record<number, string> = {
+const SIGNALS: Record<number, string> = {
   1: 'SIGHUP',
   2: 'SIGINT',
   3: 'SIGQUIT',
@@ -88,9 +88,9 @@ const statusToString = (type: 'exited' | 'killed' | 'core_dumped' | 'unknown', v
     case 'core_dumped':
       return `Killed by ${SIGNALS[value] || 'unknown signal'} and dumped core`;
     default:
-      return `Unknown status`;
+      return 'Unknown status';
   }
-}
+};
 
 export default function Run() {
   const [language, setLanguage] = useState('');
@@ -187,7 +187,7 @@ export default function Run() {
       Output operations: ${data.output_ops}
       Socket messages sent: ${data.socket_sent}
       Socket messages received: ${data.socket_recv}
-      `.trim().split('\n').map(s => s.trim()).join('\n')
+      `.trim().split('\n').map(s => s.trim()).join('\n'),
     );
 
     if (data.timed_out) {
@@ -267,9 +267,11 @@ export default function Run() {
                   </svg>
                   )}
                 </button>
-                {statusType && (<p className="ml-4">
+                {statusType && (
+                <p className="ml-4">
                   {statusToString(statusType, statusValue)}
-                </p>)}
+                </p>
+                )}
               </div>
             </form>
             <CollapsibleText state={[stdout, setStdout]} encodingState={[stdoutEncoding, setStdoutEncoding]} id="stdout" disabled onKeyDown={keyDownHandler}>
