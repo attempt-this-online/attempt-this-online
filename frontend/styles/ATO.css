@@ -8,11 +8,11 @@
        local("Fira Mono");
 }
 
-.ATO_no_font_ligatures code {
+.ATO_no_font_ligatures code, .ATO_no_font_ligatures textarea {
     font-variant-ligatures: none;
 }
 
-.ATO_font_ligatures code {
+.ATO_font_ligatures code, .ATO_font_ligatures textarea {
     font-variant-ligatures: normal;
 }
 
