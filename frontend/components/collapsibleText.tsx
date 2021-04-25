@@ -1,8 +1,10 @@
 import localforage from 'localforage';
 import { debounce } from 'lodash';
 import {
-  useEffect, useMemo, useState, ReactNode,
+  useEffect, useMemo, useRef, useState, ReactNode,
 } from 'react';
+
+import ResizeableText from 'components/resizeableText';
 
 // milliseconds
 const DEBOUNCE = 100;
@@ -23,6 +25,7 @@ function CollapsibleText({
   onKeyDown: (event: any) => void,
 }) {
   const [open, setOpen] = useState(true);
+  const dummy = useRef(null);
   // don't recreate the debouncer on every render
   const save = useMemo(
     () => debounce( // don't save too quickly
@@ -62,13 +65,12 @@ function CollapsibleText({
             </button>
           </label>
         </summary>
-        <textarea
-          id={`textarea:${id}`}
+        <ResizeableText
+          id={id}
           value={value}
-          disabled={disabled}
           onChange={handleChange}
           onKeyDown={onKeyDown}
-          className="block w-full my-4 p-2 rounded bg-gray-100 dark:bg-gray-800 font-mono text-base resize-y cursor-text focus:outline-none focus:ring min-h-6"
+          disabled={disabled}
         />
         <div className="absolute top-0 right-0">
           <label htmlFor={`encodingSelect:${id}`}>
