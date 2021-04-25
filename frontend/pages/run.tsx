@@ -1,4 +1,3 @@
-import * as msgpack from '@msgpack/msgpack';
 import localforage from 'localforage';
 import Head from 'next/head';
 import { SyntheticEvent, useState, useEffect } from 'react';
@@ -8,32 +7,7 @@ import ResizeableText from 'components/resizeableText';
 import Footer from 'components/footer';
 import Navbar from 'components/navbar';
 import Notification from 'components/notification';
-
-const BASE_URL = 'https://ato.pxeger.com';
-
-interface APIResponse {
-  stdout: Uint8Array;
-  stderr: Uint8Array;
-  status_type: 'exited' | 'killed' | 'core_dumped' | 'unknown';
-  status_value: number;
-  timed_out: boolean;
-  real: number;
-  kernel: number;
-  user: number;
-  max_mem: number;
-  unshared: number;
-  shared: number;
-  waits: number;
-  preemptions: number;
-  major_page_faults: number;
-  minor_page_faults: number;
-  swaps: number;
-  signals_recv: number;
-  input_ops: number;
-  output_ops: number;
-  socket_recv: number;
-  socket_sent: number;
-}
+import * as API from 'lib/api';
 
 const ENCODERS: Record<string, ((s: string) => Uint8Array)> = {
   'utf-8': s => new TextEncoder().encode(s),
@@ -137,33 +111,17 @@ export default function Run() {
     ]);
     const inputBytes = ENCODERS[inputEncoding](input);
 
-    const response = await fetch(`${BASE_URL}/api/v0/execute`, {
-      method: 'POST',
-      body: msgpack.encode({
-        language,
-        code: combined,
-        input: inputBytes,
-        options: [],
-        arguments: [],
-      }),
-    });
-    if (!response.ok || !response.body) {
-      notify('An error occured');
-      console.error(await response.text);
-      setSubmitting(false);
-      return;
-    }
     let data;
+
     try {
-      data = await msgpack.decodeAsync(response.body) as APIResponse;
+      data = await API.run({ language, input: inputBytes, code: combined });
     } catch (e) {
-      notify('An error occured');
       console.error(e);
+      notify('An error occurred; see the console for details');
       setSubmitting(false);
       return;
     }
 
-    setStdout(DECODERS[stdoutEncoding](data.stdout));
     setStderr(DECODERS[stderrEncoding](data.stderr));
 
     setStatusType(data.status_type);
@@ -193,6 +151,7 @@ export default function Run() {
     if (data.timed_out) {
       notify('The program ran for over 60 seconds and timed out');
     }
+
     setSubmitting(false);
   };
 
