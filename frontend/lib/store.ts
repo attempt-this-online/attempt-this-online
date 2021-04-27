@@ -23,6 +23,11 @@ const reducer = (state = initialState, action: any) => {
         ...state,
         fontLigaturesEnabled: action.fontLigaturesEnabled!,
       };
+    case 'setLanguagesMetadata':
+      return {
+        ...state,
+        metadata: action.metadata!,
+      }
     default:
       return state;
   }

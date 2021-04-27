@@ -1,5 +1,6 @@
 import localforage from 'localforage';
 import Head from 'next/head';
+import { connect } from 'react-redux';
 import { SyntheticEvent, useState, useEffect } from 'react';
 
 import CollapsibleText from 'components/collapsibleText';
@@ -66,7 +67,7 @@ const statusToString = (type: 'exited' | 'killed' | 'core_dumped' | 'unknown', v
   }
 };
 
-export default function Run() {
+function Run({ languages }) {
   const [language, setLanguage] = useState('');
   const [header, setHeader] = useState('');
   const [headerEncoding, setHeaderEncoding] = useState('utf-8');
@@ -199,8 +200,9 @@ export default function Run() {
                   value={language}
                   onChange={languageChangeHandler}
                 >
-                  <option value="" />
-                  <option value="python">Python</option>
+                  {Object.keys(languages ?? {}).map(l => (
+                    <option value={l} key={l}>{languages[l].name}</option>
+                  ))}
                 </select>
               </div>
               <CollapsibleText state={[header, setHeader]} encodingState={[headerEncoding, setHeaderEncoding]} id="header" onKeyDown={keyDownHandler}>
@@ -265,3 +267,6 @@ export default function Run() {
     </>
   );
 }
+
+Run = connect((state: any) => ({ languages: state.metadata }))(Run);
+export default Run;

@@ -6,6 +6,7 @@ import { Provider, connect, useDispatch } from 'react-redux';
 
 import useSystemThemePreference from 'lib/useSystemThemePreference';
 import { useStore } from 'lib/store';
+import * as API from 'lib/api';
 import 'styles/ATO.css';
 
 const ThemeWrapper = connect(
@@ -28,6 +29,7 @@ const ThemeWrapper = connect(
     if (typeof storedFontLigatures === 'boolean') {
       dispatch({ type: 'setFontLigaturesEnabled', fontLigaturesEnabled: storedFontLigatures });
     }
+    dispatch({ type: 'setLanguagesMetadata', metadata: await API.getMetadata() });
   }) as (() => void), []);
   const systemThemePreference = useSystemThemePreference();
   return (
