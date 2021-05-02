@@ -13,7 +13,7 @@ export default function About({ enableRedirect }: { enableRedirect: boolean }) {
       if (!greeted) {
         localforage.setItem('ATO_greeted', true);
       }
-      // if already used the site, and not explicitly on /home, send them to the run page
+      // if already used the site, and not explicitly on /about, send them to the run page
       if (enableRedirect && greeted) {
         router.push('/run');
       }
