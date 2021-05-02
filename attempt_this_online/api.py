@@ -1,12 +1,10 @@
 import json
-from base64 import b64encode
 from hashlib import sha256
-from os import access, getenv, mkdir, R_OK, X_OK
+from os import getenv, mkdir
 from pathlib import Path
 from secrets import token_bytes, token_hex
 from shutil import rmtree
 from subprocess import run
-from tempfile import TemporaryDirectory
 
 import msgpack
 from pydantic import BaseModel, validator, ValidationError
