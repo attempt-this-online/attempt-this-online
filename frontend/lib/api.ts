@@ -30,7 +30,7 @@ async function run({
   language,
   input,
   code,
-}) {
+}: { language: string, input: Uint8Array, code: Uint8Array }) {
   const response = await fetch(`${BASE_URL}/api/v0/execute`, {
     method: 'POST',
     body: msgpack.encode({
@@ -44,15 +44,16 @@ async function run({
   if (!response.ok || !response.body) {
     throw new Error(await response.text());
   }
-  return await msgpack.decodeAsync(response.body) as APIResponse;
+  return await msgpack.decodeAsync(response.body) as RunAPIResponse;
 }
 
 async function getMetadata() {
   const response = await fetch(`${BASE_URL}/api/v0/metadata`, { method: 'GET' });
   if (!response.ok || !response.body) {
-    throw new Error(await response.text);
+    throw new Error(await response.text());
   }
   return await msgpack.decodeAsync(response.body) as Record<string, string>[];
 }
 
-export { RunAPIResponse, run, getMetadata };
+export { run, getMetadata };
+export type { RunAPIResponse };

@@ -67,7 +67,7 @@ const statusToString = (type: 'exited' | 'killed' | 'core_dumped' | 'unknown', v
   }
 };
 
-function Run({ languages }) {
+function _Run({ languages }: { languages: Record<string, Record<string, any>> }) {
   const [language, setLanguage] = useState('');
   const [header, setHeader] = useState('');
   const [headerEncoding, setHeaderEncoding] = useState('utf-8');
@@ -268,5 +268,5 @@ function Run({ languages }) {
   );
 }
 
-Run = connect((state: any) => ({ languages: state.metadata }))(Run);
+const Run = connect((state: any) => ({ languages: state.metadata }))(_Run);
 export default Run;
