@@ -49,6 +49,6 @@ display. This assumes ATO is being run with the default full setup.
   `sandbox` user, the API can't do that itself)
     - Most of these scripts are given an *unhashed* request ID which they hash themselves to prevent attacks like
       directory traversal.
-- <s>The frontend decodes and lays out the result</s>
+- The frontend decodes and lays out the result
 
 <!-- TODO: add links to all these things -->
