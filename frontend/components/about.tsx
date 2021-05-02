@@ -15,7 +15,7 @@ export default function About({ enableRedirect }: { enableRedirect: boolean }) {
       }
       // if already used the site, and not explicitly on /about, send them to the run page
       if (enableRedirect && greeted) {
-        router.push('/run');
+        router.replace('/run');
       }
     });
   }, []);

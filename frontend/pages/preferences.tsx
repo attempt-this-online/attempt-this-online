@@ -1,6 +1,6 @@
 import { ArrowLeftIcon } from '@heroicons/react/outline';
 import Head from 'next/head';
-import Link from 'next/link';
+import { useRouter } from 'next/router';
 import localForage from 'localforage';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
@@ -9,6 +9,7 @@ import useSystemThemePreference from 'lib/useSystemThemePreference';
 import Footer from 'components/footer';
 
 export default function Preferences() {
+  const router = useRouter();
   const dispatch = useDispatch();
   const [theme, setTheme] = useState('system');
   const systemThemePreference = useSystemThemePreference();
@@ -36,11 +37,9 @@ export default function Preferences() {
       <div className="min-h-screen bg-white dark:bg-gray-900 text-black dark:text-white pt-8 relative flex flex-col">
         <main className="mb-3 px-4 md:container md:mx-auto flex-grow">
           <header className="flex mb-2">
-            <Link href="/run">
-              <a className="my-auto p-2 transition hover:bg-gray-300 dark:hover:bg-gray-600 rounded-full">
-                <ArrowLeftIcon className="w-8 h-8 inline" />
-              </a>
-            </Link>
+            <button className="my-auto p-2 transition hover:bg-gray-300 dark:hover:bg-gray-600 rounded-full" type="button" onClick={() => router.back()}>
+              <ArrowLeftIcon className="w-8 h-8 inline" />
+            </button>
             <h1 className="flex-grow my-auto text-4xl md:text-center font-bold">
               Preferences
             </h1>
