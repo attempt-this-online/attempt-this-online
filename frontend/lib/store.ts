@@ -27,7 +27,7 @@ const reducer = (state = initialState, action: any) => {
       return {
         ...state,
         metadata: action.metadata!,
-      }
+      };
     default:
       return state;
   }
