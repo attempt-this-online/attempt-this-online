@@ -123,6 +123,7 @@ function _Run({ languages }: { languages: Record<string, Record<string, any>> })
       return;
     }
 
+    setStdout(DECODERS[stdoutEncoding](data.stdout));
     setStderr(DECODERS[stderrEncoding](data.stderr));
 
     setStatusType(data.status_type);
