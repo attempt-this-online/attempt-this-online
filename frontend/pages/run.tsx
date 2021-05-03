@@ -259,6 +259,7 @@ function _Run({ languages }: { languages: Record<string, Record<string, any>> })
               <ResizeableText
                 disabled
                 value={timing}
+                open={timingOpen}
               />
             </details>
           </main>

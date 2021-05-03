@@ -7,12 +7,15 @@ export default function ResizeableText(
     disabled,
     id = undefined,
     onKeyDown = _ => undefined,
+    // there seems to be no proper way to get it to resize itself when opening/closing
+    open
   }: {
     value: string,
     onChange?: (e: any) => void,
     disabled: boolean,
     id?: string,
     onKeyDown?: (e: any) => void,
+    open: boolean,
   },
 ) {
   const dummy = useRef<any>(null);
@@ -29,7 +32,7 @@ export default function ResizeableText(
       dummy.current.value = value;
       setHeight(dummy.current.scrollHeight);
     }
-  }, [dummy, value]);
+  }, [dummy, value, open]);
   return (
     <>
       <textarea ref={dummy} className="block w-full px-2 rounded font-mono text-base h-0 opacity-0" aria-hidden disabled />
