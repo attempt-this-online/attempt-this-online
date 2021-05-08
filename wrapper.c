@@ -67,7 +67,7 @@
 
 // #define AUTHORS proper_name("Padraig Brady")
 
-#define TIMEOUT_SECS 2
+#define TIMEOUT_SECS 60
 
 static int timed_out;
 static int term_signal = SIGKILL; /* same default as kill command.  */
