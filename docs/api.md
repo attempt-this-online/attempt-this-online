@@ -29,22 +29,16 @@ A [msgpack]-encoded payload - a map with the following string keys:
     - `unknown`: always `-1`
 - `timed_out`: whether the process had to be killed because it overran its 60 second timeout. If this is the case,
   the process will have been killed by `SIGKILL` (ID 9)
-- `real`: real elapsed time in microseconds
-- `kernel`: CPU microseconds spent in kernel mode
-- `user`: CPU microseconds spent in user mode
-- `max_mem`: total maximum memory usage at any one time in, kilobytes
-- `unshared`: average amount of unshared data/stack space used, in kilobytes
-- `shared`: average amount of shared text space used, in kilobytes
+- `real`: real elapsed time in nanoseconds
+- `kernel`: CPU nanoseconds spent in kernel mode
+- `user`: CPU nanoseconds spent in user mode
+- `max_mem`: total maximum memory usage at any one time, in kilobytes
 - `waits`: number of voluntary context switches
 - `preemptions`: number of involuntary context switches
 - `major_page_faults`: number of major page faults (where a memory page needed to be brought from the disk)
 - `minor_page_faults`: number of minor page faults
-- `swaps`: number of times the process was swapped to disk
-- `signals_recv`: number of signals the process received
 - `input_ops`: number of input operations
 - `output_ops`: number of output operations
-- `socket_recv`: number of socket messages received (always 0 since network access is not allowed)
-- `socket_sent`: number of socket messages sent (always 0 since network access is not allowed)
 
 ## GET `/api/v0/metadata`
 ### Request

@@ -131,22 +131,16 @@ function _Run({ languages }: { languages: Record<string, Record<string, any>> })
 
     setTiming(
       `
-      Real time: ${data.real / 1e6} s
-      Kernel time: ${data.kernel / 1e6} s
-      User time: ${data.kernel / 1e6} s
+      Real time: ${data.real / 1e9} s
+      Kernel time: ${data.kernel / 1e9} s
+      User time: ${data.kernel / 1e9} s
       Maximum lifetime memory usage: ${data.max_mem} KiB
-      Average unshared memory usage: ${data.unshared} KiB
-      Average shared memory usage: ${data.shared} KiB
       Waits (volunatry context switches): ${data.waits}
       Preemptions (involuntary context switches): ${data.preemptions}
-      Swaps: ${data.swaps}
       Minor page faults: ${data.minor_page_faults}
       Major page faults: ${data.major_page_faults}
-      Signals received: ${data.signals_recv}
       Input operations: ${data.input_ops}
       Output operations: ${data.output_ops}
-      Socket messages sent: ${data.socket_sent}
-      Socket messages received: ${data.socket_recv}
       `.trim().split('\n').map(s => s.trim()).join('\n'),
     );
 

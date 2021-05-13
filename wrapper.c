@@ -67,7 +67,20 @@
 
 // #define AUTHORS proper_name("Padraig Brady")
 
-#define TIMEOUT_SECS 60
+#define TIMEOUT_SECS 2
+
+#define DPRINTF(d, f, ...) do { \
+    int _result; \
+    _result = dprintf(d, f, __VA_ARGS__); \
+    if (_result < 0) { \
+        perror("dprintf"); \
+        return 1; \
+    } \
+} while (0)
+
+// converts to nanoseconds, using (long long) because the number of nanoseconds in a minute might exceed 2**31
+#define TIMESPEC(ts) ((long long)ts.tv_sec * 1000000000LL + (long long)ts.tv_nsec)
+#define TIMEVAL(tv) ((long long)tv.tv_sec * 1000000000LL + (long long)tv.tv_usec * 1000LL)
 
 static int timed_out;
 static int term_signal = SIGKILL; /* same default as kill command.  */
@@ -247,6 +260,13 @@ int main(int argc, char** argv)
     signal(SIGTTOU, SIG_IGN); /* Don't stop if background child needs tty.  */
     install_sigchld(); /* Interrupt sigsuspend() when child exits.   */
 
+    struct timespec start_time;
+    int result = clock_gettime(CLOCK_MONOTONIC, &start_time);
+    if (result == -1) {
+        perror("clock_gettime");
+        return 1;
+    }
+
     monitored_pid = fork();
     if (monitored_pid == -1) {
         perror("fork system call failed");
@@ -263,6 +283,7 @@ int main(int argc, char** argv)
     } else {
         pid_t wait_result;
         int status;
+        struct rusage rusage;
         char* status_type = "unknown";
 
         /* We configure timers so that SIGALRM is sent on expiry.
@@ -278,6 +299,9 @@ int main(int argc, char** argv)
 
         while ((wait_result = waitpid(monitored_pid, &status, WNOHANG)) == 0)
             sigsuspend(&cleanup_set); /* Wait with cleanup signals unblocked.  */
+
+        struct timespec end_time;
+        result = clock_gettime(CLOCK_MONOTONIC, &end_time);
 
         if (wait_result < 0) {
             /* shouldn't happen.  */
@@ -298,10 +322,27 @@ int main(int argc, char** argv)
             }
         }
 
-        int result = dprintf(fd, "\"timed_out\":%s,\"status_type\":\"%s\",\"status_value\":%d,", (timed_out ? "true" : "false"), status_type, status);
-        if (result < 0) {
-            perror("dprintf");
+        result = getrusage(RUSAGE_CHILDREN, &rusage);
+        if (result == -1) {
+            perror("getrusage");
+            return 1;
         }
+
+        DPRINTF(fd, "%s", "{");
+        DPRINTF(fd, "\"timed_out\":%s,", timed_out ? "true" : "false");
+        DPRINTF(fd, "\"status_type\":\"%s\",", status_type);
+        DPRINTF(fd, "\"status_value\":%d,", status);
+        DPRINTF(fd, "\"user\":%lld,", TIMEVAL(rusage.ru_utime));
+        DPRINTF(fd, "\"kernel\":%lld,", TIMEVAL(rusage.ru_stime));
+        DPRINTF(fd, "\"real\":%lld,", TIMESPEC(end_time) - TIMESPEC(start_time));
+        DPRINTF(fd, "\"max_mem\":%ld,", rusage.ru_maxrss);
+        DPRINTF(fd, "\"major_page_faults\":%ld,", rusage.ru_majflt);
+        DPRINTF(fd, "\"minor_page_faults\":%ld,", rusage.ru_minflt);
+        DPRINTF(fd, "\"input_ops\":%ld,", rusage.ru_inblock);
+        DPRINTF(fd, "\"output_ops\":%ld,", rusage.ru_oublock);
+        DPRINTF(fd, "\"waits\":%ld,", rusage.ru_nvcsw);
+        DPRINTF(fd, "\"preemptions\":%ld", rusage.ru_nivcsw);
+        DPRINTF(fd, "%s\n", "}");
 
         return 0;
     }

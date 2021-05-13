@@ -70,11 +70,6 @@ def execute(ip_hash: str, invocation_id: str, invocation: Invocation) -> dict:
             stderr = f.read()
         with (dir_o / "status").open("r") as f:
             status = json.load(f)
-        del status["_dummy"]
-        # remove "us" (microsecond) suffix on all timing info to get just an integer
-        status["user"] = int(status["user"][:-2])
-        status["kernel"] = int(status["kernel"][:-2])
-        status["real"] = int(status["real"][:-2])
 
         status["stdout"] = stdout
         status["stderr"] = stderr

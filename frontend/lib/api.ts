@@ -12,18 +12,12 @@ interface RunAPIResponse {
   kernel: number;
   user: number;
   max_mem: number;
-  unshared: number;
-  shared: number;
   waits: number;
   preemptions: number;
   major_page_faults: number;
   minor_page_faults: number;
-  swaps: number;
-  signals_recv: number;
   input_ops: number;
   output_ops: number;
-  socket_recv: number;
-  socket_sent: number;
 }
 
 async function run({
