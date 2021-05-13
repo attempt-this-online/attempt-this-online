@@ -147,7 +147,7 @@ chown -R http:http /usr/local/share/ATO/public
 chmod -R a+rX-w /usr/local/share/ATO/public
 
 # configure nginx
-sed -i "s/{ato.pxeger.com}/$1/g" setup/nginx.conf
+sed -i "s/ato.pxeger.com/$1/g" setup/nginx.conf
 install -m 644 -o root -g root setup/nginx.conf /etc/nginx/
 install -m 644 -o root -g root setup/modsecurity.conf /etc/nginx/
 # don't waste time generating DH params unless necessary
