@@ -19,3 +19,7 @@ you will need to change *a lot* of things to get it to work with a custom setup.
 support any other system setups.
 
 Read and follow the steps described in the source code of `setup/setup`, adjusting them to your setup as necessary.
+
+## Uninstallation
+There is an uninstallation script, `setup/uninstall`, which stops all services and removes all configuration files. It
+does not remove any installed dependencies.
