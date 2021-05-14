@@ -25,7 +25,6 @@ whoami | grep -xFq root || error you must run this script as root
 # - base-devel: to install libcgroup
 # - bubblewrap: primary sandboxing mechanism
 # - certbot: generate SSL certificates for nginx
-# - cmake: build dependency for libcgroup
 # - cronie: automate renewal of certbot certificates, cache cleaning, etc.
 # - fuse-overlayfs: union filesystem
 # - docker: to extract images of the various languages
@@ -41,7 +40,6 @@ pacman -Syu --noconfirm --needed \
     base-devel \
     bubblewrap \
     certbot \
-    cmake \
     cronie \
     docker \
     git \
@@ -59,12 +57,12 @@ mkdir -p /var/cache/ATO
 cd /var/cache/ATO
 
 # install libcgroup
-git clone https://aur.archlinux.org/libcgroup-git.git libcgroup
+git clone https://aur.archlinux.org/libcgroup.git
 # makepkg doesn't allow running as root, so use `nobody`
 chown -R nobody:nobody libcgroup
 cd libcgroup
 sudo -u nobody makepkg
-pacman -U --noconfirm --needed libcgroup-git-*.pkg.tar.zst
+pacman -U --noconfirm --needed libcgroup-*.pkg.tar.zst
 cd ..
 
 if [ "$2" = --manual-package ]; then
