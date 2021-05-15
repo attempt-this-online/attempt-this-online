@@ -24,8 +24,7 @@ display. This assumes ATO is being run with the default full setup.
   request ID, and selected language.
 - `sandbox` creates `cgroup`s according to the IP hash and invocation ID to keep track of the resource usage, and sets
   their resource limits
-- `sandbox` creates an isolated [Bubblewrap](https://github.com/containers/bubblewrap) container in the `cgroup` which
-  is run with a timeout of 60 seconds
+- `sandbox` creates an isolated [Bubblewrap](https://github.com/containers/bubblewrap) container in the `cgroup`
     - The container has mounted:
          - `/` (the root file system): from `/usr/local/lib/ATO/rootfs`, an extracted Docker image containing the root
          file system for the relevant language. The extraction is done as part of the `setup/setup` script, and the
@@ -36,11 +35,12 @@ display. This assumes ATO is being run with the default full setup.
          - `/ATO/yargs`: a wrapper to execute a command with null-terminated arguments from a file
          - `/ATO/code` etc.: the input files from `/run/ATO_i/{request_id}` on the host
          - `/ATO/wrapper`
-    - The command run in the container is `wrapper`, which wraps the main runner to save the exit code
+    - The command run in the container is `ATO_wrapper`, which wraps the main runner to save the exit code, track
+    resource usage, and limit execution time to 60 seconds
     - `wrapper` executes the runner, which is a script dependant on the language requested
+    - `wrapper` writes its information in JSON format to `/run/ATO_o/{request_id}/status`
     - The standard output and standard error are passed, via `head` to limit the amount they can produce, and written to
     some files in a newly created directory `/run/ATO_o/{request_id}/` (`stdout`, `stderr`)
-    - `wrapper` and `zsh` (the shell that runs `sandbox`) write timing and status information in JSON format to `/run/ATO_o/{request_id}/status`
 - `sandbox` cleans up the `cgroup`s
 - API takes in the output and status, adds the output to the status object to create a whole response which is packed
   again using `msgpack` and sent back to the client via `uvicorn` and `nginx`
