@@ -8,7 +8,7 @@ export default function ResizeableText(
     id = undefined,
     onKeyDown = _ => undefined,
     // there seems to be no proper way to get it to resize itself when opening/closing
-    open
+    open,
   }: {
     value: string,
     onChange?: (e: any) => void,

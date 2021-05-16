@@ -71,7 +71,8 @@ export default function About({ enableRedirect }: { enableRedirect: boolean }) {
             </li>
             <li className="text-justify">We don&apos;t advertise or use any tracking technologies</li>
             <li className="text-justify">Regularly maintained: new languages and features are added by request all the time</li>
-            <li className="text-justify">The interface is customisable (see the
+            <li className="text-justify">
+              The interface is customisable (see the
               {' '}
               <Link href="/preferences">
                 <a className="underline text-blue-500">Preferences</a>
