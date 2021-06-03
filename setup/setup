@@ -56,15 +56,6 @@ original_cwd="$(pwd)"
 mkdir -p /var/cache/ATO
 cd /var/cache/ATO
 
-# install libcgroup
-git clone https://aur.archlinux.org/libcgroup.git
-# makepkg doesn't allow running as root, so use `nobody`
-chown -R nobody:nobody libcgroup
-cd libcgroup
-sudo -u nobody makepkg
-pacman -U --noconfirm --needed libcgroup-*.pkg.tar.zst
-cd ..
-
 if [ "$2" = --manual-package ]; then
     cd "$original_cwd"
     cp "$3" /var/cache/ATO
@@ -73,7 +64,17 @@ else
     curl "https://github.com/pxeger/attempt_this_online/releases/download/$VERSION/attempt_this_online.tar.gz"
 fi
 tar -xzf attempt_this_online.tar.gz # fun fact: you don't need the -v option to tar
-cd attempt_this_online
+
+# install libcgroup
+git clone https://aur.archlinux.org/libcgroup.git
+# makepkg doesn't allow running as root, so use `nobody`
+chown -R nobody:nobody libcgroup
+cd libcgroup
+# fix PGP signature issues
+patch < ../attempt_this_online/setup/libcgroup-2.0-1-PKGBUILD.patch
+sudo -u nobody makepkg
+pacman -U --noconfirm --needed libcgroup-*.pkg.tar.zst
+cd ../attempt_this_online
 
 mkdir -p \
     /usr/local/lib/ATO \
