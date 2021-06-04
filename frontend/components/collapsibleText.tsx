@@ -1,55 +1,30 @@
-import localforage from 'localforage';
-import { debounce } from 'lodash';
 import {
-  useEffect, useMemo, useState, ReactNode,
+  useState, ReactNode,
 } from 'react';
 
 import ResizeableText from 'components/resizeableText';
 
-// milliseconds
-const DEBOUNCE = 100;
-
 function CollapsibleText({
-  state: [value, setValue],
-  encodingState: [encoding, setEncoding],
+  value,
+  onChange,
+  encoding,
+  onEncodingChange,
   id,
   disabled = false,
   children,
   onKeyDown,
 }: {
-  state: [string, (value: string) => void],
-  encodingState: [string, (value: string) => void],
+  value: string,
+  onChange: (event: any) => void,
+  encoding: string,
+  onEncodingChange: (event: any) => void,
   id: string,
   disabled?: boolean,
   children: ReactNode,
   onKeyDown: (event: any) => void,
 }) {
   const [open, setOpen] = useState(true);
-  // don't recreate the debouncer on every render
-  const save = useMemo(
-    () => debounce( // don't save too quickly
-      async v => {
-        await localforage.setItem(`ATO_saved_${id}`, v);
-      },
-      DEBOUNCE,
-    ),
-    [id],
-  );
-  // restore saved code
-  useEffect(() => {
-    localforage.getItem(`ATO_saved_${id}`)
-      .then((v: string) => { setValue(v || value); });
-    localforage.getItem(`ATO_encoding_${id}`)
-      .then((e: string) => { setEncoding(e || encoding); });
-  }, [id]);
-  const handleChange = (event: any) => {
-    setValue(event.target.value);
-    save(event.target.value);
-  };
-  const handleChangeEncoding = (event: any) => {
-    setEncoding(event.target.value);
-    localforage.setItem(`ATO_encoding_${id}`, event.target.value);
-  };
+
   return (
     <div className="relative">
       <details open={open} className="my-6">
@@ -67,7 +42,7 @@ function CollapsibleText({
         <ResizeableText
           id={id}
           value={value}
-          onChange={handleChange}
+          onChange={onChange}
           onKeyDown={onKeyDown}
           disabled={disabled}
           open={open}
@@ -79,7 +54,7 @@ function CollapsibleText({
           {' '}
           <select
             value={encoding}
-            onChange={handleChangeEncoding}
+            onChange={onEncodingChange}
             id={`encodingSelect:${id}`}
             className="appearance-none ml-1 p-1 rounded bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 transition cursor-pointer ATO_select focus:outline-none focus:ring"
           >

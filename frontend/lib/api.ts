@@ -49,5 +49,5 @@ async function getMetadata() {
   return await msgpack.decodeAsync(response.body) as Record<string, string>[];
 }
 
-export { run, getMetadata };
+export { BASE_URL, run, getMetadata };
 export type { RunAPIResponse };

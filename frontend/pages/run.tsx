@@ -1,7 +1,11 @@
-import localforage from 'localforage';
+// import localforage from 'localforage';
 import Head from 'next/head';
+import { useRouter } from 'next/router';
 import { connect } from 'react-redux';
-import { SyntheticEvent, useState, useEffect } from 'react';
+import {
+  SyntheticEvent, useMemo, useRef, useState, useEffect,
+} from 'react';
+import { throttle } from 'lodash';
 
 import CollapsibleText from 'components/collapsibleText';
 import ResizeableText from 'components/resizeableText';
@@ -9,6 +13,7 @@ import Footer from 'components/footer';
 import Navbar from 'components/navbar';
 import Notification from 'components/notification';
 import * as API from 'lib/api';
+import { save, load } from 'lib/urls';
 
 const ENCODERS: Record<string, ((s: string) => Uint8Array)> = {
   'utf-8': s => new TextEncoder().encode(s),
@@ -68,7 +73,9 @@ const statusToString = (type: 'exited' | 'killed' | 'core_dumped' | 'unknown', v
 };
 
 function _Run({ languages }: { languages: Record<string, Record<string, any>> }) {
-  const [language, setLanguage] = useState('');
+  const router = useRouter();
+
+  const [language, setLanguage] = useState('python');
   const [header, setHeader] = useState('');
   const [headerEncoding, setHeaderEncoding] = useState('utf-8');
   const [code, setCode] = useState('');
@@ -151,14 +158,82 @@ function _Run({ languages }: { languages: Record<string, Record<string, any>> })
     setSubmitting(false);
   };
 
+  const [shouldLoad, setShouldLoad] = useState(true);
   useEffect(() => {
-    localforage.getItem('ATO_saved_language').then((l: any) => l && setLanguage(l));
-  }, []);
+    if (!shouldLoad || !router.isReady) {
+      return;
+    }
+    const loadedData = load(router.query);
+    if (loadedData !== null) {
+      setLanguage(loadedData.language);
+      setHeader(loadedData.header);
+      setHeaderEncoding(loadedData.headerEncoding);
+      setCode(loadedData.code);
+      setCodeEncoding(loadedData.codeEncoding);
+      setFooter(loadedData.footer);
+      setFooterEncoding(loadedData.footerEncoding);
+      setInput(loadedData.input);
+      setInputEncoding(loadedData.inputEncoding);
+      // further updates the router.query should not trigger updates
+      setShouldLoad(false);
+    }
+  }, [router, shouldLoad]);
 
-  const languageChangeHandler = (e: any) => {
-    setLanguage(e.target.value);
-    localforage.setItem('ATO_saved_language', e.target.value);
-  };
+  // combination of useRef and useMemo: useRef ignores its argument after the second call, but the
+  // argument still has to be computed which is a bit of a waste. useMemo here is not being used to
+  // maintain the same stored throttle function (that's the job of useMemo), but as an optimisation
+  // only.
+  const updateURL = useRef(useMemo(
+    // we throttle calls for 2 reasons:
+    // - saving might take a while due to several layers of encoding and compression;
+    //   we don't want it to block the main thread too much
+    // - some browsers error on too many frequent history pushState/replaceState calls
+    () => throttle(
+      // the debounced function cannot have any closure variable dependencies because otherwise the
+      // function would have to be recreated every render and the debouncing wouldn't work properly,
+      // so what would otherwise be closure variables are passed as arguments upon call.
+      (router2, data) => {
+        router2.replace(`/run?${save(data)}`);
+      },
+      200, // milliseconds
+    ),
+    [],
+  ));
+
+  // save data in URL on data change
+  useEffect(
+    () => {
+      // TODO: fix jank with not including router in useEffect dependencies!
+      // For now I've got the right combination such that the URL never flickers, but it's fragile
+      // and I don't really understand why it would or wouldn't work.
+      if (!router.isReady) {
+        return;
+      }
+      updateURL.current(router, {
+        language,
+        header,
+        headerEncoding,
+        code,
+        codeEncoding,
+        footer,
+        footerEncoding,
+        input,
+        inputEncoding,
+      });
+    },
+    // update when these values change:
+    [
+      language,
+      header,
+      headerEncoding,
+      code,
+      codeEncoding,
+      footer,
+      footerEncoding,
+      input,
+      inputEncoding,
+    ],
+  );
 
   const keyDownHandler = (e: any) => {
     if (!submitting && language && e.ctrlKey && !e.shiftKey && !e.metaKey && !e.altKey && e.key === 'Enter') {
@@ -192,24 +267,52 @@ function _Run({ languages }: { languages: Record<string, Record<string, any>> })
                 <select
                   id="languageSelector"
                   className="appearance-none ml-2 p-2 w-80 rounded bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 transition cursor-pointer ATO_select focus:outline-none focus:ring"
-                  value={language}
-                  onChange={languageChangeHandler}
+                  value={language || ''}
+                  onChange={e => setLanguage(e.target.value)}
                 >
                   {Object.keys(languages ?? {}).map(l => (
                     <option value={l} key={l}>{languages[l].name}</option>
                   ))}
                 </select>
               </div>
-              <CollapsibleText state={[header, setHeader]} encodingState={[headerEncoding, setHeaderEncoding]} id="header" onKeyDown={keyDownHandler}>
+              <CollapsibleText
+                value={header}
+                onChange={e => setHeader(e.target.value)}
+                encoding={headerEncoding}
+                onEncodingChange={e => setHeaderEncoding(e.target.value)}
+                id="header"
+                onKeyDown={keyDownHandler}
+              >
                 Header
               </CollapsibleText>
-              <CollapsibleText state={[code, setCode]} encodingState={[codeEncoding, setCodeEncoding]} id="code" onKeyDown={keyDownHandler}>
+              <CollapsibleText
+                value={code}
+                onChange={e => setCode(e.target.value)}
+                encoding={codeEncoding}
+                onEncodingChange={e => setCodeEncoding(e.target.value)}
+                id="code"
+                onKeyDown={keyDownHandler}
+              >
                 Code
               </CollapsibleText>
-              <CollapsibleText state={[footer, setFooter]} encodingState={[footerEncoding, setFooterEncoding]} id="footer" onKeyDown={keyDownHandler}>
+              <CollapsibleText
+                value={footer}
+                onChange={e => setFooter(e.target.value)}
+                encoding={footerEncoding}
+                onEncodingChange={e => setFooterEncoding(e.target.value)}
+                id="footer"
+                onKeyDown={keyDownHandler}
+              >
                 Footer
               </CollapsibleText>
-              <CollapsibleText state={[input, setInput]} encodingState={[inputEncoding, setInputEncoding]} id="input" onKeyDown={keyDownHandler}>
+              <CollapsibleText
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                encoding={inputEncoding}
+                onEncodingChange={e => setInputEncoding(e.target.value)}
+                id="input"
+                onKeyDown={keyDownHandler}
+              >
                 Input
               </CollapsibleText>
               <div className="flex mb-6 items-center">
@@ -230,12 +333,28 @@ function _Run({ languages }: { languages: Record<string, Record<string, any>> })
                 )}
               </div>
             </form>
-            <CollapsibleText state={[stdout, setStdout]} encodingState={[stdoutEncoding, setStdoutEncoding]} id="stdout" disabled onKeyDown={keyDownHandler}>
+            <CollapsibleText
+              value={stdout}
+              onChange={e => setStdout(e.target.value)}
+              encoding={stdoutEncoding}
+              onEncodingChange={e => setStdoutEncoding(e.target.value)}
+              id="stdout"
+              onKeyDown={keyDownHandler}
+              disabled
+            >
               <code>stdout</code>
               {' '}
               output
             </CollapsibleText>
-            <CollapsibleText state={[stderr, setStderr]} encodingState={[stderrEncoding, setStderrEncoding]} id="stderr" disabled onKeyDown={keyDownHandler}>
+            <CollapsibleText
+              value={stderr}
+              onChange={e => setStderr(e.target.value)}
+              encoding={stderrEncoding}
+              onEncodingChange={e => setStderrEncoding(e.target.value)}
+              id="stderr"
+              onKeyDown={keyDownHandler}
+              disabled
+            >
               <code>stderr</code>
               {' '}
               output
