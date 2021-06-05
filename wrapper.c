@@ -67,7 +67,7 @@
 
 // #define AUTHORS proper_name("Padraig Brady")
 
-#define TIMEOUT_SECS 2
+#define TIMEOUT_SECS 60
 
 #define DPRINTF(d, f, ...) do { \
     int _result; \
