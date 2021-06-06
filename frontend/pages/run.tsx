@@ -12,7 +12,7 @@ import ResizeableText from 'components/resizeableText';
 import Footer from 'components/footer';
 import Navbar from 'components/navbar';
 import Notification from 'components/notification';
-import ArgvList from 'components/argvList';
+import { ArgvList, parseList } from 'components/argvList';
 import * as API from 'lib/api';
 import { save, load } from 'lib/urls';
 
@@ -176,12 +176,14 @@ function _Run({ languages }: { languages: Record<string, Record<string, any>> })
     const loadedData = load(router.query);
     if (loadedData !== null) {
       setLanguage(loadedData.language);
+      setOptions([loadedData.options, parseList(loadedData.options)]);
       setHeader(loadedData.header);
       setHeaderEncoding(loadedData.headerEncoding);
       setCode(loadedData.code);
       setCodeEncoding(loadedData.codeEncoding);
       setFooter(loadedData.footer);
       setFooterEncoding(loadedData.footerEncoding);
+      setProgramArguments([loadedData.programArguments, parseList(loadedData.programArguments)]);
       setInput(loadedData.input);
       setInputEncoding(loadedData.inputEncoding);
       // further updates the router.query should not trigger updates
@@ -221,12 +223,14 @@ function _Run({ languages }: { languages: Record<string, Record<string, any>> })
       }
       updateURL.current(router, {
         language,
+        options: optionsString,
         header,
         headerEncoding,
         code,
         codeEncoding,
         footer,
         footerEncoding,
+        programArguments: argsString,
         input,
         inputEncoding,
       });

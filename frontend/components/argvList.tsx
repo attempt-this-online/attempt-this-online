@@ -29,7 +29,7 @@ const parseList = (list: string) => {
   return output;
 };
 
-export default function ArgvList({
+function ArgvList({
   state, setState, keyDownHandler, children, id,
 }: {
   state: [string, string[] | null],
@@ -74,3 +74,5 @@ export default function ArgvList({
     </div>
   );
 }
+
+export { ArgvList, parseList };
