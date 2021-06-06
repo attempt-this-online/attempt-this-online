@@ -24,15 +24,23 @@ async function run({
   language,
   input,
   code,
-}: { language: string, input: Uint8Array, code: Uint8Array }) {
+  options,
+  programArguments,
+}: {
+  language: string,
+  input: Uint8Array,
+  code: Uint8Array,
+  options: string[],
+  programArguments: string[],
+}) {
   const response = await fetch(`${BASE_URL}/api/v0/execute`, {
     method: 'POST',
     body: msgpack.encode({
       language,
       code,
       input,
-      options: [],
-      arguments: [],
+      options,
+      arguments: programArguments,
     }),
   });
   if (!response.ok || !response.body) {

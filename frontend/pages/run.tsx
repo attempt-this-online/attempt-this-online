@@ -12,6 +12,7 @@ import ResizeableText from 'components/resizeableText';
 import Footer from 'components/footer';
 import Navbar from 'components/navbar';
 import Notification from 'components/notification';
+import ArgvList from 'components/argvList';
 import * as API from 'lib/api';
 import { save, load } from 'lib/urls';
 
@@ -94,6 +95,9 @@ function _Run({ languages }: { languages: Record<string, Record<string, any>> })
   const [timing, setTiming] = useState('');
   const [timingOpen, setTimingOpen] = useState(false);
 
+  const [[optionsString, options], setOptions] = useState<[string, string[] | null]>(['', []]);
+  const [[argsString, programArguments], setProgramArguments] = useState<[string, string[] | null]>(['', []]);
+
   const [submitting, setSubmitting] = useState(false);
   const [notifications, setNotifications] = useState<{ id: number, text: string }[]>([]);
   const dismissNotification = (target: number) => {
@@ -122,7 +126,13 @@ function _Run({ languages }: { languages: Record<string, Record<string, any>> })
     let data;
 
     try {
-      data = await API.run({ language, input: inputBytes, code: combined });
+      data = await API.run({
+        language,
+        input: inputBytes,
+        code: combined,
+        options: options!,
+        programArguments: programArguments!,
+      });
     } catch (e) {
       console.error(e);
       notify('An error occurred; see the console for details');
@@ -236,7 +246,7 @@ function _Run({ languages }: { languages: Record<string, Record<string, any>> })
   );
 
   const keyDownHandler = (e: any) => {
-    if (!submitting && language && e.ctrlKey && !e.shiftKey && !e.metaKey && !e.altKey && e.key === 'Enter') {
+    if (!submitting && language && options !== null && programArguments !== null && e.ctrlKey && !e.shiftKey && !e.metaKey && !e.altKey && e.key === 'Enter') {
       submit(e);
     }
   };
@@ -275,6 +285,16 @@ function _Run({ languages }: { languages: Record<string, Record<string, any>> })
                   ))}
                 </select>
               </div>
+              <div className="pt-3 pb-1">
+                <ArgvList
+                  id="options"
+                  state={[optionsString, options]}
+                  setState={setOptions}
+                  keyDownHandler={keyDownHandler}
+                >
+                  Options:
+                </ArgvList>
+              </div>
               <CollapsibleText
                 value={header}
                 onChange={e => setHeader(e.target.value)}
@@ -305,6 +325,16 @@ function _Run({ languages }: { languages: Record<string, Record<string, any>> })
               >
                 Footer
               </CollapsibleText>
+              <div className="pb-1 -mt-2">
+                <ArgvList
+                  id="programArguments"
+                  state={[argsString, programArguments]}
+                  setState={setProgramArguments}
+                  keyDownHandler={keyDownHandler}
+                >
+                  Arguments:
+                </ArgvList>
+              </div>
               <CollapsibleText
                 value={input}
                 onChange={e => setInput(e.target.value)}
@@ -316,7 +346,12 @@ function _Run({ languages }: { languages: Record<string, Record<string, any>> })
                 Input
               </CollapsibleText>
               <div className="flex mb-6 items-center">
-                <button type="submit" className="rounded px-4 py-2 bg-blue-500 text-white flex focus:outline-none focus:ring disabled:cursor-not-allowed" onKeyDown={keyDownHandler} disabled={submitting || !language}>
+                <button
+                  type="submit"
+                  className="rounded px-4 py-2 bg-blue-500 text-white flex focus:outline-none focus:ring disabled:cursor-not-allowed"
+                  onKeyDown={keyDownHandler}
+                  disabled={submitting || !language || options === null || programArguments === null}
+                >
                   <span>Execute</span>
                   {submitting && (
                   /* this SVG is taken from https://git.io/JYHot, under the MIT licence https://git.io/JYHoh */
