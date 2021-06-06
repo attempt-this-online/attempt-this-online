@@ -51,7 +51,7 @@ def execute(ip_hash: str, invocation_id: str, invocation: Invocation) -> dict:
         with (dir_i / "input").open("wb") as f:
             f.write(invocation.input)
 
-        if any("b\0" in arg for arg in invocation.arguments) or any(b"\0" in opt for opt in invocation.options):
+        if any(b"\0" in arg for arg in invocation.arguments) or any(b"\0" in opt for opt in invocation.options):
             raise HTTPException("arguments and options cannot contain null bytes", 400)
 
         with (dir_i / "arguments").open("wb") as f:
