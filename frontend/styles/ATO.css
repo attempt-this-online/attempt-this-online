@@ -1,11 +1,11 @@
 @font-face {
-  font-family: "Fira Code";
-  src: url("/FiraCode-Regular.woff2") format("woff2"),
-       url("/FiraCode-Regular.woff") format("woff"),
-       url("/FiraCode-Regular.ttf") format("ttf"),
-       local("Fira Code Regular"),
-       local("Fira Code"),
-       local("Fira Mono");
+    font-family: "Fira Code";
+    src: url("/FiraCode-Regular.woff2") format("woff2"),
+         url("/FiraCode-Regular.woff") format("woff"),
+         url("/FiraCode-Regular.ttf") format("ttf"),
+         local("Fira Code Regular"),
+         local("Fira Code"),
+         local("Fira Mono");
 }
 
 .ATO_no_font_ligatures code, .ATO_no_font_ligatures textarea {
