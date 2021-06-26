@@ -73,6 +73,8 @@ const statusToString = (type: 'exited' | 'killed' | 'core_dumped' | 'unknown', v
   }
 };
 
+const pluralise = (string, length) => length === 1 ? string : string + 's';
+
 function _Run({ languages }: { languages: Record<string, Record<string, any>> }) {
   const router = useRouter();
 
@@ -212,6 +214,8 @@ function _Run({ languages }: { languages: Record<string, Record<string, any>> })
     [],
   ));
 
+  const byteLength = ENCODERS[codeEncoding](code).length;
+
   // save data in URL on data change
   useEffect(
     () => {
@@ -277,17 +281,30 @@ function _Run({ languages }: { languages: Record<string, Record<string, any>> })
           <main className="mb-3 px-4 -mt-4 md:container md:mx-auto">
             <form onSubmit={submit}>
               <div className="flex items-center mt-4 pb-1">
-                <label htmlFor="languageSelector">Language:</label>
-                <select
-                  id="languageSelector"
-                  className="appearance-none ml-2 p-2 w-80 rounded bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 transition cursor-pointer ATO_select focus:outline-none focus:ring"
-                  value={language || ''}
-                  onChange={e => setLanguage(e.target.value)}
-                >
-                  {Object.keys(languages ?? {}).map(l => (
-                    <option value={l} key={l}>{languages[l].name}</option>
-                  ))}
-                </select>
+                <div className="flex-grow">
+                  <label htmlFor="languageSelector">Language:</label>
+                  <select
+                    id="languageSelector"
+                    className="appearance-none ml-2 p-2 w-80 rounded bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 transition cursor-pointer ATO_select focus:outline-none focus:ring"
+                    value={language || ''}
+                    onChange={e => setLanguage(e.target.value)}
+                  >
+                    {Object.keys(languages ?? {}).map(l => (
+                      <option value={l} key={l}>{languages[l].name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex">
+                  <code className="my-auto mr-4 font-mono bg-gray-200 dark:bg-gray-800 px-2 py-px rounded">
+                    {code.length}
+                    {' '}
+                    {pluralise('char', code.length)}
+                    {', '}
+                    {byteLength}
+                    {' '}
+                    {pluralise('byte', byteLength)}
+                  </code>
+                </div>
               </div>
               <div className="pt-3 pb-1">
                 <ArgvList
