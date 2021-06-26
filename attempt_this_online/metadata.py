@@ -5,6 +5,7 @@ import re
 
 __all__ = ["languages"]
 
+known_keys = {"name", "image"}
 languages = {}
 for path in Path("/usr/local/share/ATO/runners").iterdir():
 # for path in (Path(__file__).parents[1] / "runners").iterdir():
@@ -16,6 +17,8 @@ for path in Path("/usr/local/share/ATO/runners").iterdir():
         for line in f:
             if match := re.match(r"^#:(?P<key>\w+): (?P<value>.*)", line):
                 if match["key"] in metadata:
-                    raise Exception(f"duplicate metadata item {key} in runner {runner.name}")
+                    raise Exception(f"duplicate metadata item {key} in runner {path.name}")
+                elif match["key"] not in known_keys:
+                    raise Exception(f"unknown metadata item {key} in runner {path.name}")
                 metadata[match["key"]] = match["value"]
     languages[path.name] = metadata
