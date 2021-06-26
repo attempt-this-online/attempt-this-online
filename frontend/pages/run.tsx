@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import {
   SyntheticEvent, useMemo, useRef, useState, useEffect,
 } from 'react';
-import { throttle } from 'lodash';
+import { escape, throttle } from 'lodash';
 
 import CollapsibleText from 'components/collapsibleText';
 import ResizeableText from 'components/resizeableText';
@@ -253,6 +253,35 @@ function _Run({ languages }: { languages: Record<string, Record<string, any>> })
     ],
   );
 
+  const copyCGCCPost = () => {
+    if (!language) {
+      notify('Please select a language first!');
+      return;
+    }
+    // avoid double notifications
+    if (notifications.find(n => n.text === 'Copied to clipboard!') === undefined) {
+      notify('Copied to clipboard!');
+    }
+    const url = save({
+      language,
+      options: optionsString,
+      header,
+      headerEncoding,
+      code,
+      codeEncoding,
+      footer,
+      footerEncoding,
+      programArguments: argsString,
+      input,
+      inputEncoding,
+    });
+    navigator.clipboard.writeText(`# [${languages[language].name}], ${byteLength} ${pluralise('bytes', byteLength)}
+
+<pre><code>${escape(code)}</code></pre>
+
+[Attempt This Online!](https://ato.pxeger.com/run${url})`);
+  }
+
   const keyDownHandler = (e: any) => {
     if (!submitting && language && options !== null && programArguments !== null && e.ctrlKey && !e.shiftKey && !e.metaKey && !e.altKey && e.key === 'Enter') {
       submit(e);
@@ -304,6 +333,13 @@ function _Run({ languages }: { languages: Record<string, Record<string, any>> })
                     {' '}
                     {pluralise('byte', byteLength)}
                   </code>
+                  <button
+                    type="button"
+                    onClick={copyCGCCPost}
+                    className="rounded px-4 py-2 bg-blue-500 text-white flex focus:outline-none focus:ring disabled:cursor-not-allowed"
+                  >
+                    CGCC Post
+                  </button>
                 </div>
               </div>
               <div className="pt-3 pb-1">
