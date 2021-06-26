@@ -71,4 +71,4 @@ cd /ATO/context
 Make sure you've made the runner script executable (`chmod +x runners/path`)
 
 3. Test your runner! It's not helpful if you submit a broken runner.
-4. Make a [Pull Request](https://github.com/pxeger/attempt_this_online/pulls)
+4. Make a [Pull Request](https://github.com/attempt-this-online/attempt-this-online/pulls)

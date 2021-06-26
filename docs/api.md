@@ -58,6 +58,6 @@ Currently recognised proprties are:
 - `image` (string): Docker image used for execution of the language
 
 [msgpack]: https://msgpack.org
-[`runners/` directory]: https://github.com/pxeger/attempt_this_online/tree/main/runners
+[`runners/` directory]: https://github.com/attempt-this-online/attempt-this-online/tree/main/runners
 [`signal(7)`]: https://man.archlinux.org/man/core/man-pages/signal.7.en
 [`core(5)`]: https://man.archlinux.org/man/core/man-pages/core.5.en

@@ -62,11 +62,11 @@ export default function About({ enableRedirect }: { enableRedirect: boolean }) {
             <li className="text-justify">
               The software is
               {' '}
-              <a href="https://github.com/pxeger/attempt_this_online" className="text-blue-500 underline">open-source</a>
+              <a href="https://github.com/attempt-this-online/attempt-this-online" className="text-blue-500 underline">open-source</a>
               {' '}
               (available under the copyleft
               {' '}
-              <a href="https://github.com/pxeger/attempt_this_online/blob/main/LICENCE.txt" className="text-blue-500 underline">GNU Affero General Public License 3.0</a>
+              <a href="https://github.com/attempt-this-online/attempt-this-online/blob/main/LICENCE.txt" className="text-blue-500 underline">GNU Affero General Public License 3.0</a>
               )
             </li>
             <li className="text-justify">We don&apos;t advertise or use any tracking technologies</li>
@@ -86,11 +86,11 @@ export default function About({ enableRedirect }: { enableRedirect: boolean }) {
             If you have a feature suggestion, bug report, or request for a new or updated language,
             open an issue in the
             {' '}
-            <a href="https://github.com/pxeger/attempt_this_online/issues/new/choose" className="text-blue-500 underline">GitHub repository</a>
+            <a href="https://github.com/attempt-this-online/attempt-this-online/issues/new/choose" className="text-blue-500 underline">GitHub repository</a>
             .
             Feel free to implement it yourself and
             {' '}
-            <a href="https://github.com/pxeger/attempt_this_online/compare" className="text-blue-500 underline">submit a pull request</a>
+            <a href="https://github.com/attempt-this-online/attempt-this-online/compare" className="text-blue-500 underline">submit a pull request</a>
             !
           </p>
           <p className="my-4 text-justify">

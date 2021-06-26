@@ -2,19 +2,19 @@
 Hash: SHA512
 
 Contact: https://www.pxeger.com/#contact-me
-Expires: Sat, 20 Mar 2021 09:39 +0000
+Expires: 2022-06-26T23:00:00.000Z
 Encryption: https://www.pxeger.com/pgp.asc
 Preferred-Languages: en
 Canonical: https://ato.pxeger.com/.well-known/security.txt
-Policy: https://github.com/pxeger/attempt_this_online/security/policy
+Policy: https://github.com/attempt-this-online/attempt-this-online/security/policy
 -----BEGIN PGP SIGNATURE-----
 
-iQEzBAEBCgAdFiEEITkSoL/FmAaNQ5qtVq1ayvBwpkAFAmBVw0cACgkQVq1ayvBw
-pkC5pwf+MTf9GNKDzI61pCAQCxLzOHbXtGBCZ4RhrJo8QVrIX2ZF8pv+L1lVUwVh
-E0d/BMzPcK2y5Yj6OPFbuNXFZdzEKLHO++2PYUkJof6EISq5GUaS+lK4FuDs7Vyg
-qoh8mP3APaNvlBQnh20rxih0tpSXNvWQprfUAGsa4TTJ5l69tEB+t3N0RvZHm2CS
-Nd4POpflpAKu+CNHzMXnrgurVuBLtm7xpt4Pq1rOACdqIvAczlNRUTdOEgRWFTMw
-sd9AV1/CCC5yI6JG3ZpmWzxsjjsNe9eopfU0kpnjjn6MVpVr6KirAHX4n7NSiVwG
-O02iYQ00dIBWPKMy7zq0BOpsDKAfSA==
-=pIgT
+iQEzBAEBCgAdFiEEITkSoL/FmAaNQ5qtVq1ayvBwpkAFAmDXPxwACgkQVq1ayvBw
+pkBAJgf/XQes/3/27fUcGFiT7KGATkVBczobgCcXbCRdjYG9rosmVKu1Z8N+2dk3
+rvFNLZ3WRhp2RMUc6JMeaxal62y3apwOFS+vBk8q6uXH4i/ELAQQB/AJuAJtMkbU
+UzNABmocb0NJIve8rASPgVQhnV85UEt9SBPdyzmU9XuFk1imvroRxZod5AISVb35
+Q0YID8Q5evErdZpWPHUmTDxyzVLnbnAzDDbl77yrCMIyTjs6sXkYttxGQi4R1Us6
+xWUpqI2EXlUQK3Tggqee3RmFrUGhbL6Y32Eo8DgTreCd5WN2ESmnDuuzya4jjKyt
+zivOjphIbB7+90G0x2HSA5AqdubjrQ==
+=A3Ty
 -----END PGP SIGNATURE-----

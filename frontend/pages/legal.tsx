@@ -15,7 +15,7 @@ export default function Home() {
           <article id="privacy-policy">
             <h1 className="mb-4 text-4xl font-bold">Privacy Policy</h1>
             <aside className="text-justify italic mb-3">
-              <a href="https://github.com/pxeger/attempt_this_online/commits/main/frontend/pages/legal.tsx" className="underline text-blue-500">
+              <a href="https://github.com/attempt-this-online/attempt-this-online/commits/main/frontend/pages/legal.tsx" className="underline text-blue-500">
                 Last Updated: April 9th, 2021
               </a>
             </aside>
@@ -46,7 +46,7 @@ export default function Home() {
               before and after. (if I remember, that is - I can&apos;t guarantee anything). You can
               also check the history of this policy page at any time
               {' '}
-              <a href="https://github.com/pxeger/attempt_this_online/commits/main/frontend/pages/legal.tsx" className="underline text-blue-500">
+              <a href="https://github.com/attempt-this-online/attempt-this-online/commits/main/frontend/pages/legal.tsx" className="underline text-blue-500">
                 on GitHub
               </a>
               , and there&apos;s probably a way to get email updates there as well I reckon.
@@ -104,14 +104,14 @@ export default function Home() {
                 The code and other resources provided in the Attempt This Online repository located
                 at
                 {' '}
-                <a href="https://github.com/pxeger/attempt_this_online" className="underline">
-                  <code>https://github.com/pxeger/attempt_this_online</code>
+                <a href="https://github.com/attempt-this-online/attempt-this-online" className="underline">
+                  <code>https://github.com/attempt-this-online/attempt-this-online</code>
                 </a>
                 {' '}
                 and/or elsewhere. Use of the Software is governed by the
                 {' '}
                 <a
-                  href="https://github.com/pxeger/attempt_this_online/blob/main/LICENCE.txt"
+                  href="https://github.com/attempt-this-online/attempt-this-online/blob/main/LICENCE.txt"
                   className="underline text-blue-500"
                 >
                   Software Licence Agreement
@@ -168,7 +168,7 @@ export default function Home() {
             <p className="mb-2 text-justify">
               In order to use the Service, you must agree to the terms of the
               {' '}
-              <a href="https://github.com/pxeger/attempt_this_online/blob/main/LICENCE.txt" className="underline text-blue-500">
+              <a href="https://github.com/attempt-this-online/attempt-this-online/blob/main/LICENCE.txt" className="underline text-blue-500">
                 Software Licence Agreement
               </a>
               , which is the
@@ -465,7 +465,7 @@ export default function Home() {
                 only on your own privately hosted instance or other instances where you have
                 permission to do so. See the project&apos;s
                 {' '}
-                <a href="https://github.com/pxeger/attempt_this_online/security/policy" className="underline text-blue-500">
+                <a href="https://github.com/attempt-this-online/attempt-this-online/security/policy" className="underline text-blue-500">
                   Security Policy
                 </a>
                 {' '}

@@ -61,7 +61,7 @@ if [ "$2" = --manual-package ]; then
     cp "$3" /var/cache/ATO
     cd /var/cache/ATO
 else
-    curl "https://github.com/pxeger/attempt_this_online/releases/download/$VERSION/attempt_this_online.tar.gz"
+    curl "https://github.com/attempt-this-online/attempt-this-online/releases/download/$VERSION/attempt_this_online.tar.gz"
 fi
 tar -xzf attempt_this_online.tar.gz # fun fact: you don't need the -v option to tar
 

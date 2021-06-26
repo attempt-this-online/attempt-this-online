@@ -80,7 +80,7 @@ def execute(ip_hash: str, invocation_id: str, invocation: Invocation) -> dict:
 
 
 async def not_found_handler(_request, _exc):
-    return RedirectResponse("https://github.com/pxeger/attempt_this_online", 303)
+    return RedirectResponse("https://github.com/attempt-this-online/attempt-this-online", 303)
 
 
 async def execute_route(request: Request) -> Response:
