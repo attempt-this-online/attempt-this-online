@@ -1,6 +1,8 @@
 #!/bin/sh
 #:name: Zsh
 #:image: attemptthisonline/zsh:5.8
+#:version: 5.8
+#:url: https://www.zsh.org/
 
 mkdir /ATO/tmp
 export TMPPREFIX=/ATO/tmp

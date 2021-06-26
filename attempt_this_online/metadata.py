@@ -5,7 +5,7 @@ import re
 
 __all__ = ["languages"]
 
-known_keys = {"name", "image"}
+known_keys = {"name", "image", "version", "url"}
 languages = {}
 for path in Path("/usr/local/share/ATO/runners").iterdir():
 # for path in (Path(__file__).parents[1] / "runners").iterdir():
