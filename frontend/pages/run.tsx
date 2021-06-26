@@ -73,7 +73,7 @@ const statusToString = (type: 'exited' | 'killed' | 'core_dumped' | 'unknown', v
   }
 };
 
-const pluralise = (string, length) => length === 1 ? string : string + 's';
+const pluralise = (string: string, n: number) => (n === 1 ? string : `${string}s`);
 
 function _Run({ languages }: { languages: Record<string, Record<string, any>> }) {
   const router = useRouter();
@@ -280,7 +280,7 @@ function _Run({ languages }: { languages: Record<string, Record<string, any>> })
 <pre><code>${escape(code)}</code></pre>
 
 [Attempt This Online!](https://ato.pxeger.com/run${url})`);
-  }
+  };
 
   const keyDownHandler = (e: any) => {
     if (!submitting && language && options !== null && programArguments !== null && e.ctrlKey && !e.shiftKey && !e.metaKey && !e.altKey && e.key === 'Enter') {
