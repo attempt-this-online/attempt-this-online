@@ -275,7 +275,7 @@ function _Run({ languages }: { languages: Record<string, Record<string, any>> })
       input,
       inputEncoding,
     });
-    navigator.clipboard.writeText(`# [${languages[language].name}], ${byteLength} ${pluralise('bytes', byteLength)}
+    navigator.clipboard.writeText(`# ${languages[language].name}, ${byteLength} ${pluralise('byte', byteLength)}
 
 <pre><code>${escape(code)}</code></pre>
 
