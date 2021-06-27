@@ -120,6 +120,11 @@ cp -RT public /usr/local/share/ATO/public
 for format in woff woff2 ttf; do
     curl "https://raw.githubusercontent.com/tonsky/FiraCode/master/distr/$format/FiraCode-Regular.$format" -o "/usr/local/share/ATO/public/FiraCode-Regular.$format"
 done
+for format in woff woff2 otf; do
+    for variant in Bold Regular; do
+        curl -L "https://github.com/pxeger/Cantarell/raw/v0.301-2/Cantarell$variant.$format" -o "/usr/local/share/ATO/public/Cantarell-$variant.$format"
+    done
+done
 chown -R http:http /usr/local/share/ATO/public
 chmod -R a+rX-w /usr/local/share/ATO/public
 

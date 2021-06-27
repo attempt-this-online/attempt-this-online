@@ -6,6 +6,7 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
+        sans: ['Cantarell', 'Fira Sans', 'Roboto', 'Ubuntu', ...defaultTheme.fontFamily.mono],
         mono: ['Fira Code', ...defaultTheme.fontFamily.mono],
       },
       maxWidth: {
