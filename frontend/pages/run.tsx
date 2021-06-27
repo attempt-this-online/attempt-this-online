@@ -309,12 +309,12 @@ function _Run({ languages }: { languages: Record<string, Record<string, any>> })
           </div>
           <main className="mb-3 px-4 -mt-4 md:container md:mx-auto">
             <form onSubmit={submit}>
-              <div className="flex items-center mt-4 pb-1">
-                <div className="flex-grow">
-                  <label htmlFor="languageSelector">Language:</label>
+              <div className="lg:flex flex-wrap lg:flex-nowrap items-center mt-4 pb-1">
+                <div className="flex sm:block lg:flex-grow">
+                  <label className="my-auto" htmlFor="languageSelector">Language:</label>
                   <select
                     id="languageSelector"
-                    className="appearance-none ml-2 p-2 w-80 rounded bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 transition cursor-pointer ATO_select focus:outline-none focus:ring"
+                    className="appearance-none ml-2 p-2 flex-grow sm:w-80 rounded bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 transition cursor-pointer ATO_select focus:outline-none focus:ring"
                     value={language || ''}
                     onChange={e => setLanguage(e.target.value)}
                   >
@@ -323,7 +323,7 @@ function _Run({ languages }: { languages: Record<string, Record<string, any>> })
                     ))}
                   </select>
                 </div>
-                <div className="flex">
+                <div className="mt-3 lg:mt-0 flex justify-between">
                   <code className="my-auto mr-4 font-mono bg-gray-200 dark:bg-gray-800 px-2 py-px rounded">
                     {code.length}
                     {' '}
