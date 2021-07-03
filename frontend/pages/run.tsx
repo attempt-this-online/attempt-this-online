@@ -279,7 +279,7 @@ function _Run({ languages }: { languages: Record<string, Record<string, any>> })
 
 <pre><code>${escape(code)}</code></pre>
 
-[Attempt This Online!](https://ato.pxeger.com/run${url})`);
+[Attempt This Online!](https://ato.pxeger.com/run?${url})`);
   };
 
   const keyDownHandler = (e: any) => {
