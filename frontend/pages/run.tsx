@@ -18,6 +18,9 @@ import { save, load } from 'lib/urls';
 
 const ENCODERS: Record<string, ((s: string) => Uint8Array)> = {
   'utf-8': s => new TextEncoder().encode(s),
+  // sbcs is still just UTF-8, but with different byte counting (switching to a different code page, if necessary, is
+  // done on the backend)
+  'sbcs': s => new TextEncoder().encode(s),
 };
 
 const DECODERS: Record<string, ((b: Uint8Array) => string)> = {
@@ -108,6 +111,13 @@ function _Run({ languages }: { languages: Record<string, Record<string, any>> })
   const notify = (text: string) => {
     setNotifications([{ id: Math.random(), text }, ...notifications]);
   };
+
+  // when language changes, set encoding to sbcs if it uses it by default
+  useEffect(() => {
+    if (languages[language].sbcs === 'true') {
+      setCodeEncoding('sbcs');
+    }
+  }, [language]);
 
   const submit = async (event: SyntheticEvent) => {
     event.preventDefault();
@@ -214,7 +224,12 @@ function _Run({ languages }: { languages: Record<string, Record<string, any>> })
     [],
   ));
 
-  const byteLength = ENCODERS[codeEncoding](code).length;
+  let byteLength;
+  if (codeEncoding === 'sbcs') {
+    byteLength = code.length;
+  } else {
+    byteLength = ENCODERS[codeEncoding](code).length;
+  }
 
   // save data in URL on data change
   useEffect(
