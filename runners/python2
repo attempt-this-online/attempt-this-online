@@ -1,0 +1,9 @@
+#!/bin/sh
+#:name: Python 2
+#:image: python:2-buster
+#:version: 2
+#:url: https://docs.python.org/2/
+#:sbcs: false
+
+cd /ATO/context
+/ATO/yargs %1 /ATO/options /ATO/yargs %2 /ATO/arguments python %1 /ATO/code %2 < /ATO/input
