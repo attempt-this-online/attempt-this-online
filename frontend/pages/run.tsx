@@ -228,7 +228,7 @@ function _Run({ languages }: { languages: Record<string, Record<string, any>> })
     [],
   ));
 
-  let byteLength;
+  let byteLength: number;
   if (codeEncoding === 'sbcs') {
     byteLength = code.length;
   } else {

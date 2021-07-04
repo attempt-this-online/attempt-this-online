@@ -77,6 +77,7 @@ Make sure you've made the runner script executable (`chmod +x runners/path`)
 - Update version numbers in `frontend/package.json`, `pyproject.toml`, and `setup/setup`
 - Upgrade dependencies (`cd frontend; npm update; cd ..` and `poetry update`)
 - Build package `./build`
+- Stage and commit changes
 - Tag version in git, e.g. `v0.1.2`
 - Upload `setup/setup` and `dist/attempt_this_online.tar.gz` to GitHub release
 - Set description etc. on GitHub release
