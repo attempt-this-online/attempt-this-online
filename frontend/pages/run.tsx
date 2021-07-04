@@ -305,6 +305,9 @@ function _Run({ languages }: { languages: Record<string, Record<string, any>> })
     if (!submitting && language && options !== null && programArguments !== null && e.ctrlKey && !e.shiftKey && !e.metaKey && !e.altKey && e.key === 'Enter') {
       submit(e);
     }
+    if (e.key === 'n') {
+      notify('demo');
+    }
   };
   return (
     <>
@@ -314,7 +317,7 @@ function _Run({ languages }: { languages: Record<string, Record<string, any>> })
       <div className="min-h-screen bg-white dark:bg-gray-900 text-black dark:text-white relative flex flex-col">
         <Navbar />
         <div className="flex-grow relative">
-          <div className="absolute top-0 z-20 w-full flex flex-col pointer-events-none">
+          <div className="sticky h-0 top-4 z-20 pointer-events-none">
             {notifications.map(
               notification => (
                 <Notification
