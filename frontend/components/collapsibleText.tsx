@@ -1,5 +1,5 @@
 import {
-  useState, ReactNode,
+  useState, useEffect, ReactNode,
 } from 'react';
 
 import ResizeableText from 'components/resizeableText';
@@ -24,6 +24,19 @@ function CollapsibleText({
   onKeyDown: (event: any) => void,
 }) {
   const [open, setOpen] = useState(true);
+  const [modified, setModified] = useState(false);
+
+  useEffect(() => {
+    console.log(value, modified, id);
+    if (modified) {
+      // don't open when already manually modified
+      return;
+    }
+    if (id === 'header' || id === 'footer' || id === 'input') {
+      // close by default when empty
+      setOpen(!!value);
+    }
+  }, [modified, id, value]);
 
   return (
     <div className="relative">
@@ -42,7 +55,7 @@ function CollapsibleText({
         <ResizeableText
           id={id}
           value={value}
-          onChange={onChange}
+          onChange={event => { setModified(true); onChange(event); }}
           onKeyDown={onKeyDown}
           disabled={disabled}
           open={open}
