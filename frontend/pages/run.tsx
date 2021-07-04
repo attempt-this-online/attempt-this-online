@@ -114,10 +114,14 @@ function _Run({ languages }: { languages: Record<string, Record<string, any>> })
 
   // when language changes, set encoding to sbcs if it uses it by default
   useEffect(() => {
+    if (!languages) {
+      // not loaded yet
+      return;
+    }
     if (languages[language].sbcs === 'true') {
       setCodeEncoding('sbcs');
     }
-  }, [language]);
+  }, [language, languages]);
 
   const submit = async (event: SyntheticEvent) => {
     event.preventDefault();
