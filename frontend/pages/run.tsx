@@ -314,7 +314,7 @@ function _Run({ languages }: { languages: Record<string, Record<string, any>> })
       <div className="min-h-screen bg-white dark:bg-gray-900 text-black dark:text-white relative flex flex-col">
         <Navbar />
         <div className="flex-grow relative">
-          <div className="absolute top-0 z-20 w-full flex flex-col">
+          <div className="absolute top-0 z-20 w-full flex flex-col pointer-events-none">
             {notifications.map(
               notification => (
                 <Notification
