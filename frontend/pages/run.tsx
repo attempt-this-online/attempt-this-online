@@ -305,9 +305,6 @@ function _Run({ languages }: { languages: Record<string, Record<string, any>> })
     if (!submitting && language && options !== null && programArguments !== null && e.ctrlKey && !e.shiftKey && !e.metaKey && !e.altKey && e.key === 'Enter') {
       submit(e);
     }
-    if (e.key === 'n') {
-      notify('demo');
-    }
   };
   return (
     <>
