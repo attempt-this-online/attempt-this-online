@@ -109,7 +109,10 @@ function _Run({ languages }: { languages: Record<string, Record<string, any>> })
     setNotifications(notifications.filter(({ id }) => id !== target));
   };
   const notify = (text: string) => {
-    setNotifications([{ id: Math.random(), text }, ...notifications]);
+    // avoid double notifications
+    if (notifications.find(n => n.text === text) === undefined) {
+      setNotifications([{ id: Math.random(), text }, ...notifications]);
+    }
   };
 
   // when language changes, set encoding to sbcs if it uses it by default
@@ -276,10 +279,7 @@ function _Run({ languages }: { languages: Record<string, Record<string, any>> })
       notify('Please select a language first!');
       return;
     }
-    // avoid double notifications
-    if (notifications.find(n => n.text === 'Copied to clipboard!') === undefined) {
-      notify('Copied to clipboard!');
-    }
+    notify('Copied to clipboard!');
     const url = save({
       language,
       options: optionsString,
