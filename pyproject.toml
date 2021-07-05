@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "attempt_this_online"
-version = "0.1.5"
+version = "0.1.6"
 description = "Try It Online clone"
 authors = ["pxeger <_@pxeger.com>"]
 license = "Artistic License 2.0"
