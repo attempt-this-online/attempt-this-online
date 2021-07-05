@@ -261,12 +261,14 @@ function _Run({ languages }: { languages: Record<string, Record<string, any>> })
     // update when these values change:
     [
       language,
+      optionsString,
       header,
       headerEncoding,
       code,
       codeEncoding,
       footer,
       footerEncoding,
+      argsString,
       input,
       inputEncoding,
     ],
