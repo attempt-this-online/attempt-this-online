@@ -27,7 +27,6 @@ function CollapsibleText({
   const [modified, setModified] = useState(false);
 
   useEffect(() => {
-    console.log(value, modified, id);
     if (modified) {
       // don't open when already manually modified
       return;

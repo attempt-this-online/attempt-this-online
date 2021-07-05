@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 
 export default function useSystemThemePreference() {
-  const [systemThemePreference, setSystemThemePreference] = useState<'dark'| 'light' | null>(null);
+  const [systemThemePreference, setSystemThemePreference] = useState<'dark' | 'light' | null>(null);
 
   useEffect(() => {
     if (!window.matchMedia) {

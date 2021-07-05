@@ -18,9 +18,9 @@ import { save, load } from 'lib/urls';
 
 const ENCODERS: Record<string, ((s: string) => Uint8Array)> = {
   'utf-8': s => new TextEncoder().encode(s),
-  // sbcs is still just UTF-8, but with different byte counting (switching to a different code page, if necessary, is
-  // done on the backend)
-  'sbcs': s => new TextEncoder().encode(s),
+  // sbcs is still just UTF-8, but with different byte counting (switching to a different code page,
+  // if necessary, is done on the backend)
+  sbcs: s => new TextEncoder().encode(s),
 };
 
 const DECODERS: Record<string, ((b: Uint8Array) => string)> = {
@@ -238,9 +238,6 @@ function _Run({ languages }: { languages: Record<string, Record<string, any>> })
   // save data in URL on data change
   useEffect(
     () => {
-      // TODO: fix jank with not including router in useEffect dependencies!
-      // For now I've got the right combination such that the URL never flickers, but it's fragile
-      // and I don't really understand why it would or wouldn't work.
       if (!router.isReady) {
         return;
       }
