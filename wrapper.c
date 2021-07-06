@@ -51,6 +51,7 @@
 #include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/prctl.h>
 #include <sys/resource.h>
 #include <sys/types.h>
@@ -67,7 +68,7 @@
 
 // #define AUTHORS proper_name("Padraig Brady")
 
-#define TIMEOUT_SECS 60
+#define MAX_TIMEOUT_SECS 60
 
 #define DPRINTF(d, f, ...) do { \
     int _result; \
@@ -84,6 +85,7 @@
 
 static int timed_out;
 static int term_signal = SIGKILL; /* same default as kill command.  */
+static int timeout_secs = MAX_TIMEOUT_SECS;
 static pid_t monitored_pid;
 static bool foreground; /* whether to use another program group.  */
 static bool preserve_status; /* whether to use a timeout status or not.  */
@@ -92,8 +94,7 @@ static bool preserve_status; /* whether to use a timeout status or not.  */
 static void
 settimeout(bool warn)
 {
-
-    struct timespec ts = { TIMEOUT_SECS, 0 };
+    struct timespec ts = { timeout_secs, 0 };
     struct itimerspec its = { { 0, 0 }, ts };
     timer_t timerid;
     if (timer_create(CLOCK_REALTIME, NULL, &timerid) == 0) {
@@ -108,7 +109,7 @@ settimeout(bool warn)
         perror("warning: timer_create");
 
     /* fallback to single second resolution provided by alarm().  */
-    alarm(TIMEOUT_SECS);
+    alarm(timeout_secs);
 }
 
 /* send SIG avoiding the current process.  */
@@ -218,25 +219,35 @@ block_cleanup_and_chld(int sigterm, sigset_t* old_set)
         perror("warning: sigprocmask");
 }
 
+int parse_int(char* string) {
+    int value = 0;
+    if (string[0] < '1') {
+        // invalid integer (must be >= 0)
+        exit(2);
+    }
+    for (int i = 0; string[i]; i++) {
+        if (string[i] < '0' || string[i] > '9') {
+            // invalid integer
+            exit(2);
+        }
+        value *= 10;
+        value += string[i] - '0';
+    }
+    return value;
+}
+
 int main(int argc, char** argv)
 {
-    if (argc != 2) {
-        // file descriptor must be given as argument
-        return 1;
+    if (argc != 3) {
+        // file descriptor and timeout must be given as argument
+        return 2;
     }
-    int fd = 0;
-    if (argv[1][0] < '1') {
-        // invalid integer
-        return 1;
+    int fd = parse_int(argv[1]);
+    timeout_secs = parse_int(argv[2]);
+    if (timeout_secs < 1 || timeout_secs > MAX_TIMEOUT_SECS) {
+        return 2;
     }
-    for (int i = 0; argv[1][i]; i++) {
-        if (argv[1][i] < '0' || argv[1][i] > '9') {
-            // invalid integer
-            return 1;
-        }
-        fd *= 10;
-        fd += argv[1][i] - '0';
-    }
+
     errno = 0;
     fcntl(fd, F_GETFD);
     if (errno) {
