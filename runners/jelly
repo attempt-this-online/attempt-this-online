@@ -10,4 +10,4 @@ export TMPPREFIX=/ATO/tmp
 
 cd /ATO/context
 
-/ATO/yargs %1 /ATO/options /ATO/yargs %2 /ATO/arguments /usr/local/bin/jelly %1 /ATO/code %2 < /ATO/input
+/ATO/yargs % /ATO/arguments /usr/local/bin/jelly fun /ATO/code % < /ATO/input
