@@ -1,6 +1,6 @@
 #!/bin/sh
 #:name: Jelly
-#:image: attemptthisonline/jelly
+#:image: attemptthisonline/jelly:commit-70c9fd93
 #:version: 0.1.30
 #:url: https://github.com/DennisMitchell/jellylanguage
 #:sbcs: true
