@@ -224,7 +224,7 @@ function _Run({ languages }: { languages: Record<string, Record<string, any>> })
       // function would have to be recreated every render and the debouncing wouldn't work properly,
       // so what would otherwise be closure variables are passed as arguments upon call.
       (router2, data) => {
-        router2.replace(`/run?${save(data)}`);
+        router2.replace(`/run?${save(data)}`, null, { scroll: false });
       },
       200, // milliseconds
     ),
