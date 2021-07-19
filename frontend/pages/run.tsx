@@ -86,7 +86,7 @@ function _Run({ languages }: { languages: Record<string, Record<string, any>> })
   const [headerEncoding, setHeaderEncoding] = useState('utf-8');
   const [code, setCode] = useState('');
   // default code encoding depends on language selected
-  const [codeEncoding, setCodeEncoding] = useState(null);
+  const [codeEncoding, setCodeEncoding] = useState<string | null>(null);
   const [footer, setFooter] = useState('');
   const [footerEncoding, setFooterEncoding] = useState('utf-8');
   const [input, setInput] = useState('');
@@ -138,7 +138,7 @@ function _Run({ languages }: { languages: Record<string, Record<string, any>> })
 
     const headerBytes = ENCODERS[headerEncoding](header);
     const footerBytes = ENCODERS[footerEncoding](footer);
-    const codeBytes = ENCODERS[codeEncoding](code);
+    const codeBytes = ENCODERS[codeEncoding!](code);
     const combined = new Uint8Array([
       ...headerBytes,
       ...(headerBytes.length === 0 ? [] : [NEWLINE]),
@@ -237,7 +237,7 @@ function _Run({ languages }: { languages: Record<string, Record<string, any>> })
     [],
   ));
 
-  let byteLength: number;
+  let byteLength: number = 0;
   if (codeEncoding !== null) {
     if (codeEncoding === 'sbcs') {
       byteLength = code.length;
@@ -391,7 +391,7 @@ function _Run({ languages }: { languages: Record<string, Record<string, any>> })
               <CollapsibleText
                 value={code}
                 onChange={e => setCode(e.target.value)}
-                encoding={codeEncoding}
+                encoding={codeEncoding!}
                 onEncodingChange={e => setCodeEncoding(e.target.value)}
                 id="code"
                 onKeyDown={keyDownHandler}
