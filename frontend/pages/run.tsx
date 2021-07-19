@@ -85,7 +85,8 @@ function _Run({ languages }: { languages: Record<string, Record<string, any>> })
   const [header, setHeader] = useState('');
   const [headerEncoding, setHeaderEncoding] = useState('utf-8');
   const [code, setCode] = useState('');
-  const [codeEncoding, setCodeEncoding] = useState('utf-8');
+  // default code encoding depends on language selected
+  const [codeEncoding, setCodeEncoding] = useState(null);
   const [footer, setFooter] = useState('');
   const [footerEncoding, setFooterEncoding] = useState('utf-8');
   const [input, setInput] = useState('');
@@ -121,8 +122,13 @@ function _Run({ languages }: { languages: Record<string, Record<string, any>> })
       // not loaded yet
       return;
     }
-    if (languages[language].sbcs === 'true') {
-      setCodeEncoding('sbcs');
+    // only set encoding if not already set
+    if (codeEncoding === null) {
+      if (languages[language].sbcs === 'true') {
+        setCodeEncoding('sbcs');
+      } else {
+        setCodeEncoding('utf-8');
+      }
     }
   }, [language, languages]);
 
@@ -232,10 +238,12 @@ function _Run({ languages }: { languages: Record<string, Record<string, any>> })
   ));
 
   let byteLength: number;
-  if (codeEncoding === 'sbcs') {
-    byteLength = code.length;
-  } else {
-    byteLength = ENCODERS[codeEncoding](code).length;
+  if (codeEncoding !== null) {
+    if (codeEncoding === 'sbcs') {
+      byteLength = code.length;
+    } else {
+      byteLength = ENCODERS[codeEncoding](code).length;
+    }
   }
 
   // save data in URL on data change
