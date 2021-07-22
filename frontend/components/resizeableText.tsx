@@ -42,8 +42,8 @@ export default function ResizeableText(
         disabled={disabled}
         onChange={handleChange}
         onKeyDown={onKeyDown}
-        style={{ height: `max(${height + 16}px, 6rem)` }}
-        className="block w-full my-4 p-2 rounded bg-gray-100 dark:bg-gray-800 font-mono text-base resize-none cursor-text focus:outline-none focus:ring min-h-6"
+        style={{ height: `${height + 16}px` }}
+        className="block w-full my-4 p-2 rounded bg-gray-100 dark:bg-gray-800 font-mono text-base resize-none cursor-text focus:outline-none focus:ring"
         autoComplete="off"
         autoCorrect="off"
         autoCapitalize="none"
