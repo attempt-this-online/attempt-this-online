@@ -12,6 +12,8 @@ A [msgpack]-encoded payload - a map with the following string keys:
 - `input`: a binary containing the data to be passed to the standard input of the program
 - `options`: an array of binaries - command-line arguments to be passed to the **interpreter or compiler**
 - `arguments`: an array of binaries - command-line arguments to be passed to the **program itself**
+- `timeout`: (optional) an integer which specifies the duration in seconds for which the program is allowed to run. Must
+be less than or equal to 60. If not specified, 60 is used.
 
 ### Response
 A [msgpack]-encoded payload - a map with the following string keys:
