@@ -7,7 +7,7 @@ from shutil import rmtree
 from subprocess import run
 
 import msgpack
-from pydantic import BaseModel, validator, ValidationError
+from pydantic import BaseModel, conint, validator, ValidationError
 from starlette.applications import Starlette
 from starlette.concurrency import run_in_threadpool
 from starlette.exceptions import HTTPException
@@ -32,6 +32,7 @@ class Invocation(BaseModel):
     input: bytes
     arguments: list[bytes]
     options: list[bytes]
+    timeout: conint(le=60, ge=1) = 60
 
     @validator("language")
     def validate_language(cls, value: str):
@@ -41,7 +42,7 @@ class Invocation(BaseModel):
             return value
 
 
-def execute(ip_hash: str, invocation_id: str, invocation: Invocation) -> dict:
+def execute_once(ip_hash: str, invocation_id: str, invocation: Invocation) -> dict:
     try:
         hashed_invocation_id = sha256(invocation_id.encode()).hexdigest()
         dir_i = Path("/run/ATO_i") / hashed_invocation_id
@@ -60,7 +61,7 @@ def execute(ip_hash: str, invocation_id: str, invocation: Invocation) -> dict:
             f.write(b"".join(opt + b"\0" for opt in invocation.options))
 
         run(
-            ["sudo", "-u", "sandbox", "/usr/local/bin/ATO_sandbox", ip_hash, invocation_id, invocation.language],
+            ["sudo", "-u", "sandbox", "/usr/local/bin/ATO_sandbox", ip_hash, invocation_id, invocation.language, str(invocation.timeout)],
             env={"PATH": getenv("PATH")}
         )
         dir_o = Path("/run/ATO_o") / hashed_invocation_id
@@ -83,7 +84,7 @@ async def not_found_handler(_request, _exc):
     return RedirectResponse("https://github.com/attempt-this-online/attempt-this-online", 303)
 
 
-async def execute_route(request: Request) -> Response:
+async def execute_once_route(request: Request) -> Response:
     try:
         if int(request.headers.get("Content-Length")) > MAX_REQUEST_SIZE:
             return Response(
@@ -105,7 +106,7 @@ async def execute_route(request: Request) -> Response:
         ip = request.client.host
     ip_hash = sha256(IP_ADDRESS_SALT + ip.encode()).hexdigest()
     invocation_id = token_hex()
-    status = await run_in_threadpool(execute, ip_hash, invocation_id, invocation)
+    status = await run_in_threadpool(execute_once, ip_hash, invocation_id, invocation)
     return Response(msgpack.dumps(status), 200)
 
 
@@ -115,7 +116,7 @@ async def get_metadata(_request) -> Response:
 
 app = Starlette(
     routes=[
-        Route("/api/v0/execute", methods=["POST"], endpoint=execute_route),
+        Route("/api/v0/execute", methods=["POST"], endpoint=execute_once_route),
         Route("/api/v0/metadata", methods=["GET"], endpoint=get_metadata),
     ],
     exception_handlers={
