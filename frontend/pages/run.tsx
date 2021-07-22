@@ -78,7 +78,12 @@ const statusToString = (type: 'exited' | 'killed' | 'core_dumped' | 'unknown', v
 
 const pluralise = (string: string, n: number) => (n === 1 ? string : `${string}s`);
 
-function _Run({ languages }: { languages: Record<string, Record<string, any>> }) {
+function _Run(
+  { languages, fullWidthMode }: {
+    languages: Record<string, Record<string, any>>,
+    fullWidthMode: boolean
+  },
+) {
   const router = useRouter();
 
   const [language, setLanguage] = useState('python');
@@ -333,7 +338,9 @@ function _Run({ languages }: { languages: Record<string, Record<string, any>> })
               ),
             )}
           </div>
-          <main className="mb-3 px-4 -mt-4 md:container md:mx-auto">
+          <main
+            className={`mb-3 px-4 -mt-4${fullWidthMode ? '' : ' md:container md:mx-auto'}`}
+          >
             <form onSubmit={submit}>
               <div className="lg:flex flex-wrap lg:flex-nowrap items-center mt-4 pb-1">
                 <div className="flex sm:block lg:flex-grow">
@@ -501,5 +508,8 @@ function _Run({ languages }: { languages: Record<string, Record<string, any>> })
   );
 }
 
-const Run = connect((state: any) => ({ languages: state.metadata }))(_Run);
+const Run = connect((state: any) => ({
+  fullWidthMode: state.fullWidthMode,
+  languages: state.metadata,
+}))(_Run);
 export default Run;

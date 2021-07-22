@@ -9,6 +9,7 @@ const initialState = {
   lastUpdate: 0,
   light: false,
   count: 0,
+  fullWidthMode: false,
 };
 
 const reducer = (state = initialState, action: any) => {
@@ -27,6 +28,11 @@ const reducer = (state = initialState, action: any) => {
       return {
         ...state,
         metadata: action.metadata!,
+      };
+    case 'setFullWidthMode':
+      return {
+        ...state,
+        fullWidthMode: action.fullWidthMode!,
       };
     default:
       return state;

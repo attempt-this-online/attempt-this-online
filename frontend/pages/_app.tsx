@@ -29,6 +29,12 @@ const ThemeWrapper = connect(
     if (typeof storedFontLigatures === 'boolean') {
       dispatch({ type: 'setFontLigaturesEnabled', fontLigaturesEnabled: storedFontLigatures });
     }
+    const storedFullWidthMode = await localForage.getItem('ATO_full_width_mode');
+    if (typeof storedFullWidthMode === 'boolean') {
+      dispatch({ type: 'setFullWidthMode', fullWidthMode: storedFullWidthMode });
+    } else {
+      await localForage.setItem('ATO_full_width_mode', true);
+    }
     dispatch({ type: 'setLanguagesMetadata', metadata: await API.getMetadata() });
   }) as (() => void), []);
   const systemThemePreference = useSystemThemePreference();

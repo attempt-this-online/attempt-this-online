@@ -3,7 +3,7 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import localForage from 'localforage';
 import { useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 
 import useSystemThemePreference from 'lib/useSystemThemePreference';
 import Footer from 'components/footer';
@@ -25,6 +25,11 @@ export default function Preferences() {
     dispatch({ type: 'setFontLigaturesEnabled', fontLigaturesEnabled: event.target.checked });
     await localForage.setItem('ATO_font_ligatures', event.target.checked);
   };
+  const fullWidthMode = useSelector(state => state.fullWidthMode);
+  const handleFullWidthModeChange = async (event: any) => {
+    dispatch({ type: 'setFullWidthMode', fullWidthMode: event.target.checked });
+    await localForage.setItem('ATO_full_width_mode', event.target.checked);
+  };
   useEffect(() => {
     localForage.getItem('ATO_theme').then(v => setTheme(v as string));
     localForage.getItem('ATO_font_ligatures').then(v => {
@@ -41,7 +46,9 @@ export default function Preferences() {
         <title>Prefences &ndash; Attempt This Online</title>
       </Head>
       <div className="min-h-screen bg-white dark:bg-gray-900 text-black dark:text-white pt-8 relative flex flex-col">
-        <main className="mb-3 px-4 md:container md:mx-auto flex-grow">
+        <main
+          className={`mb-3 px-4 flex-grow${fullWidthMode ? '' : ' md:container md:mx-auto'}`}
+        >
           <header className="flex mb-2">
             <button className="my-auto p-2 transition hover:bg-gray-300 dark:hover:bg-gray-600 rounded-full" type="button" onClick={() => router.back()}>
               <ArrowLeftIcon className="w-8 h-8 inline" />
@@ -88,6 +95,12 @@ export default function Preferences() {
                 <code className="bg-gray-200 dark:bg-gray-800 px-2 py-px rounded">{'<-> </> :: ||> #! ++ /* */ 0xFF != www'}</code>
                 )
               </span>
+            </div>
+            <div className="flex mt-3">
+              <label className="flex">
+                <input type="checkbox" className="mr-2" checked={fullWidthMode} onChange={handleFullWidthModeChange} />
+                Full-width mode (enabled anyway on small screens)
+              </label>
             </div>
           </fieldset>
         </main>
