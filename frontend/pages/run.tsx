@@ -162,6 +162,7 @@ function _Run(
         code: combined,
         options: options!,
         programArguments: programArguments!,
+        timeout: 60, // TODO
       });
     } catch (e) {
       console.error(e);

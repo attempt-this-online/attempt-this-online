@@ -26,12 +26,14 @@ async function run({
   code,
   options,
   programArguments,
+  timeout,
 }: {
   language: string,
   input: Uint8Array,
   code: Uint8Array,
   options: string[],
   programArguments: string[],
+  timeout: number,
 }) {
   const response = await fetch(`${BASE_URL}/api/v0/execute`, {
     method: 'POST',
@@ -41,6 +43,7 @@ async function run({
       input,
       options,
       arguments: programArguments,
+      timeout,
     }),
   });
   if (!response.ok || !response.body) {
