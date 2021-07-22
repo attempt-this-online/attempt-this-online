@@ -1,7 +1,6 @@
 import { ArrowLeftIcon } from '@heroicons/react/outline';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import localForage from 'localforage';
 import { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
@@ -11,35 +10,19 @@ import Footer from 'components/footer';
 export default function Preferences() {
   const router = useRouter();
   const dispatch = useDispatch();
-  const [theme, setTheme] = useState('system');
   const systemThemePreference = useSystemThemePreference();
+  const theme = useSelector(state => state.theme);
   const handleThemeChange = async (event: any) => {
-    event.preventDefault();
-    setTheme(event.target.value);
     dispatch({ type: 'setTheme', theme: event.target.value });
-    await localForage.setItem('ATO_theme', event.target.value);
   };
-  const [fontLigaturesEnabled, setFontLigaturesEnabled] = useState(true);
+  const fontLigaturesEnabled = useSelector(state => state.fontLigaturesEnabled);
   const handleFontLigaturesChange = async (event: any) => {
-    setFontLigaturesEnabled(event.target.checked);
     dispatch({ type: 'setFontLigaturesEnabled', fontLigaturesEnabled: event.target.checked });
-    await localForage.setItem('ATO_font_ligatures', event.target.checked);
   };
   const fullWidthMode = useSelector(state => state.fullWidthMode);
   const handleFullWidthModeChange = async (event: any) => {
     dispatch({ type: 'setFullWidthMode', fullWidthMode: event.target.checked });
-    await localForage.setItem('ATO_full_width_mode', event.target.checked);
   };
-  useEffect(() => {
-    localForage.getItem('ATO_theme').then(v => setTheme(v as string));
-    localForage.getItem('ATO_font_ligatures').then(v => {
-      if (typeof v !== 'boolean') {
-        v = true;
-        localForage.setItem('ATO_font_ligatures', true);
-      }
-      setFontLigaturesEnabled(v as boolean);
-    });
-  }, []);
   return (
     <>
       <Head>
@@ -47,6 +30,7 @@ export default function Preferences() {
       </Head>
       <div className="min-h-screen bg-white dark:bg-gray-900 text-black dark:text-white pt-8 relative flex flex-col">
         <main
+          // only included here to provide instant feedback when changing full width mode
           className={`mb-3 px-4 flex-grow${fullWidthMode ? '' : ' md:container md:mx-auto'}`}
         >
           <header className="flex mb-2">
@@ -76,7 +60,7 @@ export default function Preferences() {
                 { systemThemePreference !== null && (
                 <option value="system">
                   System default (
-                  { systemThemePreference }
+                  {systemThemePreference}
                   )
                 </option>
                 ) }

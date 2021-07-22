@@ -2,24 +2,31 @@
 import { useMemo } from 'react';
 import { Store, createStore, applyMiddleware } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
+import localForage from 'localforage';
 
 let store: Store | undefined;
 
 const initialState = {
+  // TODO(pxeger): these are part of the Redux example, but are they necessary for something?
   lastUpdate: 0,
   light: false,
   count: 0,
+
   fullWidthMode: false,
+  theme: 'system',
+  fontLigaturesEnabled: true,
 };
 
 const reducer = (state = initialState, action: any) => {
   switch (action.type) {
     case 'setTheme':
+      localForage.setItem('ATO_theme', action.theme!);
       return {
         ...state,
         theme: action.theme!,
       };
     case 'setFontLigaturesEnabled':
+      localForage.setItem('ATO_font_ligatures', action.fontLigaturesEnabled!);
       return {
         ...state,
         fontLigaturesEnabled: action.fontLigaturesEnabled!,
@@ -30,6 +37,7 @@ const reducer = (state = initialState, action: any) => {
         metadata: action.metadata!,
       };
     case 'setFullWidthMode':
+      localForage.setItem('ATO_full_width_mode', action.fullWidthMode!);
       return {
         ...state,
         fullWidthMode: action.fullWidthMode!,

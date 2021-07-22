@@ -21,20 +21,21 @@ const ThemeWrapper = connect(
 }) => {
   const dispatch = useDispatch();
   React.useEffect((async () => {
-    const storedTheme = await localForage.getItem('ATO_theme');
-    if (storedTheme) {
-      dispatch({ type: 'setTheme', theme: storedTheme });
+    let storedTheme = await localForage.getItem('ATO_theme');
+    if (storedTheme !== 'light' && storedTheme !== 'dark' && storedTheme !== 'system') {
+      storedTheme = 'system';
     }
-    const storedFontLigatures = await localForage.getItem('ATO_font_ligatures');
-    if (typeof storedFontLigatures === 'boolean') {
-      dispatch({ type: 'setFontLigaturesEnabled', fontLigaturesEnabled: storedFontLigatures });
+    dispatch({ type: 'setTheme', theme: storedTheme });
+    let storedFontLigatures = await localForage.getItem('ATO_font_ligatures');
+    if (typeof storedFontLigatures !== 'boolean') {
+      storedFontLigatures = true;
     }
-    const storedFullWidthMode = await localForage.getItem('ATO_full_width_mode');
-    if (typeof storedFullWidthMode === 'boolean') {
-      dispatch({ type: 'setFullWidthMode', fullWidthMode: storedFullWidthMode });
-    } else {
-      await localForage.setItem('ATO_full_width_mode', true);
+    dispatch({ type: 'setFontLigaturesEnabled', fontLigaturesEnabled: storedFontLigatures });
+    let storedFullWidthMode = await localForage.getItem('ATO_full_width_mode');
+    if (typeof storedFullWidthMode !== 'boolean') {
+      storedFullWidthMode = false;
     }
+    dispatch({ type: 'setFullWidthMode', fullWidthMode: storedFullWidthMode });
     dispatch({ type: 'setLanguagesMetadata', metadata: await API.getMetadata() });
   }) as (() => void), []);
   const systemThemePreference = useSystemThemePreference();
