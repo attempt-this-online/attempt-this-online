@@ -1,7 +1,6 @@
 import { ArrowLeftIcon } from '@heroicons/react/outline';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import useSystemThemePreference from 'lib/useSystemThemePreference';
@@ -11,15 +10,15 @@ export default function Preferences() {
   const router = useRouter();
   const dispatch = useDispatch();
   const systemThemePreference = useSystemThemePreference();
-  const theme = useSelector(state => state.theme);
+  const theme = useSelector((state: any) => state.theme);
   const handleThemeChange = async (event: any) => {
     dispatch({ type: 'setTheme', theme: event.target.value });
   };
-  const fontLigaturesEnabled = useSelector(state => state.fontLigaturesEnabled);
+  const fontLigaturesEnabled = useSelector((state: any) => state.fontLigaturesEnabled);
   const handleFontLigaturesChange = async (event: any) => {
     dispatch({ type: 'setFontLigaturesEnabled', fontLigaturesEnabled: event.target.checked });
   };
-  const fullWidthMode = useSelector(state => state.fullWidthMode);
+  const fullWidthMode = useSelector((state: any) => state.fullWidthMode);
   const handleFullWidthModeChange = async (event: any) => {
     dispatch({ type: 'setFullWidthMode', fullWidthMode: event.target.checked });
   };
