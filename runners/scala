@@ -1,6 +1,6 @@
 #!/bin/sh
 #:name: Scala
-#:image: attemptthisonline/scala
+#:image: hseeberger/scala-sbt:16.0.2_1.5.5_2.13.6
 #:version: 2.13.6
 #:url: https://www.scala-lang.org/
 #:sbcs: false
