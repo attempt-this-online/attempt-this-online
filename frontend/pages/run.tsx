@@ -307,9 +307,10 @@ function _Run(
       input,
       inputEncoding,
     });
-    navigator.clipboard.writeText(`# ${languages[language].name}, ${byteLength} ${pluralise('byte', byteLength)}
+    const languageName = languages[language].name;
+    navigator.clipboard.writeText(`# ${languageName}, ${byteLength} ${pluralise('byte', byteLength)}
 
-<pre><code>${escape(code)}</code></pre>
+<pre><code class="language-${languageName}">${escape(code)}</code></pre>
 
 [Attempt This Online!](https://ato.pxeger.com/run?${url})`);
   };
