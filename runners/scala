@@ -4,6 +4,7 @@
 #:version: 2
 #:url: https://www.scala-lang.org/
 #:sbcs: false
+#:SE_class: scala
 
 mkdir /ATO/tmp
 cd /ATO/context
