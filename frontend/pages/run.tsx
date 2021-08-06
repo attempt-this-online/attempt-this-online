@@ -306,7 +306,7 @@ function _Run(
       input,
       inputEncoding,
     });
-    let syntaxHighlightingClass: string?;
+    let syntaxHighlightingClass: string;
     if (languages[language].SE_class) {
       syntaxHighlightingClass = ` class="lang-${escape(languages[language].SE_class)}"`;
     } else {
