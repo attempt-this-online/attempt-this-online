@@ -293,7 +293,6 @@ function _Run(
       notify('Please select a language first!');
       return;
     }
-    notify('Copied to clipboard!');
     const url = save({
       language,
       options: optionsString,
@@ -307,11 +306,19 @@ function _Run(
       input,
       inputEncoding,
     });
+    let syntaxHighlightingClass: string?;
+    if (languages[language].SE_class) {
+      syntaxHighlightingClass = ` class="lang-${escape(languages[language].SE_class)}"`;
+    } else {
+      syntaxHighlightingClass = '';
+    }
     navigator.clipboard.writeText(`# ${languages[language].name}, ${byteLength} ${pluralise('byte', byteLength)}
 
-<pre><code>${escape(code)}</code></pre>
+<pre><code${syntaxHighlightingClass}>${escape(code)}</code></pre>
 
 [Attempt This Online!](https://ato.pxeger.com/run?${url})`);
+
+    notify('Copied to clipboard!');
   };
 
   const keyDownHandler = (e: any) => {

@@ -4,6 +4,7 @@
 #:version: 5.8
 #:url: https://www.zsh.org/
 #:sbcs: false
+#:SE_class: bash
 
 mkdir /ATO/tmp
 export TMPPREFIX=/ATO/tmp
