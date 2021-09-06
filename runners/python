@@ -1,8 +1,8 @@
 #!/bin/sh
 #:name: Python
-#:image: python:3-buster
+#:image: attemptthisonline/python
 #:version: Latest
-#:url: https://docs.python.org/3/
+#:url: https://www.python.org
 #:sbcs: false
 #:SE_class: python
 

@@ -1,7 +1,7 @@
 #!/bin/sh
 #:name: Jelly
-#:image: attemptthisonline/jelly:commit-70c9fd93
-#:version: 0.1.30
+#:image: attemptthisonline/jelly
+#:version: 70c9fd93
 #:url: https://github.com/DennisMitchell/jellylanguage
 #:sbcs: true
 
@@ -10,4 +10,4 @@ export TMPPREFIX=/ATO/tmp
 
 cd /ATO/context
 
-/ATO/yargs % /ATO/arguments /usr/local/bin/jelly fun /ATO/code % < /ATO/input
+/ATO/yargs % /ATO/arguments jelly fun /ATO/code % < /ATO/input

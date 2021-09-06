@@ -1,7 +1,7 @@
 #!/bin/sh
 #:name: Zsh
-#:image: attemptthisonline/zsh:5.8
-#:version: 5.8
+#:image: attemptthisonline/zsh
+#:version: 5
 #:url: https://www.zsh.org/
 #:sbcs: false
 #:SE_class: bash
@@ -11,4 +11,4 @@ export TMPPREFIX=/ATO/tmp
 
 cd /ATO/context
 
-/ATO/yargs %1 /ATO/options /ATO/yargs %2 /ATO/arguments /usr/local/bin/zsh %1 /ATO/code %2 < /ATO/input
+/ATO/yargs %1 /ATO/options /ATO/yargs %2 /ATO/arguments zsh %1 /ATO/code %2 < /ATO/input

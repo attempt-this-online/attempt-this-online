@@ -1,0 +1,10 @@
+#!/bin/sh
+#:name: Scala 2
+#:image: attemptthisonline/scala2
+#:version: 2
+#:url: https://www.scala-lang.org/
+#:sbcs: false
+
+mkdir /ATO/tmp
+cd /ATO/context
+/ATO/yargs %1 /ATO/options /ATO/yargs %2 /ATO/arguments scala -Djava.io.tmpdir=/ATO/tmp %1 /ATO/code %2 < /ATO/input
