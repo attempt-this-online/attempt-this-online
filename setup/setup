@@ -51,19 +51,17 @@ pacman -Syu --noconfirm --needed \
     sudo \
     zsh
 
-original_cwd="$(pwd)"
 # don't use /tmp because it has weird permissions
 mkdir -p /var/cache/ATO
-cd /var/cache/ATO
 
-if [ "$2" = --manual-package ]; then
-    cd "$original_cwd"
-    cp "$3" /var/cache/ATO
-    cd /var/cache/ATO
+if [ "$ATO_MANUAL_PACKAGE" ]; then
+    tar -xf "$ATO_MANUAL_PACKAGE" -C /var/cache/ATO
 else
-    curl "https://github.com/attempt-this-online/attempt-this-online/releases/download/$VERSION/attempt_this_online.tar.gz"
+    curl -sSL "https://github.com/attempt-this-online/attempt-this-online/releases/download/v$VERSION/attempt_this_online.tar.gz" \
+        | tar -xz -C /var/cache/ATO
 fi
-tar -xzf attempt_this_online.tar.gz # fun fact: you don't need the -v option to tar
+
+cd /var/cache/ATO
 
 # install libcgroup
 git clone https://aur.archlinux.org/libcgroup.git
@@ -226,7 +224,7 @@ echo Clearing up...
 
 docker image prune -af
 systemctl disable --now docker.service docker.socket
-cd "$original_cwd"
+cd /
 rm -rf /var/cache/ATO
 
 echo Starting up services...
