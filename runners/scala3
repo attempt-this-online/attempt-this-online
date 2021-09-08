@@ -1,0 +1,12 @@
+#!/bin/sh
+#:name: Scala 3
+#:image: attemptthisonline/scala3
+#:version: 3
+#:url: https://www.scala-lang.org/
+#:sbcs: false
+
+mkdir /ATO/tmp
+cd /ATO/context
+ln -s /ATO/code /ATO/code.scala
+export JAVA_OPTS=-Djava.io.tmpdir=/ATO/tmp
+/ATO/yargs %1 /ATO/options /ATO/yargs %2 /ATO/arguments scala %1 /ATO/code.scala %2 < /ATO/input
