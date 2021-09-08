@@ -1,0 +1,11 @@
+#!/bin/sh
+#:name: Java
+#:image: attemptthisonline/java
+#:version: Latest
+#:url: https://en.wikipedia.org/wiki/Java_(programming_language)
+#:sbcs: false
+#:SE_class: java
+
+cd /ATO/context
+ln -s /ATO/code /ATO/code.java
+/ATO/yargs %1 /ATO/options /ATO/yargs %2 /ATO/arguments java %1 /ATO/code.java %2 < /ATO/input
