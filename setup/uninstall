@@ -18,3 +18,6 @@ rm -rf \
     /etc/sudoers.d/40_ATO \
     /usr/local/lib/systemd/system/ATO.service \
     /usr/local/lib/systemd/system/ATO.socket
+systemctl start docker
+docker image prune -af
+systemctl stop docker

@@ -209,6 +209,7 @@ grep -Ex '[0-9a-f]+' |
         mkdir -p "/usr/local/lib/ATO/layers/$layer"
         tar -xf "/var/cache/ATO/images/$layer/layer.tar" -C \
             "/usr/local/lib/ATO/layers/$layer"
+        rm "/var/cache/ATO/images/$layer/layer.tar"
     done
 
 # shellcheck disable=SC2010
@@ -222,10 +223,8 @@ grep -Ex 'manifest_.+\.json' |
 echo Finished extracting images.
 echo Clearing up...
 
-docker image prune -af
 systemctl disable --now docker.service docker.socket
 cd /
-rm -rf /var/cache/ATO
 
 echo Starting up services...
 # mount all overlayfs
