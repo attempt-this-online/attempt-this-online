@@ -98,7 +98,11 @@ function load0(b64encoded: string): any {
 
 function load(query: any): any {
   const latestVersion = Object.keys(query).reduce((acc, key) => {
-    const value = parseInt(key, 10) ?? -1;
+    const value = parseInt(key, 10);
+    if (isNaN(value) || value.toString() !== key) {
+      // invalid integer
+      return acc;
+    }
     if (value < 0) {
       console.warn('invalid integer key in URL', key);
       return acc;
