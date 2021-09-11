@@ -20,6 +20,15 @@ interface RunAPIResponse {
   output_ops: number;
 }
 
+interface MetadataItem {
+  name: string;
+  image: string;
+  version: string;
+  SE_class: string;
+  sbcs: string;
+  url: string;
+}
+
 async function run({
   language,
   input,
@@ -57,8 +66,8 @@ async function getMetadata() {
   if (!response.ok || !response.body) {
     throw new Error(await response.text());
   }
-  return await msgpack.decodeAsync(response.body) as Record<string, string>[];
+  return await msgpack.decodeAsync(response.body) as Record<string, MetadataItem>;
 }
 
 export { BASE_URL, run, getMetadata };
-export type { RunAPIResponse };
+export type { RunAPIResponse, MetadataItem };
