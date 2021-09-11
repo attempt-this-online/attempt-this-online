@@ -1,12 +1,17 @@
 import { SearchIcon, XIcon } from '@heroicons/react/solid';
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 
-export default function LanguageSelector({ languages, setLanguage, language, setLanguageSelectorOpen }) {
+export default function LanguageSelector({ languages, setLanguage, language, setLanguageSelectorOpen }: {
+    languages: Record<string, any>,
+    setLanguage: (language: string) => void,
+    language: string | null,
+    setLanguageSelectorOpen: (state: boolean) => void 
+}) {
   const [search, setSearch] = useState('');
   const onSearchChange = (event: any) => {
     setSearch(event.target.value);
   };
-  const searchFilter = value => value.toLowerCase().includes(search.toLowerCase());
+  const searchFilter = (value: string) => value.toLowerCase().includes(search.toLowerCase());
   const results = languages ? Object.entries(languages).filter(([_, {name}]) => searchFilter(name)) : null;
   return (
     <div

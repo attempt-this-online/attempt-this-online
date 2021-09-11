@@ -155,7 +155,7 @@ function _Run(
 
     try {
       data = await API.run({
-        language,
+        language: language!,
         input: inputBytes,
         code: combined,
         options: options!,
