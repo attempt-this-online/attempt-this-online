@@ -20,6 +20,8 @@ import { ENCODERS, DECODERS } from 'lib/encoding';
 
 const NEWLINE = '\n'.charCodeAt(0);
 
+const EMPTY_BUFFER = new Uint8Array([]);
+
 const SIGNALS: Record<number, string> = {
   1: 'SIGHUP',
   2: 'SIGINT',
@@ -87,9 +89,9 @@ function _Run(
   const [footerEncoding, setFooterEncoding] = useState('utf-8');
   const [input, setInput] = useState('');
   const [inputEncoding, setInputEncoding] = useState('utf-8');
-  const [stdout, setStdout] = useState('');
+  const [stdout, setStdout] = useState(EMPTY_BUFFER);
   const [stdoutEncoding, setStdoutEncoding] = useState('utf-8');
-  const [stderr, setStderr] = useState('');
+  const [stderr, setStderr] = useState(EMPTY_BUFFER);
   const [stderrEncoding, setStderrEncoding] = useState('utf-8');
 
   const [statusType, setStatusType] = useState<'exited' | 'killed' | 'core_dumped' | 'unknown' | null>(null);
@@ -167,8 +169,8 @@ function _Run(
       return;
     }
 
-    setStdout(DECODERS[stdoutEncoding](data.stdout));
-    setStderr(DECODERS[stderrEncoding](data.stderr));
+    setStdout(data.stdout);
+    setStderr(data.stderr);
 
     setStatusType(data.status_type);
     setStatusValue(data.status_value);
@@ -194,6 +196,9 @@ function _Run(
 
     setSubmitting(false);
   };
+
+  const encodedStdout = useMemo(() => DECODERS[stdoutEncoding](stdout), [stdout, stdoutEncoding]);
+  const encodedStderr = useMemo(() => DECODERS[stderrEncoding](stderr), [stderr, stderrEncoding]);
 
   const [shouldLoad, setShouldLoad] = useState(true);
   useEffect(() => {
@@ -473,8 +478,8 @@ function _Run(
               </div>
             </form>
             <CollapsibleText
-              value={stdout}
-              onChange={e => setStdout(e.target.value)}
+              value={encodedStdout}
+              onChange={e => void e}
               encoding={stdoutEncoding}
               onEncodingChange={e => setStdoutEncoding(e.target.value)}
               id="stdout"
@@ -486,8 +491,8 @@ function _Run(
               output
             </CollapsibleText>
             <CollapsibleText
-              value={stderr}
-              onChange={e => setStderr(e.target.value)}
+              value={encodedStderr}
+              onChange={e => void e}
               encoding={stderrEncoding}
               onEncodingChange={e => setStderrEncoding(e.target.value)}
               id="stderr"
