@@ -87,7 +87,7 @@ function _Run(
 ) {
   const router = useRouter();
 
-  const [language, setLanguage] = useState('python');
+  const [language, setLanguage] = useState<string | null>(null);
   const [header, setHeader] = useState('');
   const [headerEncoding, setHeaderEncoding] = useState('utf-8');
   const [code, setCode] = useState('');
@@ -128,6 +128,9 @@ function _Run(
   useEffect(() => {
     if (!languages) {
       // not loaded yet
+      return;
+    } else if (!language) {
+      // not chosen yet
       return;
     }
     // only set encoding if not already set
@@ -263,6 +266,9 @@ function _Run(
     () => {
       if (!router.isReady) {
         return;
+      } else if (!language) {
+        // not chosen
+        return;
       }
       updateURL.current(router, {
         language,
@@ -364,7 +370,7 @@ function _Run(
                       Language: 
                       {' '}
                     </span>
-                    {languages && <a className="mx-2 text-blue-500 underline" href={languages[language].url}>{languages[language].name}</a>}
+                    {languages && language && <a className="mx-2 text-blue-500 underline" href={languages[language].url}>{languages[language].name}</a>}
                   </span>
                   <button
                     type="button"
