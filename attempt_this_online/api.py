@@ -19,7 +19,7 @@ from starlette.routing import Route
 from attempt_this_online import metadata
 
 # Change to True if running behind a trusted reverse proxy
-TRUST_PROXY_HEADER = True
+TRUST_PROXY_HEADER = False
 
 IP_ADDRESS_SALT = token_bytes()
 MAX_REQUEST_SIZE = 2 ** 16
