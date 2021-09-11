@@ -9,6 +9,7 @@ import { escape, throttle } from 'lodash';
 
 import CollapsibleText from 'components/collapsibleText';
 import ResizeableText from 'components/resizeableText';
+import LanguageSelector from 'components/languageSelector';
 import Footer from 'components/footer';
 import Navbar from 'components/navbar';
 import Notification from 'components/notification';
@@ -105,6 +106,8 @@ function _Run(
   const [statusValue, setStatusValue] = useState<number | null>(null);
   const [timing, setTiming] = useState('');
   const [timingOpen, setTimingOpen] = useState(false);
+
+  const [languageSelectorOpen, setLanguageSelectorOpen] = useState(false);
 
   const [[optionsString, options], setOptions] = useState<[string, string[] | null]>(['', []]);
   const [[argsString, programArguments], setProgramArguments] = useState<[string, string[] | null]>(['', []]);
@@ -205,7 +208,10 @@ function _Run(
       return;
     }
     const loadedData = load(router.query);
-    if (loadedData !== null) {
+    if (loadedData === null) {
+      // TODO: if loaded data is invalid rather than simply not present, don't open the selector?
+      setLanguageSelectorOpen(true);
+    } else {
       setLanguage(loadedData.language);
       setOptions([loadedData.options, parseList(loadedData.options)]);
       setHeader(loadedData.header);
@@ -334,6 +340,7 @@ function _Run(
       <div className="min-h-screen bg-white dark:bg-gray-900 text-black dark:text-white relative flex flex-col">
         <Navbar />
         <div className="flex-grow relative">
+          {languageSelectorOpen ? <LanguageSelector {...{language, languages, setLanguage, setLanguageSelectorOpen}} /> : null}
           <div className="sticky h-0 top-4 z-20 pointer-events-none">
             {notifications.map(
               notification => (
@@ -350,21 +357,24 @@ function _Run(
             className={`mb-3 px-4 -mt-4${fullWidthMode ? '' : ' md:container md:mx-auto'}`}
           >
             <form onSubmit={submit}>
-              <div className="lg:flex flex-wrap lg:flex-nowrap items-center mt-4 pb-1">
-                <div className="flex sm:block lg:flex-grow">
-                  <label className="my-auto" htmlFor="languageSelector">Language:</label>
-                  <select
-                    id="languageSelector"
-                    className="appearance-none ml-2 p-2 flex-grow sm:w-80 rounded bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 transition cursor-pointer ATO_select focus:outline-none focus:ring"
-                    value={language || ''}
-                    onChange={e => setLanguage(e.target.value)}
+              <div className="flex flex-wrap justify-between mt-4 pb-1 gap-y-2">
+                <div className="mr-4 my-auto" style={{ flexGrow: 99999 }}>
+                  <span className="my-auto">
+                    <span>
+                      Language: 
+                      {' '}
+                    </span>
+                    {languages && <a className="mx-2 text-blue-500 underline" href={languages[language].url}>{languages[language].name}</a>}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => { setLanguageSelectorOpen(true); }}
+                    className="ml-1 rounded px-2 py-1 bg-gray-200 dark:bg-gray-700 focus:outline-none focus:ring"
                   >
-                    {Object.keys(languages ?? {}).map(l => (
-                      <option value={l} key={l}>{languages[l].name}</option>
-                    ))}
-                  </select>
+                    Change
+                  </button>
                 </div>
-                <div className="mt-3 lg:mt-0 flex justify-between">
+                <div className="flex flex-grow justify-between">
                   <code className="my-auto mr-4 font-mono bg-gray-200 dark:bg-gray-800 px-2 py-px rounded">
                     {code.length}
                     {' '}
