@@ -416,7 +416,7 @@ function _Run(
               <CollapsibleText
                 value={code}
                 onChange={e => setCode(e.target.value)}
-                encoding={codeEncoding!}
+                encoding={codeEncoding ?? 'utf-8'}
                 onEncodingChange={e => setCodeEncoding(e.target.value)}
                 id="code"
                 onKeyDown={keyDownHandler}
