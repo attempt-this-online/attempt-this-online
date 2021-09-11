@@ -115,14 +115,19 @@ function load(query: any): any {
     }
     return acc;
   }, -1);
-  switch (latestVersion) {
-    case 0:
-      return load0(query[0]);
-    case 1:
-      return load1(query[1]);
-    default:
-      console.warn('missing or invalid save key in URL');
-      return null;
+  try {
+    switch (latestVersion) {
+      case 0:
+        return load0(query[0]);
+      case 1:
+        return load1(query[1]);
+      default:
+        console.warn('missing or invalid save key in URL');
+        return null;
+    }
+  } catch (e) {
+    console.error(e);
+    return null;
   }
 }
 
