@@ -10,7 +10,6 @@ import msgpack
 from pydantic import BaseModel, conint, validator, ValidationError
 from starlette.applications import Starlette
 from starlette.concurrency import run_in_threadpool
-from starlette.exceptions import HTTPException
 from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
@@ -41,6 +40,13 @@ class Invocation(BaseModel):
         else:
             return value
 
+    @validator("arguments", "options", each_item=True)
+    def validate_args(cls, arg: bytes):
+        if 0 in arg:
+            raise ValueError("null bytes not allowed")
+        else:
+            return value
+
 
 def execute_once(ip_hash: str, invocation_id: str, invocation: Invocation) -> dict:
     try:
@@ -51,9 +57,6 @@ def execute_once(ip_hash: str, invocation_id: str, invocation: Invocation) -> di
             f.write(invocation.code)
         with (dir_i / "input").open("wb") as f:
             f.write(invocation.input)
-
-        if any(b"\0" in arg for arg in invocation.arguments) or any(b"\0" in opt for opt in invocation.options):
-            raise HTTPException("arguments and options cannot contain null bytes", 400)
 
         with (dir_i / "arguments").open("wb") as f:
             f.write(b"".join(arg + b"\0" for arg in invocation.arguments))
