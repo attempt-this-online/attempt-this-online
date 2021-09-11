@@ -7,7 +7,7 @@ export default function LanguageSelector({ languages, setLanguage, language, set
     setSearch(event.target.value);
   };
   const searchFilter = value => value.toLowerCase().includes(search.toLowerCase());
-  const results = languages ? Object.entries(languages).filter(([_, {name}]) => searchFilter(name)) : [];
+  const results = languages ? Object.entries(languages).filter(([_, {name}]) => searchFilter(name)) : null;
   return (
     <div
       id="foo"
@@ -39,7 +39,7 @@ export default function LanguageSelector({ languages, setLanguage, language, set
           <SearchIcon className="opacity-50 mr-2 my-auto h-6 w-6 inline-block" />
         </label>
         <div className="flex-grow overflow-y-auto mt-4 mb-2 mx-2 bg-gray-200 dark:bg-gray-800 rounded p-2" role="list">
-          {results.length > 0 ? results
+          {results && results.length > 0 ? results
             .sort(([_, {name: a}], [_2, {name: b}]) => a < b ? -1 : a > b ? 1 : 0)
             .map(([id, {name}]) => (
               <div
@@ -52,7 +52,7 @@ export default function LanguageSelector({ languages, setLanguage, language, set
                 {id === language ? <span className="bg-gray-300 dark:bg-gray-700 -mx-2 -my-1 py-1 px-2 rounded">Selected</span> : null}
               </div>
             )
-            ) : <p className="p-2 text-center">No results</p>}
+            ) : <p className="p-2 text-center">{results === null ? 'Loading...' : 'No results'}</p>}
         </div>
       </div>
     </div>
