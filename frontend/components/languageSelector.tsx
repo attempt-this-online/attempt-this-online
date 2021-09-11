@@ -1,8 +1,9 @@
 import { SearchIcon, XIcon } from '@heroicons/react/solid';
 import { useState } from 'react';
+import { MetadataItem } from 'lib/api';
 
 export default function LanguageSelector({ languages, setLanguage, language, setLanguageSelectorOpen }: {
-    languages: Record<string, any>,
+    languages: Record<string, MetadataItem>,
     setLanguage: (language: string) => void,
     language: string | null,
     setLanguageSelectorOpen: (state: boolean) => void 

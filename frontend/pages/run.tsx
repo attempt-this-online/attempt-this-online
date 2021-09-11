@@ -73,7 +73,7 @@ const pluralise = (string: string, n: number) => (n === 1 ? string : `${string}s
 
 function _Run(
   { languages, fullWidthMode }: {
-    languages: Record<string, Record<string, any>>,
+    languages: Record<string, API.MetadataItem>,
     fullWidthMode: boolean
   },
 ) {
