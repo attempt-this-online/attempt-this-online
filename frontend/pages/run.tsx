@@ -16,17 +16,7 @@ import Notification from 'components/notification';
 import { ArgvList, parseList } from 'components/argvList';
 import * as API from 'lib/api';
 import { save, load } from 'lib/urls';
-
-const ENCODERS: Record<string, ((s: string) => Uint8Array)> = {
-  'utf-8': s => new TextEncoder().encode(s),
-  // sbcs is still just UTF-8, but with different byte counting (switching to a different code page,
-  // if necessary, is done on the backend)
-  sbcs: s => new TextEncoder().encode(s),
-};
-
-const DECODERS: Record<string, ((b: Uint8Array) => string)> = {
-  'utf-8': b => new TextDecoder().decode(b),
-};
+import { ENCODERS, DECODERS } from 'lib/encoding';
 
 const NEWLINE = '\n'.charCodeAt(0);
 
