@@ -328,8 +328,10 @@ function _Run(
     notify('Copied to clipboard!');
   };
 
+  const readyToSubmit = !submitting && language && codeEncoding && options !== null && programArguments !== null;
+
   const keyDownHandler = (e: any) => {
-    if (!submitting && language && options !== null && programArguments !== null && e.ctrlKey && !e.shiftKey && !e.metaKey && !e.altKey && e.key === 'Enter') {
+    if (readyToSubmit && e.ctrlKey && !e.shiftKey && !e.metaKey && !e.altKey && e.key === 'Enter') {
       submit(e);
     }
   };
@@ -459,7 +461,7 @@ function _Run(
                   type="submit"
                   className="rounded px-4 py-2 bg-blue-500 text-white flex focus:outline-none focus:ring disabled:cursor-not-allowed"
                   onKeyDown={keyDownHandler}
-                  disabled={submitting || !language || options === null || programArguments === null}
+                  disabled={!readyToSubmit}
                 >
                   <span>Execute</span>
                   {submitting && (
