@@ -45,7 +45,7 @@ class Invocation(BaseModel):
         if 0 in arg:
             raise ValueError("null bytes not allowed")
         else:
-            return value
+            return arg
 
 
 def execute_once(ip_hash: str, invocation_id: str, invocation: Invocation) -> dict:
