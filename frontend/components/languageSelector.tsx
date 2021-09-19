@@ -16,8 +16,8 @@ export default function LanguageSelector({ languages, setLanguage, language, set
   const results = languages ? Object.entries(languages).filter(([_, {name}]) => searchFilter(name)) : null;
   return (
     <div
-      id="foo"
       className="fixed flex items-center justify-center overflow-auto z-50 bg-black bg-opacity-40 left-0 right-0 top-0 bottom-0"
+      onClick={(event: any) => { event.target === event.currentTarget && setLanguageSelectorOpen(false); }}
     >
       <div
         className="bg-gray-100 dark:bg-gray-900 rounded shadow-2xl w-full sm:w-10/12 mx-5 sm:mx-10 h-3/5 p-4 flex flex-col"
@@ -27,7 +27,7 @@ export default function LanguageSelector({ languages, setLanguage, language, set
           <h3 className="text-xl font-bold text-center">Select language</h3>
           <button
             onClick={() => { setLanguageSelectorOpen(false); }}
-            className="absolute right-0 top-0 bottom-0 rounded-full bg-transparent hover:bg-gray-200 dark:hover:bg-gray-800 flex"
+            className="absolute right-0 top-0 bottom-0 rounded-full bg-transparent hover:bg-gray-200 dark:hover:bg-gray-800 transition flex"
           >
             <XIcon className="h-5 w-5 inline-block mx-1 my-auto" />
           </button>
@@ -50,7 +50,7 @@ export default function LanguageSelector({ languages, setLanguage, language, set
             .map(([id, {name}]) => (
               <div
                 key={id}
-                className="p-2 rounded flex cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700"
+                className="p-2 rounded flex cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700 transition"
                 onClick={() => { setLanguage(id); setLanguageSelectorOpen(false); }}
                 role="listitem"
               >
