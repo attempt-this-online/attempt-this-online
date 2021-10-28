@@ -14,11 +14,22 @@ npm run build
 cd ..
 
 echo Compiling binaries... >&2
+cd backend
+go build
+cd ..
 gcc -Wall -Werror wrapper.c -static -lrt -lpthread -o dist/attempt_this_online/wrapper
 gcc -Wall -Werror -static yargs.c -o dist/attempt_this_online/yargs
 
 echo Building tarball... >&2
 cp -R frontend/out dist/attempt_this_online/public
-cp -R pyproject.toml poetry.lock attempt_this_online setup sandbox runners dist/attempt_this_online/
+cp -R \
+    pyproject.toml \
+    poetry.lock \
+    attempt_this_online \
+    setup \
+    sandbox \
+    runners \
+    backend/attempt-this-online \
+    dist/attempt_this_online/
 cd dist
 tar -czf attempt_this_online.tar.gz attempt_this_online
