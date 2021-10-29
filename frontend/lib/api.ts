@@ -1,6 +1,6 @@
 import * as msgpack from '@msgpack/msgpack';
 
-const BASE_URL = 'https://ato.pxeger.com';
+const BASE_URL = process.env.NEXT_PUBLIC_ATO_BASE_URL || '';
 
 interface RunAPIResponse {
   stdout: Uint8Array;

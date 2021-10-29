@@ -9,3 +9,11 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+For development, create a `.env.local` file in this directory, and set the URL to the API. For basic testing, you can
+just use the production ATO instance.
+
+```
+# .env.local
+NEXT_PUBLIC_ATO_BASE_URL="https://ato.pxeger.com"
+```
