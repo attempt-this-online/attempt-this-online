@@ -215,7 +215,10 @@ function _Run(
       setHeader(loadedData.header);
       setHeaderEncoding(loadedData.headerEncoding);
       setCode(loadedData.code);
-      setCodeEncoding(loadedData.codeEncoding);
+      if (loadedData.codeEncoding !== null) {
+        // avoid overwriting codeEncoding while it is half way through being set automatically
+        setCodeEncoding(loadedData.codeEncoding);
+      }
       setFooter(loadedData.footer);
       setFooterEncoding(loadedData.footerEncoding);
       setProgramArguments([loadedData.programArguments, parseList(loadedData.programArguments)]);
