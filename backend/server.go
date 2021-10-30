@@ -151,11 +151,17 @@ func getHashedIp(req *http.Request) string {
 	return hex.EncodeToString(hashed[:])
 }
 
+func getMetadata(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(200)
+	w.Write(serialisedLanguages)
+}
+
 var addr = flag.String("addr", "127.0.0.1:4568", "http service address")
 
 func main() {
 	flag.Parse()
 	http.HandleFunc("/api/v0/ws/execute", handleWs)
+	http.HandleFunc("/api/v0/metadata", getMetadata)
 	go log.Println("listening on", *addr)
 	err := http.ListenAndServe(*addr, nil)
 	// in an ideal case, ListenAndServe would run forever and never terminate
