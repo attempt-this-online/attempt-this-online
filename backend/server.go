@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"flag"
 	"hash"
+	"io"
 	"log"
 	"net"
 	"net/http"
@@ -22,23 +23,25 @@ var upgrader = websocket.Upgrader{
 }
 
 func closeConnection(conn *websocket.Conn, code int, message string) {
-    // ignore all errors
+	// ignore all errors
 	conn.WriteControl(
 		websocket.CloseMessage,
 		websocket.FormatCloseMessage(code, message),
-		time.Now().Add(1 * time.Second),  // timeout
+		time.Now().Add(1*time.Second), // timeout
 	)
-    conn.Close()
+	conn.Close()
 }
 
 func checkArgs(args [][]byte, conn *websocket.Conn) {
 	for _, arg := range args {
 		if bytes.IndexByte(arg, 0) != -1 {
-            log.Println("argument contains null byte")
+			log.Println("argument contains null byte")
 			closeConnection(conn, websocket.ClosePolicyViolation, "argument contains null byte")
 		}
 	}
 }
+
+const maxRequestBytes int64 = 1 << 16
 
 func handleWs(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
@@ -47,7 +50,7 @@ func handleWs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var invocation invocation
-	msgtype, b, err := conn.ReadMessage()
+	msgtype, reader, err := conn.NextReader()
 	if msgtype != websocket.BinaryMessage {
 		log.Println("unexpected message type:", msgtype)
 		closeConnection(conn, websocket.CloseUnsupportedData, "unexpected message type")
@@ -58,16 +61,28 @@ func handleWs(w http.ResponseWriter, r *http.Request) {
 			// ignore error
 			return
 		}
-		log.Println(err)
+		log.Println("error while getting reader:", err)
 		closeConnection(conn, websocket.CloseInternalServerErr, "internal error")
 		return
 	}
-
-	if err = msgpack.Unmarshal(b, /* write to */ &invocation); err != nil {
-		log.Println(err)
-        closeConnection(conn, websocket.ClosePolicyViolation, "bad request: " + err.Error())
+	limitedReader := io.LimitReader(reader, maxRequestBytes)
+	b, err := io.ReadAll(limitedReader)
+	if err != nil {
+		log.Println("error while reading:", err)
+		closeConnection(conn, websocket.CloseInternalServerErr, "internal error")
 		return
-    }
+	}
+	if limitedReader.(*io.LimitedReader).N <= 0 {
+		log.Println("request too large")
+		closeConnection(conn, websocket.CloseMessageTooBig, "request too large")
+		return
+	}
+
+	if err = msgpack.Unmarshal(b /* write to */, &invocation); err != nil {
+		log.Println("error while unmarshalling:", err)
+		closeConnection(conn, websocket.ClosePolicyViolation, "bad request: "+err.Error())
+		return
+	}
 
 	checkArgs(invocation.Arguments, conn)
 	checkArgs(invocation.Options, conn)
@@ -78,33 +93,33 @@ func handleWs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-    if invocation.Timeout <= 0 || invocation.Timeout > 60 {
-        log.Println("unacceptable timeout", invocation.Timeout)
-        closeConnection(conn, websocket.ClosePolicyViolation, "timeout not in range (0, 60]")
-        return
-    }
+	if invocation.Timeout <= 0 || invocation.Timeout > 60 {
+		log.Println("unacceptable timeout:", invocation.Timeout)
+		closeConnection(conn, websocket.ClosePolicyViolation, "timeout not in range (0, 60]")
+		return
+	}
 
 	ipHash := getHashedIp(r)
-    if result, err := invocation.invoke(ipHash); err != nil {
-		log.Println(err)
-        closeConnection(conn, websocket.CloseInternalServerErr, "internal error")
+	if result, err := invocation.invoke(ipHash); err != nil {
+		log.Println("invocation error:", err)
+		closeConnection(conn, websocket.CloseInternalServerErr, "internal error")
 	} else {
-        marshalled, err := msgpack.Marshal(result)
-        if err != nil {
-            // result should always be valid
-            panic(err)
-        }
-        conn.WriteMessage(websocket.BinaryMessage, marshalled)
-        log.Println("successful invocation!")
-        closeConnection(conn, websocket.CloseNormalClosure, "success")
-    }
+		marshalled, err := msgpack.Marshal(result)
+		if err != nil {
+			// result should always be valid
+			panic(err)
+		}
+		conn.WriteMessage(websocket.BinaryMessage, marshalled)
+		log.Println("successful invocation!")
+		closeConnection(conn, websocket.CloseNormalClosure, "success")
+	}
 }
 
 const ipSaltSize = 32
 
 func initIpSalt() hash.Hash {
 	ipSalt := make([]byte, ipSaltSize)
-	if _, err := rand.Read(/* write random data to */ ipSalt); err != nil {
+	if _, err := rand.Read( /* write random data to */ ipSalt); err != nil {
 		log.Panic("random generation failed", err)
 	}
 	ipHash_ := sha256.New()

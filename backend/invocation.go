@@ -47,20 +47,20 @@ func generateInvocationId() (string, string) {
 }
 
 func nullTerminate(args [][]byte) []byte {
-    var buf bytes.Buffer
-    for _, arg := range args {
-        buf.Write(arg)
-        buf.WriteByte(0)
-    }
-    return buf.Bytes()
+	var buf bytes.Buffer
+	for _, arg := range args {
+		buf.Write(arg)
+		buf.WriteByte(0)
+	}
+	return buf.Bytes()
 }
 
 type result struct {
-    Stdout          []byte `json:"-" msgpack:"stdout"`
-    Stderr          []byte `json:"-" msgpack:"stderr"`
-    StatusType      string `json:"status_type" msgpack:"status_type"`
-    StatusValue     int    `json:"status_value" msgpack:"status_value"`
-    TimedOut        string `json:"timed_out" msgpack:"timed_out"`
+	Stdout          []byte `json:"-" msgpack:"stdout"`
+	Stderr          []byte `json:"-" msgpack:"stderr"`
+	StatusType      string `json:"status_type" msgpack:"status_type"`
+	StatusValue     int    `json:"status_value" msgpack:"status_value"`
+	TimedOut        string `json:"timed_out" msgpack:"timed_out"`
 	Real            int64  `json:"real" msgpack:"real"`
 	Kernel          int64  `json:"kernel" msgpack:"kernel"`
 	User            int64  `json:"user" msgpack:"user"`
