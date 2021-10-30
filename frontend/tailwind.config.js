@@ -21,6 +21,8 @@ module.exports = {
     extend: {
       outline: ['dark'],
       cursor: ['disabled'],
+      backgroundColor: ['disabled'],
+      textColor: ['disabled'],
     },
   },
   plugins: [],
