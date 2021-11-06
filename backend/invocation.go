@@ -118,7 +118,7 @@ func (invocation invocation) invoke(ipHash string) (*result, error) {
 		return nil, err
 	}
 
-	if stderr, err := os.ReadFile(path.Join(dirO, "stdout")); err == nil {
+	if stderr, err := os.ReadFile(path.Join(dirO, "stderr")); err == nil {
 		result.Stderr = stderr
 	} else {
 		return nil, err
