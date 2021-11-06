@@ -32,7 +32,6 @@ whoami | grep -xFq root || error you must run this script as root
 # - nginx: web server
 # - nginx-mod-modsecurity: web application firewall
 # - python: runtime for API
-# - python-pip: package manager for Python
 # - sed: configuration editing on installation
 # - sudo: privilege management for sandboxing
 # - zsh: for running the runner scripts
@@ -46,7 +45,6 @@ pacman -Syu --noconfirm --needed \
     nginx \
     nginx-mod-modsecurity \
     python \
-    python-pip \
     sed \
     sudo \
     zsh
@@ -82,6 +80,10 @@ mkdir -p \
 useradd -rs /usr/bin/nologin -md /var/lib/ATO_home/sandbox sandbox
 useradd -rs /usr/bin/nologin -md /var/lib/ATO_home/api api
 
+# install backend
+install -dm 500 -o api -g api /usr/local/lib/ATO/backend
+install -m 500 -o api -g api attempt-this-online /usr/local/lib/ATO/backend/
+
 # install runners
 cp -RT runners /usr/local/share/ATO/runners
 chown -R sandbox:sandbox /usr/local/share/ATO/runners
@@ -95,23 +97,6 @@ install -m 500 -o sandbox -g sandbox sandbox /usr/local/bin/ATO_sandbox
 install -m 500 -o sandbox -g sandbox wrapper /usr/local/bin/ATO_wrapper
 install -m 500 -o sandbox -g sandbox setup/rm /usr/local/bin/ATO_rm
 install -m 440 -o root -g root setup/sudo.conf /etc/sudoers.d/40_ATO
-
-# install API
-sed -i 's/TRUST_PROXY_HEADER = False/TRUST_PROXY_HEADER = True/' attempt_this_online/api.py
-mkdir -p /usr/local/share/ATO/api
-cp -R pyproject.toml poetry.lock attempt_this_online /usr/local/share/ATO/api/
-chown -R api:api /usr/local/share/ATO/api
-chmod -R o+rX-w /usr/local/share/ATO/api
-# Poetry needs write access
-chmod u+w /usr/local/share/ATO/api/pyproject.toml /usr/local/share/ATO/api/poetry.lock
-
-# setup Python environment
-cd /usr/local/share/ATO/api
-python -m pip install poetry
-sudo -u api python -m poetry install --no-dev
-# reset permissions
-chmod u-w /usr/local/share/ATO/api/pyproject.toml /usr/local/share/ATO/api/poetry.lock
-cd /var/cache/ATO/attempt_this_online
 
 # install static files
 cp -RT public /usr/local/share/ATO/public
@@ -138,6 +123,7 @@ systemctl enable nginx.service
 install -dm 750 -o root -g http /var/www/_letsencrypt
 # we can't start nginx because the certificate isn't there, but we can't obtain a certificate if nginx isn't running
 # so start a temporary Python web server
+# TODO(pxeger): work around for letsencrypt issues without needing a temp Python server (certbot standalone mode?)
 python -m http.server --directory /var/www/_letsencrypt 80 & PYSERVERPID="$!"
 # TODO get option for email
 certbot certonly -n --webroot -w /var/www/_letsencrypt -d "$1" -d "www.$1" --agree-tos --register-unsafely-without-email
