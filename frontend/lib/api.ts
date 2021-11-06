@@ -79,7 +79,7 @@ async function runWs({
 }) {
   // wrap the whole thing in a promise so it can Reject from the right point in the call stack
   return await new Promise<RunAPIResponse>(async (finalResolve, finalReject) => {
-    const url = new URL(`${BASE_URL}/api/v0/ws/execute`);
+    const url = new URL(`${BASE_URL}/api/v0/ws/execute`, document.baseURI);
     if (url.protocol === 'http:') {
       url.protocol = 'ws:';
     } else if (url.protocol === 'https:') {
