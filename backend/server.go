@@ -14,12 +14,14 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/rs/cors"
 	"github.com/vmihailenco/msgpack/v5"
 )
 
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
+	CheckOrigin:     func(_ *http.Request) bool { return true },
 }
 
 func closeConnection(conn *websocket.Conn, code int, message string) {
@@ -160,10 +162,14 @@ var addr = flag.String("addr", "127.0.0.1:4568", "http service address")
 
 func main() {
 	flag.Parse()
-	http.HandleFunc("/api/v0/ws/execute", handleWs)
-	http.HandleFunc("/api/v0/metadata", getMetadata)
+	mux := http.NewServeMux()
+	mux.HandleFunc("/api/v0/ws/execute", handleWs)
+	mux.HandleFunc("/api/v0/metadata", getMetadata)
+	handler := cors.New(cors.Options{
+		AllowedOrigins: []string{"*"},
+	}).Handler(mux)
 	go log.Println("listening on", *addr)
-	err := http.ListenAndServe(*addr, nil)
+	err := http.ListenAndServe(*addr, handler)
 	// in an ideal case, ListenAndServe would run forever and never terminate
 	// if it returns, something must have gone wrong
 	log.Fatal(err)
