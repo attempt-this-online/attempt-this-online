@@ -80,7 +80,14 @@ func (invocation invocation) invoke(ipHash string) (*result, error) {
 		log.Println(err)
 		return nil, err
 	}
-	defer os.RemoveAll(dirI)
+
+	defer func() {
+		err := os.RemoveAll(dirI)
+		if err != nil {
+			// can't really do anything about it other than log
+			log.Println("error removing input dir:", err)
+		}
+	}()
 
 	if err := write(dirI, "code", invocation.Code); err != nil {
 		return nil, err
@@ -106,7 +113,13 @@ func (invocation invocation) invoke(ipHash string) (*result, error) {
 	}
 
 	dirO := path.Join("/run/ATO_o", hashedInvocationId)
-	defer os.RemoveAll(dirO) // TODO
+	defer func() {
+		err := os.RemoveAll(dirO)
+		if err != nil {
+			// can't really do anything about it other than log
+			log.Println("error removing output dir:", err)
+		}
+	}()
 
 	var result result
 
