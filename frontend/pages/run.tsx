@@ -155,7 +155,7 @@ function _Run(
     let data;
 
     try {
-      data = await API.run({
+      data = await API.runWs({
         language: language!,
         input: inputBytes,
         code: combined,

@@ -1,6 +1,7 @@
 import * as msgpack from '@msgpack/msgpack';
 
 const BASE_URL = process.env.NEXT_PUBLIC_ATO_BASE_URL || '';
+const CLOSE_NORMAL = 1000;
 
 interface RunAPIResponse {
   stdout: Uint8Array;
@@ -61,6 +62,65 @@ async function run({
   return await msgpack.decodeAsync(response.body) as RunAPIResponse;
 }
 
+async function runWs({
+  language,
+  input,
+  code,
+  options,
+  programArguments,
+  timeout,
+}: {
+  language: string,
+  input: Uint8Array,
+  code: Uint8Array,
+  options: string[],
+  programArguments: string[],
+  timeout: number,
+}) {
+  // wrap the whole thing in a promise so it can Reject from the right point in the call stack
+  return await new Promise<RunAPIResponse>(async (finalResolve, finalReject) => {
+    const url = new URL(`${BASE_URL}/api/v0/ws/execute`);
+    if (url.protocol === 'http:') {
+      url.protocol = 'ws:';
+    } else if (url.protocol === 'https:') {
+      url.protocol = 'wss:';
+    } else {
+      throw new Error(`invalid URL protocol: ${url}`);
+    }
+    const ws = new WebSocket(url);
+    // setup error handling
+    ws.onerror = e => { finalReject(e); };
+    ws.onclose = e => {
+      if (e.code !== CLOSE_NORMAL) {
+        const e2 = new Error(`websocket connection unexpectedly closed with code ${e.code}`);
+        finalReject(e2);
+        throw e2;
+      }
+    };
+    // wait for connection
+    await new Promise(resolve => {
+      ws.onopen = () => resolve(ws);
+    });
+
+    ws.send(msgpack.encode({
+        language,
+        code,
+        input,
+        options,
+        arguments: programArguments,
+        timeout,
+    }));
+
+    const message = await new Promise<MessageEvent>(resolve => {
+      ws.onmessage = event => {
+        ws.close(CLOSE_NORMAL);
+        resolve(event);
+      };
+    });
+    finalResolve(await msgpack.decodeAsync(message.data.stream()) as RunAPIResponse);
+  });
+}
+
 async function getMetadata() {
   const response = await fetch(`${BASE_URL}/api/v0/metadata`, { method: 'GET' });
   if (!response.ok || !response.body) {
@@ -69,5 +129,5 @@ async function getMetadata() {
   return await msgpack.decodeAsync(response.body) as Record<string, MetadataItem>;
 }
 
-export { BASE_URL, run, getMetadata };
+export { BASE_URL, run, getMetadata, runWs };
 export type { RunAPIResponse, MetadataItem };
