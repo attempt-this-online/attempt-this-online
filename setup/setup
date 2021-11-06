@@ -95,7 +95,6 @@ chmod -R a+rX-w /usr/local/share/ATO/runners
 # setup sandbox access with sudo
 install -m 500 -o sandbox -g sandbox sandbox /usr/local/bin/ATO_sandbox
 install -m 500 -o sandbox -g sandbox wrapper /usr/local/bin/ATO_wrapper
-install -m 500 -o sandbox -g sandbox setup/rm /usr/local/bin/ATO_rm
 install -m 440 -o root -g root setup/sudo.conf /etc/sudoers.d/40_ATO
 
 # install static files

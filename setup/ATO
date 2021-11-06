@@ -12,7 +12,7 @@ cgcreate -a sandbox:sandbox -t sandbox:sandbox -g memory,cpu,pids:ATO
 # initialise IPC directories
 mkdir -p /run/ATO_i /run/ATO_o
 chown api:api /run/ATO_i
-chown sandbox:sandbox /run/ATO_o
-chmod 755 /run/ATO_i /run/ATO_o
+chown sandbox:api /run/ATO_o
+chmod 775 /run/ATO_i /run/ATO_o
 
 sudo -u api /usr/local/lib/ATO/backend/attempt-this-online

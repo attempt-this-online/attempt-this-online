@@ -76,7 +76,7 @@ type result struct {
 func (invocation invocation) invoke(ipHash string) (*result, error) {
 	unhashedInvocationId, hashedInvocationId := generateInvocationId()
 	dirI := path.Join("/run/ATO_i", hashedInvocationId)
-	if err := os.Mkdir(dirI, fs.ModeDir|0700); err != nil {
+	if err := os.Mkdir(dirI, fs.ModeDir|0755); err != nil {
 		log.Println(err)
 		return nil, err
 	}

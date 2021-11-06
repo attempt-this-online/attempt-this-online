@@ -1,2 +1,0 @@
-#!/bin/sh -e
-rm -rf "/run/ATO_o/$(printf %s "$1" | sha256sum | cut -d ' ' -f 1)"
