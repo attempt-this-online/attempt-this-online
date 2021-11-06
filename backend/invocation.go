@@ -60,7 +60,7 @@ type result struct {
 	Stderr          []byte `json:"-" msgpack:"stderr"`
 	StatusType      string `json:"status_type" msgpack:"status_type"`
 	StatusValue     int    `json:"status_value" msgpack:"status_value"`
-	TimedOut        string `json:"timed_out" msgpack:"timed_out"`
+	TimedOut        bool   `json:"timed_out" msgpack:"timed_out"`
 	Real            int64  `json:"real" msgpack:"real"`
 	Kernel          int64  `json:"kernel" msgpack:"kernel"`
 	User            int64  `json:"user" msgpack:"user"`
