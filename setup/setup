@@ -66,9 +66,7 @@ git clone https://aur.archlinux.org/libcgroup.git
 # makepkg doesn't allow running as root, so use `nobody`
 chown -R nobody:nobody libcgroup
 cd libcgroup
-# fix PGP signature issues
-patch < ../attempt_this_online/setup/libcgroup-2.0-1-PKGBUILD.patch
-sudo -u nobody makepkg
+sudo -u nobody makepkg --skippgpcheck
 pacman -U --noconfirm --needed libcgroup-*.pkg.tar.zst
 cd ../attempt_this_online
 
