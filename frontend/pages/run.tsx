@@ -126,14 +126,7 @@ function _Run(
       // not chosen yet
       return;
     }
-    // only set encoding if not already set
-    if (codeEncoding === null) {
-      if (languages[language].sbcs === 'true') {
-        setCodeEncoding('sbcs');
-      } else {
-        setCodeEncoding('utf-8');
-      }
-    }
+    setCodeEncoding(languages[language].sbcs ? 'sbcs' : 'utf-8');
   }, [language, languages]);
 
   const submit = async (event: SyntheticEvent) => {
