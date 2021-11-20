@@ -91,4 +91,11 @@ var languages = map[string]language{
 		Sbcs:     false,
 		SE_class: "java",
 	},
+	"tictac": {
+		Name:    "Tictac",
+		Image:   "attemptthisonline/tictac",
+		Version: "Latest",
+		Url:     "https://github.com/pxeger/tictac",
+		Sbcs:    true,
+	},
 }

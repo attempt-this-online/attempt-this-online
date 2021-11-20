@@ -1,0 +1,10 @@
+#!/bin/sh
+#:name: Tictac
+#:image: attemptthisonline/tictac
+#:version: Latest
+#:url: https://github.com/pxeger/tictac
+#:sbcs: true
+
+cd /ATO/context
+export PYTHONPATH=/opt/tictac/
+/ATO/yargs %1 /ATO/options /ATO/yargs %2 /ATO/arguments python -m tictac %1 "$(cat /ATO/code)" %2 < /ATO/input
