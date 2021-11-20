@@ -1,6 +1,6 @@
 #!/bin/sh
 #:name: Python
-#:image: attemptthisonline/python
+#:image: attemptthisonline/python_with_common_libraries
 #:version: Latest
 #:url: https://www.python.org
 #:sbcs: false

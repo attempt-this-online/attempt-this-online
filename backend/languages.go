@@ -32,7 +32,7 @@ var languages = map[string]language{
 	},
 	"python": {
 		Name:     "Python",
-		Image:    "attemptthisonline/python",
+		Image:    "attemptthisonline/python_with_common_libraries",
 		Version:  "Latest",
 		Url:      "https://www.python.org",
 		Sbcs:     false,
