@@ -2,7 +2,7 @@
 
 set -e
 
-VERSION="0.1.11"
+VERSION="0.1.12"
 
 error() {
     echo "$@" >&2; exit 2
