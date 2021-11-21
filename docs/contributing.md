@@ -3,30 +3,44 @@
 If you're not familiar with the typical Github (fork-edit-PR) workflow, please read the [GitHub
 guide](https://guides.github.com/introduction/flow/) on the matter.
 
-1. Find a [Docker image](https://hub.docker.com) with the toolchain for the language
-  - To minimise disk usage, try to use images with layers in common with existing languages. In particular, the common
-  standard is Debian Buster, so use a `buster` tag where possible.
-  - A lot of esoteric and golfing languages won't have Docker images. For this purpose, there is my
-  [esoterics](https://hub.docker.com/r/pxeger/esoterics). Submit a pull request
-  [here](https://github.com/pxeger/esoterics) to add the language to that image first, where possible.
-  - Do not pin the image to a specific version. This helps keep languages continually up-to-date because whenever ATO
-  is reinstalled, the newest version will be used. The exception to this is in cases of languages like Python 2, where
-  the language has since changed enormously and the older version is deliberately wanted.
-2. Create a runner script in `runners/`. Here is an example showing the general idea
+1. Create a [Docker image](https://hub.docker.com) with the toolchain for the language, and submit it to the
+   [languages](https://github.com/attempt-this-online/languages) repository, based on our common base image
+   `attemptthisonline/base` (which uses Arch Linux)
+   - in rare cases (such as for non-open-source languages), an existing Docker image that isn't based on
+     `attemptthisonline/base` may be used
+   - for languages that require other languages, base the new language on an `attemptthisonline/` image for the required
+     language. For example, Jelly's interpreter is written in Python, so Jelly's image is based on
+     `attemptthisonline/python`
+   - the build process of the Docker image should follow the general pattern of:
+     - declare a Docker build argument corresponding to the language's version; this can be used as an evironment
+       variable throughout the Dockerfile thereafter. This allows fast updating of the Docker images
+     - install any dependencies necessary to compile the language from source
+     - download and extract the source code of the language
+     - compile the language's source code
+     - install the compiled language (if just a few binaries are provided, they should go in `/usr/local/bin/`; if the
+       installation is more complex, put it into a directory in `/opt/`)
+     - clean up any downloaded or cached files that are no longer needed
+   - a fairly easy-to-follow example of this is [Zsh](https://github.com/attempt-this-online/languages/blob/main/languages/zsh/Dockerfile)
+   - if the language is particularly complex (or just slow) to build from source, a pre-built version can be used
+     (example: [Java](https://github.com/attempt-this-online/languages/blob/main/languages/java/Dockerfile))
+   - make a pull request to add it to the repository (from where it will be built and pushed to Docker Hub automatically)
+2. Add the language's metadata to `backend/backend/languages.go`; set the *key* to an identifier-safe name for the
+   language (avoid special characters); in the value, set these fields:
+   - name (should be human-readable - this is what will be presented to the user in the UI)
+   - image (name of the Docker image used to run the code)
+   - version (set this to whatever boundary we guarantee to the user, not just the version it currently uses)
+   - URL (homepage of the language)
+   - SBCS (set to `true` if the language's code uses a single-byte character set; this will change the behaviour of the
+     byte counter in the frontend to assume all characters comprise one byte (rather than using UTF-8))
+   - SE_class (provide this only if StackExchange has built-in syntax highlighting for the language; this will be added
+     when a CGCC post template is generated. See [here](https://meta.stackexchange.com/q/184108) for details)
+3. Create a runner script in `runners/`. Here is an example showing the general idea:
 
 ```sh
 #!/bin/sh
-
-# The runner script's name will be used as an identifier. Don't include special characters or whitespace, and keep it
-# lowercase. The name presented to the user is in this specially formatted line:
-#:name: C (gcc)
-
-# Replace with the Docker image and tag used - take it from the `docker pull` command provided on Docker Hub.
-#:image: rikorose/gcc-cmake:latest
-
 # There are no minimal requirements for the Docker image, as long as it doesn't contain a /ATO directory. If the Docker
 # image you're using doesn't have a POSIX shell, it is always available as `/ATO/bash`. If you need to use it, make sure
-# to change the `#!` (shebang) line to match that.
+# to change the `#!` (shebang) line above to match that.
 
 # Do whatever is necessary to compile and run the code.
 # - code is saved in /ATO/code
@@ -59,19 +73,14 @@ Here is another example runner for an interpreted language instead:
 ```sh
 #!/bin/sh
 
-#:name: Python
-#:image: buildpack-deps
-
 cd /ATO/context
 
 # Use two levels of yargs to substitute in multiple sets of arguments:
 /ATO/yargs %1 /ATO/options /ATO/yargs %2 /ATO/arguments python %1 /ATO/code %2 < /ATO/input
 ```
-
-Make sure you've made the runner script executable (`chmod +x runners/path`)
-
-3. Test your runner! It's not helpful if you submit a broken runner.
-4. Make a [Pull Request](https://github.com/attempt-this-online/attempt-this-online/pulls)
+  - Make sure you've made the runner script executable (`chmod +x runners/path`)
+  - Test your runner! It's unhelpful if you submit a broken runner
+  - Make a [Pull Request](https://github.com/attempt-this-online/attempt-this-online/pulls) to add the runner for
 
 ## Making Releases
 - Update version numbers in `frontend/package.json`, `pyproject.toml`, and `setup/setup`
