@@ -1,6 +1,6 @@
 # Contributing
 ## Adding Languages
-If you're not familiar with the typical Github (fork-edit-PR) workflow, please read the [GitHub
+If you're not familiar with the typical GitHub (fork-edit-PR) workflow, please read the [GitHub
 guide](https://guides.github.com/introduction/flow/) on the matter.
 
 1. Create a [Docker image](https://hub.docker.com) with the toolchain for the language, and submit it to the
@@ -83,10 +83,11 @@ cd /ATO/context
   - Make a [Pull Request](https://github.com/attempt-this-online/attempt-this-online/pulls) to add the runner for
 
 ## Making Releases
-- Update version numbers in `frontend/package.json`, `pyproject.toml`, and `setup/setup`
-- Upgrade dependencies (`cd frontend; npm update; cd ..` and `poetry update`)
+- Update version numbers in `frontend/package.json` and `setup/setup`
+- Upgrade dependencies (`cd frontend; npm update; cd ..`)
 - Build package `./build`
 - Stage and commit changes
 - Tag version in git, e.g. `v0.1.2`
+- Push `main` **and the new tag** to GitHub
 - Upload `setup/setup` and `dist/attempt_this_online.tar.gz` to GitHub release
 - Set description etc. on GitHub release
