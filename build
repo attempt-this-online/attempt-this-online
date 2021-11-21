@@ -16,12 +16,15 @@ cd ..
 echo Compiling binaries... >&2
 cd backend
 go build server.go
-go build listImages.go
 cd ..
 gcc -Wall -Werror wrapper.c -static -lrt -lpthread -o dist/attempt_this_online/wrapper
 gcc -Wall -Werror -static yargs.c -o dist/attempt_this_online/yargs
 
 echo Building tarball... >&2
+# list images
+cd backend
+go run listImages.go > ../dist/attempt_this_online/images.txt
+cd ..
 cp -R frontend/out dist/attempt_this_online/public
 cp -R \
     pyproject.toml \
@@ -31,7 +34,6 @@ cp -R \
     sandbox \
     runners \
     backend/server \
-    backend/listImages \
     dist/attempt_this_online/
 cd dist
 tar -czf attempt_this_online.tar.gz attempt_this_online
