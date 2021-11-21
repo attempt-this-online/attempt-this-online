@@ -20,7 +20,7 @@ grep -m1 '^#:image: ' /usr/local/share/ATO/runners/$language | tr / + | read _ i
 # ensure minimum lengths
 [[ $#client_id -gt 16 ]]
 [[ $#invocation_id -gt 16 ]]
-[[ $timeouit -gt 1 ]] && [[ $timeout -le 60 ]]
+[[ $timeout -gt 1 ]] && [[ $timeout -le 60 ]]
 
 # make sure IDs are path-safe by getting a hashed version in hex
 echo -n $client_id | sha256sum | read client_id _
