@@ -10,12 +10,13 @@ client_id=$1
 invocation_id=$2
 language=$3
 timeout=$4
+image=$(printf %s $5 | tr / +)
 
 # check that the runner exists (also prevents directory traversal)
 ls /usr/local/share/ATO/runners | grep -Fqx $language
 
-# find what image the runner needs from the file
-grep -m1 '^#:image: ' /usr/local/share/ATO/runners/$language | tr / + | read _ image _
+# check that the image exists
+ls /usr/local/lib/ATO/rootfs | grep -Fqx $image
 
 # ensure minimum lengths
 [[ $#client_id -gt 16 ]]

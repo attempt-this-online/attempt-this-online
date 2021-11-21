@@ -102,7 +102,17 @@ func (invocation invocation) invoke(ipHash string) (*result, error) {
 		return nil, err
 	}
 
-	cmd := exec.Command("sudo", "-u", "sandbox", "/usr/local/bin/ATO_sandbox", ipHash, unhashedInvocationId, invocation.Language, strconv.Itoa(invocation.Timeout))
+	cmd := exec.Command(
+		"sudo",
+		"-u",
+		"sandbox",
+		"/usr/local/bin/ATO_sandbox",
+		ipHash,
+		unhashedInvocationId,
+		invocation.Language,
+		strconv.Itoa(invocation.Timeout),
+		languages[invocation.Language].Image,
+	)
 	cmd.Stdin = nil
 	cmd.Stdout = os.Stderr
 	cmd.Stderr = os.Stderr
