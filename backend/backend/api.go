@@ -1,4 +1,4 @@
-package main
+package backend
 
 import (
 	"bytes"
@@ -160,7 +160,7 @@ func getMetadata(w http.ResponseWriter, r *http.Request) {
 
 var addr = flag.String("addr", "127.0.0.1:4568", "http service address")
 
-func main() {
+func ServerMain() {
 	flag.Parse()
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/v0/ws/execute", handleWs)
