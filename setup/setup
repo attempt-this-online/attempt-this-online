@@ -79,8 +79,7 @@ useradd -rs /usr/bin/nologin -md /var/lib/ATO_home/sandbox sandbox
 useradd -rs /usr/bin/nologin -md /var/lib/ATO_home/api api
 
 # install backend
-install -dm 500 -o api -g api /usr/local/lib/ATO/backend
-install -m 500 -o api -g api attempt-this-online /usr/local/lib/ATO/backend/
+install -m 500 -o api -g api server /usr/local/lib/ATO/
 
 # install runners
 cp -RT runners /usr/local/share/ATO/runners

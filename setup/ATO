@@ -15,4 +15,4 @@ chown api:api /run/ATO_i
 chown sandbox:api /run/ATO_o
 chmod 775 /run/ATO_i /run/ATO_o
 
-sudo -u api /usr/local/lib/ATO/backend/attempt-this-online
+sudo -u api /usr/local/lib/ATO/server
