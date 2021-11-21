@@ -1,4 +1,5 @@
 backend/server
+backend/listImages
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
