@@ -1,9 +1,4 @@
 #!/bin/sh
-#:name: Scala 2
-#:image: attemptthisonline/scala2
-#:version: 2
-#:url: https://www.scala-lang.org/
-#:sbcs: false
 
 mkdir /ATO/tmp
 cd /ATO/context

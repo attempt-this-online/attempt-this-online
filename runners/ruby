@@ -1,10 +1,4 @@
 #!/bin/sh
-#:name: Ruby
-#:image: attemptthisonline/ruby
-#:version: Latest
-#:url: https://www.ruby-lang.org/
-#:sbcs: false
-#:SE_class: ruby
 
 cd /ATO/context
 /ATO/yargs %1 /ATO/options /ATO/yargs %2 /ATO/arguments ruby %1 /ATO/code %2 < /ATO/input

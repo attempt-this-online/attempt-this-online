@@ -1,9 +1,4 @@
 #!/bin/sh
-#:name: Jelly
-#:image: attemptthisonline/jelly
-#:version: 70c9fd93
-#:url: https://github.com/DennisMitchell/jellylanguage
-#:sbcs: true
 
 mkdir /ATO/tmp
 export TMPPREFIX=/ATO/tmp

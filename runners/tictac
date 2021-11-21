@@ -1,9 +1,4 @@
 #!/bin/sh
-#:name: Tictac
-#:image: attemptthisonline/tictac
-#:version: Latest
-#:url: https://github.com/pxeger/tictac
-#:sbcs: true
 
 cd /ATO/context
 export PYTHONPATH=/opt/tictac/

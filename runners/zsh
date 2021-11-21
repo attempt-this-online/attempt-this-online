@@ -1,10 +1,4 @@
 #!/bin/sh
-#:name: Zsh
-#:image: attemptthisonline/zsh
-#:version: 5
-#:url: https://www.zsh.org/
-#:sbcs: false
-#:SE_class: bash
 
 mkdir /ATO/tmp
 export TMPPREFIX=/ATO/tmp

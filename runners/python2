@@ -1,10 +1,4 @@
 #!/bin/sh
-#:name: Python 2
-#:image: attemptthisonline/python2
-#:version: 2
-#:url: https://docs.python.org/2/
-#:sbcs: false
-#:SE_class: python2
 
 cd /ATO/context
 /ATO/yargs %1 /ATO/options /ATO/yargs %2 /ATO/arguments python %1 /ATO/code %2 < /ATO/input

@@ -1,10 +1,4 @@
 #!/bin/sh
-#:name: Java
-#:image: attemptthisonline/java
-#:version: Latest
-#:url: https://en.wikipedia.org/wiki/Java_(programming_language)
-#:sbcs: false
-#:SE_class: java
 
 cd /ATO/context
 ln -s /ATO/code /ATO/code.java
