@@ -105,4 +105,11 @@ var languages = map[string]language{
         Url:     "https://www.gnu.org/software/bash/",
 		Sbcs:    false,
 	},
+	"pip": {
+		Name:    "Pip",
+		Image:   "attemptthisonline/pip",
+		Version: "Latest",
+        Url:     "https://github.com/dloscutoff/pip",
+		Sbcs:    false,
+	},
 }
