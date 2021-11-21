@@ -98,4 +98,11 @@ var languages = map[string]language{
 		Url:     "https://github.com/pxeger/tictac",
 		Sbcs:    true,
 	},
+	"bash": {
+		Name:    "Bash",
+		Image:   "attemptthisonline/bash",
+		Version: "Latest",
+        Url:     "https://www.gnu.org/software/bash/",
+		Sbcs:    false,
+	},
 }
