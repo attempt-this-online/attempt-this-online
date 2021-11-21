@@ -14,14 +14,14 @@ type language struct {
 var serialisedLanguages []byte
 
 func init() {
-	b, err := msgpack.Marshal(languages)
+	b, err := msgpack.Marshal(Languages)
 	if err != nil {
 		panic(err)
 	}
 	serialisedLanguages = b
 }
 
-var languages = map[string]language{
+var Languages = map[string]language{
 	"whython": {
 		Name:     "Whython",
 		Image:    "attemptthisonline/whython",

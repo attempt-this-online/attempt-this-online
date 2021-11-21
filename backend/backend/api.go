@@ -89,7 +89,7 @@ func handleWs(w http.ResponseWriter, r *http.Request) {
 	checkArgs(invocation.Arguments, conn)
 	checkArgs(invocation.Options, conn)
 
-	if _, exists := languages[invocation.Language]; !exists {
+	if _, exists := Languages[invocation.Language]; !exists {
 		log.Println("no such language:", invocation.Language)
 		closeConnection(conn, websocket.ClosePolicyViolation, "no such language")
 		return

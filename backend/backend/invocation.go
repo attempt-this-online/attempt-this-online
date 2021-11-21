@@ -111,7 +111,7 @@ func (invocation invocation) invoke(ipHash string) (*result, error) {
 		unhashedInvocationId,
 		invocation.Language,
 		strconv.Itoa(invocation.Timeout),
-		languages[invocation.Language].Image,
+		Languages[invocation.Language].Image,
 	)
 	cmd.Stdin = nil
 	cmd.Stdout = os.Stderr
