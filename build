@@ -4,8 +4,6 @@
 rm -rf dist
 mkdir -p dist/attempt_this_online
 
-python -m poetry update
-
 echo Building frontend... >&2
 cd frontend
 # clean up previous build artefacts; otherwise nothing seems to properly update
@@ -26,10 +24,9 @@ cd backend
 go run listImages.go > ../dist/attempt_this_online/images.txt
 cd ..
 cp -R frontend/out dist/attempt_this_online/public
-cp -R \
+cp \
     pyproject.toml \
     poetry.lock \
-    attempt_this_online \
     setup \
     sandbox \
     runners \
