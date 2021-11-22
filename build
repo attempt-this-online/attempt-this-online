@@ -13,7 +13,7 @@ cd ..
 
 echo Compiling binaries... >&2
 cd backend
-go build server.go
+go build -o ../dist/attempt_this_online/server server.go
 cd ..
 gcc -Wall -Werror wrapper.c -static -lrt -lpthread -o dist/attempt_this_online/wrapper
 gcc -Wall -Werror -static yargs.c -o dist/attempt_this_online/yargs
@@ -30,7 +30,6 @@ cp \
     setup \
     sandbox \
     runners \
-    backend/server \
     dist/attempt_this_online/
 cd dist
 tar -czf attempt_this_online.tar.gz attempt_this_online
