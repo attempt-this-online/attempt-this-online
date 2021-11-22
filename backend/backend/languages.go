@@ -112,4 +112,11 @@ var Languages = map[string]language{
 		Url:     "https://github.com/dloscutoff/pip",
 		Sbcs:    false,
 	},
+	"funky2": {
+		Name:    "Funky2",
+		Image:   "attemptthisonline/funky2",
+		Version: "Latest",
+		Url:     "https://funky2.a-ta.co/",
+		Sbcs:    false,
+	},
 }
