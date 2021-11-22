@@ -24,7 +24,7 @@ guide](https://guides.github.com/introduction/flow/) on the matter.
    - if the language is particularly complex (or just slow) to build from source, a pre-built version can be used
      (example: [Java](https://github.com/attempt-this-online/languages/blob/main/languages/java/Dockerfile))
    - make a pull request to add it to the repository (from where it will be built and pushed to Docker Hub automatically)
-2. Add the language's metadata to `backend/backend/languages.go`; set the *key* to an identifier-safe name for the
+2. Add the language's metadata to `ato/languages.go`; set the *key* to an identifier-safe name for the
    language (avoid special characters); in the value, set these fields:
    - name (should be human-readable - this is what will be presented to the user in the UI)
    - image (name of the Docker image used to run the code)
