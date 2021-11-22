@@ -24,12 +24,10 @@ cd backend
 go run listImages.go > ../dist/attempt_this_online/images.txt
 cd ..
 cp -R frontend/out dist/attempt_this_online/public
-cp \
-    pyproject.toml \
-    poetry.lock \
-    setup \
+cp -R \
+    setup/ \
     sandbox \
-    runners \
+    runners/ \
     dist/attempt_this_online/
 cd dist
 tar -czf attempt_this_online.tar.gz attempt_this_online
