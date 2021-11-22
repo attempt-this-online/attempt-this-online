@@ -12,17 +12,13 @@ npm run build
 cd ..
 
 echo Compiling binaries... >&2
-cd backend
-go build -o ../dist/attempt_this_online/server server.go
-cd ..
+go build -o dist/attempt_this_online/server server.go
 gcc -Wall -Werror wrapper.c -static -lrt -lpthread -o dist/attempt_this_online/wrapper
 gcc -Wall -Werror -static yargs.c -o dist/attempt_this_online/yargs
 
 echo Building tarball... >&2
 # list images
-cd backend
-go run listImages.go > ../dist/attempt_this_online/images.txt
-cd ..
+go run listImages.go > dist/attempt_this_online/images.txt
 cp -R frontend/out dist/attempt_this_online/public
 cp -R \
     setup/ \
