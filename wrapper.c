@@ -45,6 +45,7 @@
 
    Written by Pádraig Brady.  */
 
+#include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
@@ -179,6 +180,14 @@ install_sigchld(void)
 }
 
 static void
+handle_usr1(int sig, siginfo_t *info, void *_ucontext) {
+    assert(sig == SIGUSR1);
+    union sigval sigval = info->si_value;
+    int signal = sigval.sival_int;
+    kill(monitored_pid, signal);
+}
+
+static void
 install_cleanup(int sigterm)
 {
     struct sigaction sa;
@@ -300,6 +309,16 @@ int main(int argc, char** argv)
         /* We configure timers so that SIGALRM is sent on expiry.
          Therefore ensure we don't inherit a mask blocking SIGALRM.  */
         unblock_signal(SIGALRM);
+
+        /* setup handler for kill-child-process signal */
+        struct sigaction sa;
+        sigemptyset(&sa.sa_mask);
+        sa.sa_sigaction = handle_usr1;
+        sa.sa_flags = SA_SIGINFO;
+        int err = sigaction(SIGUSR1, &sa, NULL);
+        if (err < 0) {
+            perror("sigaction");
+        }
 
         settimeout(true);
 
