@@ -103,4 +103,4 @@ exec {info_fd}>&-
 
 # clean up cgroups
 flock -w 0 /run/lock/ATO/$client_id \
-    cgdelete -rg memory,cpu,pids:ATO/$client_id/$invocation_id
+    cgdelete -rg memory,cpu,pids:ATO/$client_id/$invocation_id || true
