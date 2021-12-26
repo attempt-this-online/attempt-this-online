@@ -27,8 +27,6 @@ ls /usr/local/lib/ATO/rootfs | grep -Fqx $image
 echo -n $client_id | sha256sum | read client_id _
 echo -n $invocation_id | sha256sum | read invocation_id _
 
-mkdir /run/ATO/$invocation_id
-
 # Create a control group for this client and this invocation to manage resource usage. I'm not sure why this needs a
 # lock, but TIO uses one :shrug: (https://github.com/TryItOnline/tryitonline/blob/898a41f69eeeff915b579bf4602b3ed9aea07910/bin/run#L19)
 flock -s /run/lock/ATO/$client_id \
