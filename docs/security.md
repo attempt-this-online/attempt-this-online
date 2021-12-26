@@ -7,8 +7,7 @@ issue in this repository.
 The setup script generates "flags", which are random text stored in locations that should only be readable by various
 users. You can use the contents of these flags to demostrate your vulnerability. The flags are stored in:
 - `/root/flag` (readable only by root)
-- `/var/local/lib/ATO_home/api/flag` (readable only by the `api` user)
-- `/var/local/lib/ATO_home/sandbox/flag` (readable only by `sandbox` user)
+- `/var/local/lib/ATO_home/flag` (readable only by the `ato` user)
 
 This security policy does not give you permission to attempt to attack the official instance (ato.pxeger.com) or any of
 my servers. Test and demonstrate vulnerabilities only on your own personal instance.

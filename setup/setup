@@ -74,25 +74,22 @@ mkdir -p \
     /usr/local/lib/ATO \
     /usr/local/share/ATO
 
-# configure sandbox and api users
-useradd -rs /usr/bin/nologin -md /var/lib/ATO_home/sandbox sandbox
-useradd -rs /usr/bin/nologin -md /var/lib/ATO_home/api api
+# configure ATO user
+useradd -rs /usr/bin/nologin -md /var/lib/ATO_home ato
 
 # install backend
-install -m 500 -o api -g api server /usr/local/lib/ATO/
+install -m 500 -o ato -g ato server /usr/local/lib/ATO/
 
 # install runners
 cp -RT runners /usr/local/share/ATO/runners
-chown -R sandbox:sandbox /usr/local/share/ATO/runners
+chown -R ato:ato /usr/local/share/ATO/runners
 chmod -R a+rX-w /usr/local/share/ATO/runners
 
 # setup apparmor TODO
 # systemctl enable --now apparmor.service
 
-# setup sandbox access with sudo
-install -m 500 -o sandbox -g sandbox sandbox /usr/local/bin/ATO_sandbox
-install -m 500 -o sandbox -g sandbox wrapper /usr/local/bin/ATO_wrapper
-install -m 440 -o root -g root setup/sudo.conf /etc/sudoers.d/40_ATO
+install -m 500 -o ato -g ato sandbox /usr/local/bin/ATO_sandbox
+install -m 500 -o ato -g ato wrapper /usr/local/bin/ATO_wrapper
 
 # install static files
 cp -RT public /usr/local/share/ATO/public
@@ -153,8 +150,7 @@ flag() {
     chmod 400 "$1"
 }
 flag /root/flag root:root
-flag /var/lib/ATO_home/sandbox/flag sandbox:sandbox
-flag /var/lib/ATO_home/api/flag api:api
+flag /var/lib/ATO_home/flag ato:ato
 
 # Create upper layer filesystem for overlayfs which contains the mount point /ATO pre-made for bwrap - see
 # https://github.com/containers/bubblewrap/issues/413

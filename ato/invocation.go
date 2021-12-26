@@ -75,37 +75,34 @@ type result struct {
 
 func (invocation invocation) invoke(ipHash string) (*result, error) {
 	unhashedInvocationId, hashedInvocationId := generateInvocationId()
-	dirI := path.Join("/run/ATO_i", hashedInvocationId)
-	if err := os.Mkdir(dirI, fs.ModeDir|0755); err != nil {
+	dir := path.Join("/run/ATO", hashedInvocationId)
+	if err := os.Mkdir(dir, fs.ModeDir|0755); err != nil {
 		log.Println(err)
 		return nil, err
 	}
 
 	defer func() {
-		err := os.RemoveAll(dirI)
+		err := os.RemoveAll(dir)
 		if err != nil {
 			// can't really do anything about it other than log
 			log.Println("error removing input dir:", err)
 		}
 	}()
 
-	if err := write(dirI, "code", invocation.Code); err != nil {
+	if err := write(dir, "code", invocation.Code); err != nil {
 		return nil, err
 	}
-	if err := write(dirI, "input", invocation.Input); err != nil {
+	if err := write(dir, "input", invocation.Input); err != nil {
 		return nil, err
 	}
-	if err := write(dirI, "arguments", nullTerminate(invocation.Arguments)); err != nil {
+	if err := write(dir, "arguments", nullTerminate(invocation.Arguments)); err != nil {
 		return nil, err
 	}
-	if err := write(dirI, "options", nullTerminate(invocation.Options)); err != nil {
+	if err := write(dir, "options", nullTerminate(invocation.Options)); err != nil {
 		return nil, err
 	}
 
 	cmd := exec.Command(
-		"sudo",
-		"-u",
-		"sandbox",
 		"/usr/local/bin/ATO_sandbox",
 		ipHash,
 		unhashedInvocationId,
@@ -122,18 +119,9 @@ func (invocation invocation) invoke(ipHash string) (*result, error) {
 		return nil, err
 	}
 
-	dirO := path.Join("/run/ATO_o", hashedInvocationId)
-	defer func() {
-		err := os.RemoveAll(dirO)
-		if err != nil {
-			// can't really do anything about it other than log
-			log.Println("error removing output dir:", err)
-		}
-	}()
-
 	var result result
 
-	if encodedStatus, err := os.ReadFile(path.Join(dirO, "status")); err == nil {
+	if encodedStatus, err := os.ReadFile(path.Join(dir, "status")); err == nil {
 		if err = json.Unmarshal(encodedStatus, &result); err != nil {
 			return nil, err
 		}
@@ -141,12 +129,12 @@ func (invocation invocation) invoke(ipHash string) (*result, error) {
 		return nil, err
 	}
 
-	if stderr, err := os.ReadFile(path.Join(dirO, "stderr")); err == nil {
+	if stderr, err := os.ReadFile(path.Join(dir, "stderr")); err == nil {
 		result.Stderr = stderr
 	} else {
 		return nil, err
 	}
-	if stdout, err := os.ReadFile(path.Join(dirO, "stdout")); err == nil {
+	if stdout, err := os.ReadFile(path.Join(dir, "stdout")); err == nil {
 		result.Stdout = stdout
 	} else {
 		return nil, err

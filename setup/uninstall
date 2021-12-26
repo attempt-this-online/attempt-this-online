@@ -5,8 +5,7 @@ sed -i '/^overlay/d' /etc/fstab
 sed -i '/certbot renew && systemctl reload nginx/d' /var/spool/cron/root
 umount /usr/local/lib/ATO/rootfs/*
 pkill -9 uvicorn
-userdel api
-userdel sandbox
+userdel ato
 rm -rf \
     /var/cache/ATO \
     /run/lock/ATO \
@@ -15,7 +14,6 @@ rm -rf \
     /usr/local/share/ATO \
     /usr/local/bin/ATO_run \
     /usr/local/bin/ATO_sandbox \
-    /etc/sudoers.d/40_ATO \
     /usr/local/lib/systemd/system/ATO.service \
     /usr/local/lib/systemd/system/ATO.socket
 systemctl start docker

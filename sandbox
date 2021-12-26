@@ -27,7 +27,7 @@ ls /usr/local/lib/ATO/rootfs | grep -Fqx $image
 echo -n $client_id | sha256sum | read client_id _
 echo -n $invocation_id | sha256sum | read invocation_id _
 
-mkdir /run/ATO_o/$invocation_id
+mkdir /run/ATO/$invocation_id
 
 # Create a control group for this client and this invocation to manage resource usage. I'm not sure why this needs a
 # lock, but TIO uses one :shrug: (https://github.com/TryItOnline/tryitonline/blob/898a41f69eeeff915b579bf4602b3ed9aea07910/bin/run#L19)
@@ -63,10 +63,10 @@ cgset -r pids.max=64 ATO/$client_id/$invocation_id
 
 # Open a file descriptor where we will write all the status information. See zshmisc(1) § Opening File Descriptors
 # Using Parameters for more details.
-exec {status_fd}>/run/ATO_o/$invocation_id/status
+exec {status_fd}>/run/ATO/$invocation_id/status
 # Open file descriptor for sandbox details, which will be written by bwrap immediately, to allow the process to be
 # killed manually
-exec {info_fd}>/run/ATO_o/$invocation_id/info
+exec {info_fd}>/run/ATO/$invocation_id/info
 
 # (I wish it was possible to add comments between line continuations)
 # - env -i: start with a clean/empty environment
@@ -91,20 +91,17 @@ bwrap % \
     --die-with-parent \
     --hostname ATO_sandbox \
     --info-fd $info_fd \
-    --ro-bind /run/ATO_i/$invocation_id/input /ATO/input \
-    --ro-bind /run/ATO_i/$invocation_id/code /ATO/code \
-    --ro-bind /run/ATO_i/$invocation_id/arguments /ATO/arguments \
-    --ro-bind /run/ATO_i/$invocation_id/options /ATO/options \
+    --ro-bind /run/ATO/$invocation_id/input /ATO/input \
+    --ro-bind /run/ATO/$invocation_id/code /ATO/code \
+    --ro-bind /run/ATO/$invocation_id/arguments /ATO/arguments \
+    --ro-bind /run/ATO/$invocation_id/options /ATO/options \
     /ATO/wrapper $status_fd $timeout \
-    1> >(head -c 128k > /run/ATO_o/$invocation_id/stdout) \
-    2> >(head -c 32k > /run/ATO_o/$invocation_id/stderr)
+    1> >(head -c 128k > /run/ATO/$invocation_id/stdout) \
+    2> >(head -c 32k > /run/ATO/$invocation_id/stderr)
 
 # close status FDs
 exec {status_fd}>&-
 exec {info_fd}>&-
-
-# allow API to delete ATO_o dir
-setfacl -m u:api:rwx /run/ATO_o/$invocation_id
 
 # clean up cgroups
 flock -w 0 /run/lock/ATO/$client_id \

@@ -3,16 +3,15 @@
 
 # create lock directory
 mkdir -p /run/lock/ATO
-chown sandbox:sandbox /run/lock/ATO
+chown ato:ato /run/lock/ATO
 chmod 750 /run/lock/ATO
 
 # create control groups
-cgcreate -a sandbox:sandbox -t sandbox:sandbox -g memory,cpu,pids:ATO
+cgcreate -a ato:ato -t ato:ato -g memory,cpu,pids:ATO
 
 # initialise IPC directories
-mkdir -p /run/ATO_i /run/ATO_o
-chown api:api /run/ATO_i
-chown sandbox:api /run/ATO_o
-chmod 775 /run/ATO_i /run/ATO_o
+mkdir -p /run/ATO
+chown ato:ato /run/ATO
+chmod 775 /run/ATO
 
-sudo -u api /usr/local/lib/ATO/server
+sudo -u ato /usr/local/lib/ATO/server
