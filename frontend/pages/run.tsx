@@ -187,6 +187,12 @@ function _Run(
     if (data.timed_out) {
       notify('The program ran for over 60 seconds and timed out');
     }
+    if (data.stdout_truncated) {
+      notify('stdout exceeded 128KiB and was truncated');
+    }
+    if (data.stderr_truncated) {
+      notify('stderr exceeded 32KiB and was truncated');
+    }
 
     setSubmitting(false);
   };

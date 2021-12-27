@@ -5,7 +5,9 @@ const CLOSE_NORMAL = 1000;
 
 interface RunAPIResponse {
   stdout: Uint8Array;
+  stdout_truncated: boolean;
   stderr: Uint8Array;
+  stderr_truncated: boolean;
   status_type: 'exited' | 'killed' | 'core_dumped' | 'unknown';
   status_value: number;
   timed_out: boolean;
