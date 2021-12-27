@@ -93,9 +93,7 @@ bwrap % \
     --ro-bind /run/ATO/$invocation_id/code /ATO/code \
     --ro-bind /run/ATO/$invocation_id/arguments /ATO/arguments \
     --ro-bind /run/ATO/$invocation_id/options /ATO/options \
-    /ATO/wrapper $status_fd $timeout \
-    1> >(head -c 128k > /run/ATO/$invocation_id/stdout) \
-    2> >(head -c 32k > /run/ATO/$invocation_id/stderr)
+    /ATO/wrapper $status_fd $timeout
 
 # close status FDs
 exec {status_fd}>&-

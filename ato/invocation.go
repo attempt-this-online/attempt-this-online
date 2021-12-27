@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"io"
 	"io/fs"
 	"log"
 	"os"
@@ -58,6 +59,8 @@ func nullTerminate(args [][]byte) []byte {
 type result struct {
 	Stdout          []byte `json:"-" msgpack:"stdout"`
 	Stderr          []byte `json:"-" msgpack:"stderr"`
+	StdoutTruncated bool   `json:"-" msgpack:"stdout_truncated"`
+	StderrTruncated bool   `json:"-" msgpack:"stderr_truncated"`
 	StatusType      string `json:"status_type" msgpack:"status_type"`
 	StatusValue     int    `json:"status_value" msgpack:"status_value"`
 	TimedOut        bool   `json:"timed_out" msgpack:"timed_out"`
@@ -110,32 +113,68 @@ func (invocation invocation) invoke(ipHash string) (*result, error) {
 		strconv.Itoa(invocation.Timeout),
 		Languages[invocation.Language].Image,
 	)
-	cmd.Stdin = nil
-	cmd.Stdout = os.Stderr
-	cmd.Stderr = os.Stderr
 	cmd.Env = []string{"PATH=" + os.Getenv("PATH")}
+	cmd.Stdin = nil
 
-	if err := cmd.Run(); err != nil {
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		return nil, err
+	}
+	stderr, err := cmd.StderrPipe()
+	if err != nil {
+		return nil, err
+	}
+
+	if err := cmd.Start(); err != nil {
 		return nil, err
 	}
 
 	var result result
+	wait := make(chan error)
+	go func() {
+		lr := io.LimitedReader{
+			R: stdout,
+			N: 128 * 1024,
+		}
+		var err error
+		result.Stdout, err = io.ReadAll(&lr)
+		if lr.N <= 0 {
+			result.StdoutTruncated = true
+		}
+		err2 := stdout.Close()
+		if err == nil {
+			err = err2
+		}
+		wait <- err
+	}()
+	go func() {
+		lr := io.LimitedReader{
+			R: stderr,
+			N: 32 * 1024,
+		}
+		var err error
+		result.Stderr, err = io.ReadAll(&lr)
+		if lr.N <= 0 {
+			result.StderrTruncated = true
+		}
+		err2 := stderr.Close()
+		if err == nil {
+			err = err2
+		}
+		wait <- err
+	}()
+
+	for i := 0; i < 2; i++ {
+		err := <-wait
+		if err != nil {
+			return nil, err
+		}
+	}
 
 	if encodedStatus, err := os.ReadFile(path.Join(dir, "status")); err == nil {
 		if err = json.Unmarshal(encodedStatus, &result); err != nil {
 			return nil, err
 		}
-	} else {
-		return nil, err
-	}
-
-	if stderr, err := os.ReadFile(path.Join(dir, "stderr")); err == nil {
-		result.Stderr = stderr
-	} else {
-		return nil, err
-	}
-	if stdout, err := os.ReadFile(path.Join(dir, "stdout")); err == nil {
-		result.Stdout = stdout
 	} else {
 		return nil, err
 	}
