@@ -322,7 +322,13 @@ function _Run(
     } else {
       syntaxHighlightingClass = '';
     }
-    navigator.clipboard.writeText(`# ${languages[language].name}, ${byteLength} ${pluralise('byte', byteLength)}
+    let title: string;
+    if (languages[language].url) {
+      title = `[${languages[language].name}](${languages[language].url})`;
+    } else {
+      title = languages[language].name;
+    }
+    navigator.clipboard.writeText(`# ${title}, ${byteLength} ${pluralise('byte', byteLength)}
 
 <pre><code${syntaxHighlightingClass}>${escape(code)}</code></pre>
 
