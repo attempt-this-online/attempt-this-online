@@ -1,4 +1,29 @@
-# API Reference
+# WARNING
+The following information is out-of-date; the REST API has been replaced with a WebSocket-based API which I haven't
+documented yet (see #36). I plan to re-add a more basic REST API in future (#37).
+
+If you really want to read it, scroll down.
+
+---
+---
+---
+---
+---
+---
+---
+---
+---
+---
+---
+---
+---
+---
+---
+---
+---
+---
+
+## API Reference
 The official instance uses the base url `https://ato.pxeger.com`. Note that use of the API on the
 official instance must abide by the [Terms of Use](https://ato.pxeger.com/legal#terms-of-use):
 **you must have explicit permission from me to use the API**.
