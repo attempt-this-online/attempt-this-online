@@ -354,7 +354,9 @@ function _Run(
       <div className="min-h-screen bg-white dark:bg-gray-900 text-black dark:text-white relative flex flex-col">
         <Navbar />
         <div className="flex-grow relative">
-          {languageSelectorOpen ? <LanguageSelector {...{language, languages, setLanguage, setLanguageSelectorOpen}} /> : null}
+          {languageSelectorOpen ? (
+            <LanguageSelector {...{ language, languages, setLanguage, setLanguageSelectorOpen }} />
+          ) : null}
           <div className="sticky h-0 top-4 z-20 pointer-events-none">
             {notifications.map(
               notification => (

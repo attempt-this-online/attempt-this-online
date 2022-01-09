@@ -1,13 +1,19 @@
 import { SearchIcon, XIcon } from '@heroicons/react/solid';
-import { useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { MetadataItem } from 'lib/api';
 
-export default function LanguageSelector({ languages, setLanguage, language, setLanguageSelectorOpen }: {
-    languages: Record<string, MetadataItem>,
-    setLanguage: (language: string) => void,
-    language: string | null,
-    setLanguageSelectorOpen: (state: boolean) => void
+export default function LanguageSelector({
+  languages, setLanguage, language, setLanguageSelectorOpen,
+}: {
+  languages: Record<string, MetadataItem>,
+  setLanguage: (language: string) => void,
+  language: string | null,
+  setLanguageSelectorOpen: (state: boolean) => void,
 }) {
+  const searchBox = useRef<HTMLInputElement | null>(null);
+  useEffect(() => {
+    searchBox.current?.focus?.();
+  }, []);
   const [search, setSearch] = useState('');
   const onSearchChange = (event: any) => {
     setSearch(event.target.value);
@@ -47,6 +53,7 @@ export default function LanguageSelector({ languages, setLanguage, language, set
             placeholder="Search"
             value={search}
             onChange={onSearchChange}
+            ref={searchBox}
           />
           <SearchIcon className="opacity-50 mr-2 my-auto h-6 w-6 inline-block" />
         </label>
