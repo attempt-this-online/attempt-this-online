@@ -42,6 +42,7 @@ export default function LanguageSelector({
           <h3 className="text-xl font-bold text-center">Select language</h3>
           {language !== null && (
             <button
+              type="button"
               onClick={() => { setLanguageSelectorOpen(false); }}
               className="absolute right-0 top-0 bottom-0 rounded-full bg-transparent hover:bg-gray-200 dark:hover:bg-gray-800 transition flex"
             >
