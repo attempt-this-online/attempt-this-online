@@ -29,12 +29,14 @@ export default function LanguageSelector({ languages, setLanguage, language, set
       >
         <div className="relative">
           <h3 className="text-xl font-bold text-center">Select language</h3>
-          <button
-            onClick={() => { setLanguageSelectorOpen(false); }}
-            className="absolute right-0 top-0 bottom-0 rounded-full bg-transparent hover:bg-gray-200 dark:hover:bg-gray-800 transition flex"
-          >
-            <XIcon className="h-5 w-5 inline-block mx-1 my-auto" />
-          </button>
+          {language !== null && (
+            <button
+              onClick={() => { setLanguageSelectorOpen(false); }}
+              className="absolute right-0 top-0 bottom-0 rounded-full bg-transparent hover:bg-gray-200 dark:hover:bg-gray-800 transition flex"
+            >
+              <XIcon className="h-5 w-5 inline-block mx-1 my-auto" />
+            </button>
+          )}
         </div>
         <label
           className="rounded mt-4 flex bg-gray-200 dark:bg-gray-800 focus-within:ring mx-2 transition"
