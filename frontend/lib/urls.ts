@@ -99,7 +99,7 @@ function load0(b64encoded: string): any {
 function load(query: any): any {
   const latestVersion = Object.keys(query).reduce((acc, key) => {
     const value = parseInt(key, 10);
-    if (isNaN(value) || value.toString() !== key) {
+    if (Number.isNaN(value) || value.toString() !== key) {
       // invalid integer
       return acc;
     }

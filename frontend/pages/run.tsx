@@ -337,7 +337,9 @@ function _Run(
     notify('Copied to clipboard!');
   };
 
-  const readyToSubmit = !submitting && language && codeEncoding && options !== null && programArguments !== null;
+  const readyToSubmit = (
+    !submitting && language && codeEncoding && options !== null && programArguments !== null
+  );
 
   const keyDownHandler = (e: any) => {
     if (readyToSubmit && e.ctrlKey && !e.shiftKey && !e.metaKey && !e.altKey && e.key === 'Enter') {
@@ -373,7 +375,7 @@ function _Run(
                 <div className="mr-4 my-auto" style={{ flexGrow: 99999 }}>
                   <span className="my-auto">
                     <span>
-                      Language: 
+                      Language:
                       {' '}
                     </span>
                     {languages && language && <a className="mx-2 text-blue-500 underline" href={languages[language].url}>{languages[language].name}</a>}

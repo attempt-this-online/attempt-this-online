@@ -105,12 +105,12 @@ async function runWs({
     });
 
     ws.send(msgpack.encode({
-        language,
-        code,
-        input,
-        options,
-        arguments: programArguments,
-        timeout,
+      language,
+      code,
+      input,
+      options,
+      arguments: programArguments,
+      timeout,
     }));
 
     const message = await new Promise<MessageEvent>(resolve => {
@@ -131,5 +131,7 @@ async function getMetadata() {
   return await msgpack.decodeAsync(response.body) as Record<string, MetadataItem>;
 }
 
-export { BASE_URL, run, getMetadata, runWs };
+export {
+  BASE_URL, run, getMetadata, runWs,
+};
 export type { RunAPIResponse, MetadataItem };
