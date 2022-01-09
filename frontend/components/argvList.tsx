@@ -52,7 +52,7 @@ function ArgvList({
       <label htmlFor={id} className="my-auto">
         {children}
       </label>
-      <div className="flex ml-3 flex-grow rounded bg-gray-100 dark:bg-gray-800 focus-within:ring">
+      <div className="flex ml-3 flex-grow rounded bg-gray-100 dark:bg-gray-800 focus-within:ring transition">
         <input
           type="text"
           placeholder="[]"

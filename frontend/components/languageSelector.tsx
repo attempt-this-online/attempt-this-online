@@ -6,7 +6,7 @@ export default function LanguageSelector({ languages, setLanguage, language, set
     languages: Record<string, MetadataItem>,
     setLanguage: (language: string) => void,
     language: string | null,
-    setLanguageSelectorOpen: (state: boolean) => void 
+    setLanguageSelectorOpen: (state: boolean) => void
 }) {
   const [search, setSearch] = useState('');
   const onSearchChange = (event: any) => {
@@ -33,7 +33,7 @@ export default function LanguageSelector({ languages, setLanguage, language, set
           </button>
         </div>
         <label
-          className="rounded mt-4 flex bg-gray-200 dark:bg-gray-800 focus-within:ring mx-2"
+          className="rounded mt-4 flex bg-gray-200 dark:bg-gray-800 focus-within:ring mx-2 transition"
           role="search"
         >
           <input

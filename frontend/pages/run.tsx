@@ -381,7 +381,7 @@ function _Run(
                   <button
                     type="button"
                     onClick={() => { setLanguageSelectorOpen(true); }}
-                    className="ml-1 rounded px-2 py-1 bg-gray-200 dark:bg-gray-700 focus:outline-none focus:ring"
+                    className="ml-1 rounded px-2 py-1 bg-gray-200 dark:bg-gray-700 focus:outline-none focus:ring transition"
                   >
                     Change
                   </button>
@@ -399,7 +399,7 @@ function _Run(
                   <button
                     type="button"
                     onClick={copyCGCCPost}
-                    className="rounded px-4 py-2 bg-blue-500 text-white flex focus:outline-none focus:ring disabled:ring-red-600 disabled:ring disabled:cursor-not-allowed"
+                    className="rounded px-4 py-2 bg-blue-500 text-white flex focus:outline-none focus:ring disabled:ring-red-600 disabled:ring disabled:cursor-not-allowed transition"
                   >
                     CGCC Post
                   </button>
@@ -468,7 +468,7 @@ function _Run(
               <div className="flex mb-6 items-center">
                 <button
                   type="submit"
-                  className="rounded px-4 py-2 bg-blue-500 text-white flex focus:outline-none focus:ring disabled:bg-gray-200 disabled:text-black dark:disabled:bg-gray-700 dark:disabled:text-white disabled:cursor-not-allowed"
+                  className="rounded px-4 py-2 bg-blue-500 text-white flex focus:outline-none focus:ring disabled:bg-gray-200 disabled:text-black dark:disabled:bg-gray-700 dark:disabled:text-white disabled:cursor-not-allowed transition"
                   onKeyDown={keyDownHandler}
                   disabled={!readyToSubmit}
                 >
