@@ -499,7 +499,6 @@ function _Run(
             </form>
             <CollapsibleText
               value={encodedStdout}
-              onChange={e => void e}
               encoding={stdoutEncoding}
               onEncodingChange={e => setStdoutEncoding(e.target.value)}
               id="stdout"
@@ -512,7 +511,6 @@ function _Run(
             </CollapsibleText>
             <CollapsibleText
               value={encodedStderr}
-              onChange={e => void e}
               encoding={stderrEncoding}
               onEncodingChange={e => setStderrEncoding(e.target.value)}
               id="stderr"

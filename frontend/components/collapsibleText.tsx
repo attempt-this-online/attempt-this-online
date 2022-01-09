@@ -15,7 +15,7 @@ function CollapsibleText({
   onKeyDown,
 }: {
   value: string,
-  onChange: (event: any) => void,
+  onChange?: (event: any) => void,
   encoding: string,
   onEncodingChange: (event: any) => void,
   id: string,
@@ -54,7 +54,7 @@ function CollapsibleText({
         <ResizeableText
           id={id}
           value={value}
-          onChange={event => { setModified(true); onChange(event); }}
+          onChange={event => { setModified(true); onChange?.(event); }}
           onKeyDown={onKeyDown}
           disabled={disabled}
           open={open}
