@@ -63,7 +63,7 @@ export default function LanguageSelector({
           />
           <SearchIcon className="opacity-50 mr-2 my-auto h-6 w-6 inline-block" />
         </label>
-        <div className="flex-grow overflow-y-auto mt-4 mb-2 mx-2 bg-gray-200 dark:bg-gray-800 rounded p-2" role="list">
+        <div className="flex-grow overflow-y-auto mt-4 mb-2 mx-2 bg-gray-200 dark:bg-gray-800 rounded p-2" role="listbox">
           {results && results.length > 0 ? results
             .sort(([_, { name: a }], [_2, { name: b }]) => (a < b ? -1 : a > b ? 1 : 0))
             .map(([id, { name }]) => (
@@ -71,7 +71,7 @@ export default function LanguageSelector({
                 key={id}
                 className="p-2 rounded flex cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700 transition"
                 onClick={() => { setLanguage(id); setLanguageSelectorOpen(false); }}
-                role="listitem"
+                role="option"
               >
                 <span className="flex-grow">{name}</span>
                 {id === language ? <span className="bg-gray-300 dark:bg-gray-700 -mx-2 -my-1 py-1 px-2 rounded">Selected</span> : null}
