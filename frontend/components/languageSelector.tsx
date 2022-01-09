@@ -67,15 +67,16 @@ export default function LanguageSelector({
           {results && results.length > 0 ? results
             .sort(([_, { name: a }], [_2, { name: b }]) => (a < b ? -1 : a > b ? 1 : 0))
             .map(([id, { name }]) => (
-              <div
+              <button
+                type="button"
                 key={id}
-                className="p-2 rounded flex cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700 transition"
+                className="p-2 rounded flex w-full text-left cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700 transition"
                 onClick={() => { setLanguage(id); setLanguageSelectorOpen(false); }}
                 role="option"
               >
                 <span className="flex-grow">{name}</span>
                 {id === language ? <span className="bg-gray-300 dark:bg-gray-700 -mx-2 -my-1 py-1 px-2 rounded">Selected</span> : null}
-              </div>
+              </button>
             )) : <p className="p-2 text-center">{results === null ? 'Loading...' : 'No results'}</p>}
         </div>
       </div>
