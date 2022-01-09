@@ -28,6 +28,11 @@ export default function LanguageSelector({
       onClick={
         (event: any) => { event.target === event.currentTarget && setLanguageSelectorOpen(false); }
       }
+      onKeyDown={(event: any) => {
+        if (event.key === 'Escape' && language !== null) {
+          setLanguageSelectorOpen(false);
+        }
+      }}
     >
       <div
         className="bg-gray-100 dark:bg-gray-900 rounded shadow-2xl w-full sm:w-10/12 mx-5 sm:mx-10 h-3/5 p-4 flex flex-col"
