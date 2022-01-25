@@ -298,24 +298,25 @@ function _Run(
     ],
   );
 
+  const getCurrentURL = () => save({
+    language,
+    options: optionsString,
+    header,
+    headerEncoding,
+    code,
+    codeEncoding,
+    footer,
+    footerEncoding,
+    programArguments: argsString,
+    input,
+    inputEncoding,
+  });
+
   const copyCGCCPost = () => {
     if (!language) {
       notify('Please select a language first!');
       return;
     }
-    const url = save({
-      language,
-      options: optionsString,
-      header,
-      headerEncoding,
-      code,
-      codeEncoding,
-      footer,
-      footerEncoding,
-      programArguments: argsString,
-      input,
-      inputEncoding,
-    });
     let syntaxHighlightingClass: string;
     if (languages[language].SE_class) {
       syntaxHighlightingClass = ` class="lang-${escape(languages[language].SE_class)}"`;
@@ -332,7 +333,20 @@ function _Run(
 
 <pre><code${syntaxHighlightingClass}>${escape(code)}</code></pre>
 
-[Attempt This Online!](https://ato.pxeger.com/run?${url})`);
+[Attempt This Online!](https://ato.pxeger.com/run?${getCurrentURL()})`);
+
+    notify('Copied to clipboard!');
+  };
+
+  const copyCMC = () => {
+    if (!language) {
+      notify('Please select a language first!');
+      return;
+    }
+    navigator.clipboard.writeText(
+      `${languages[language].name}, ${byteLength} ${pluralise('byte', byteLength)}:`
+      + ` [\`${code}\`](https://ato.pxeger.com/run?${getCurrentURL()})`
+    );
 
     notify('Copied to clipboard!');
   };
@@ -400,6 +414,13 @@ function _Run(
                     {' '}
                     {pluralise('byte', byteLength)}
                   </code>
+                  <button
+                    type="button"
+                    onClick={copyCMC}
+                    className="mr-4 rounded px-4 py-2 bg-gray-200 dark:bg-gray-700 text-white flex focus:outline-none focus:ring disabled:ring-red-600 disabled:ring disabled:cursor-not-allowed transition"
+                  >
+                    CMC
+                  </button>
                   <button
                     type="button"
                     onClick={copyCGCCPost}
