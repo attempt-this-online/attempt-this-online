@@ -6,7 +6,7 @@ import {
   SyntheticEvent, useMemo, useRef, useState, useEffect,
 } from 'react';
 import { escape, throttle } from 'lodash';
-import { ExclamationCircleIcon } from '@heroicons/react/solid';
+import { ExclamationCircleIcon, ClipboardCopyIcon, XIcon } from '@heroicons/react/solid';
 
 import CollapsibleText from 'components/collapsibleText';
 import ResizeableText from 'components/resizeableText';
@@ -312,11 +312,14 @@ function _Run(
     inputEncoding,
   });
 
+  const [clipboardCopyModalOpen, setClipboardCopyModalOpen] = useState(false);
+
   const copyCGCCPost = () => {
     if (!language) {
       notify('Please select a language first!');
       return;
     }
+    setClipboardCopyModalOpen(false);
     let syntaxHighlightingClass: string;
     if (languages[language].SE_class) {
       syntaxHighlightingClass = ` class="lang-${escape(languages[language].SE_class)}"`;
@@ -343,6 +346,7 @@ function _Run(
       notify('Please select a language first!');
       return;
     }
+    setClipboardCopyModalOpen(false);
     navigator.clipboard.writeText(
       `${languages[language].name}, ${byteLength} ${pluralise('byte', byteLength)}:`
       + ` [\`${code}\`](https://ato.pxeger.com/run?${getCurrentURL()})`
@@ -404,7 +408,7 @@ function _Run(
                     Change
                   </button>
                 </div>
-                <div className="flex flex-grow justify-between">
+                <div className="flex flex-grow justify-between relative">
                   <code className="my-auto mr-4 font-mono bg-gray-200 dark:bg-gray-800 px-2 py-px rounded">
                     {code.length}
                     {' '}
@@ -416,18 +420,43 @@ function _Run(
                   </code>
                   <button
                     type="button"
-                    onClick={copyCMC}
-                    className="mr-4 rounded px-4 py-2 bg-gray-200 dark:bg-gray-700 text-white flex focus:outline-none focus:ring disabled:ring-red-600 disabled:ring disabled:cursor-not-allowed transition"
+                    onClick={() => { setClipboardCopyModalOpen(!clipboardCopyModalOpen); }}
+                    className="rounded p-2 bg-blue-500 text-white focus:outline-none focus:ring disabled:ring-red-600 disabled:ring disabled:cursor-not-allowed transition"
                   >
-                    CMC
+                    <ClipboardCopyIcon className="w-6 h-6" />
                   </button>
-                  <button
-                    type="button"
-                    onClick={copyCGCCPost}
-                    className="rounded px-4 py-2 bg-blue-500 text-white flex focus:outline-none focus:ring disabled:ring-red-600 disabled:ring disabled:cursor-not-allowed transition"
-                  >
-                    CGCC Post
-                  </button>
+                  {clipboardCopyModalOpen && (
+                    <fieldset
+                      className="absolute top-14 right-0 bg-gray-200 dark:bg-gray-800 p-4 rounded ring-gray-300 dark:ring-gray-700 ring shadow-lg z-40 flex flex-col w-max"
+                    >
+                      <h3 className="-mt-1 mb-2 flex relative">
+                        <legend>Copy to clipboard</legend>
+                        <button
+                          type="button"
+                          onClick={() => { setClipboardCopyModalOpen(false); }}
+                          className="absolute top-0 -right-1 bottom-0 p-1 rounded-full bg-transparent hover:bg-gray-300 dark:hover:bg-gray-700 transition flex"
+                        >
+                          <XIcon className="h-4 w-4" />
+                        </button>
+                      </h3>
+                      <div className="m-auto flex">
+                        <button
+                          type="button"
+                          onClick={copyCMC}
+                          className="mr-4 rounded px-4 py-2 bg-gray-300 dark:bg-gray-700 dark:text-white hover:bg-gray-400 dark:hover:bg-gray-600 focus:outline-none focus:ring disabled:ring-red-600 disabled:ring disabled:cursor-not-allowed transition"
+                        >
+                          <abbr title="Chat Mini Challenge">CMC</abbr>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={copyCGCCPost}
+                          className="rounded px-4 py-2 bg-gray-300 dark:bg-gray-700 dark:text-white hover:bg-gray-400 dark:hover:bg-gray-600 focus:outline-none focus:ring disabled:ring-red-600 disabled:ring disabled:cursor-not-allowed transition"
+                        >
+                          <abbr title="Code Golf and Coding Challenges (StackExchange)">CGCC</abbr> Post
+                        </button>
+                      </div>
+                    </fieldset>
+                  )}
                 </div>
               </div>
               <div className="pt-3 pb-1">
