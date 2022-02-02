@@ -119,4 +119,11 @@ var Languages = map[string]language{
 		Url:     "https://funky2.a-ta.co/",
 		Sbcs:    false,
 	},
+	"c_gcc": {
+		Name:    "C (GCC)",
+		Image:   "attemptthisonline/base",
+		Version: "11",
+		Url:     "https://gcc.gnu.org",
+		Sbcs:    false,
+	},
 }
