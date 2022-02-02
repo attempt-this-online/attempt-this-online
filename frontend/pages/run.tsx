@@ -452,7 +452,7 @@ function _Run(
                           onClick={copyCGCCPost}
                           className="rounded px-4 py-2 bg-gray-300 dark:bg-gray-700 dark:text-white hover:bg-gray-400 dark:hover:bg-gray-600 focus:outline-none focus:ring disabled:ring-red-600 disabled:ring disabled:cursor-not-allowed transition"
                         >
-                          <abbr title="Code Golf and Coding Challenges (StackExchange)">CGCC</abbr> Post
+                          <abbr title="Code Golf and Coding Challenges (Stack Exchange)">CGCC</abbr> Post
                         </button>
                       </div>
                     </fieldset>
