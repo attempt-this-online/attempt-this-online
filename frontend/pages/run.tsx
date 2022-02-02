@@ -427,7 +427,7 @@ function _Run(
                   </button>
                   {clipboardCopyModalOpen && (
                     <fieldset
-                      className="absolute top-14 right-0 bg-gray-200 dark:bg-gray-800 p-4 rounded ring-gray-300 dark:ring-gray-700 ring shadow-lg z-40 flex flex-col w-max"
+                      className="absolute top-14 right-0 bg-gray-200 dark:bg-gray-800 p-4 rounded ring-blue-500 ring-opacity-40 ring shadow-lg z-40 flex flex-col w-max"
                     >
                       <h3 className="-mt-1 mb-2 flex relative">
                         <legend>Copy to clipboard</legend>
