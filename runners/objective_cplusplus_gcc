@@ -1,0 +1,6 @@
+#!/bin/sh
+
+cd /ATO/context
+ln -s /ATO/code /ATO/code.mm
+/ATO/yargs % /ATO/options gcc % /ATO/code.mm -o /ATO/exe
+/ATO/yargs % /ATO/arguments /ATO/exe % < /ATO/input

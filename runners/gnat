@@ -1,0 +1,6 @@
+#!/bin/sh
+
+cd /ATO/context
+ln -s /ATO/code /ATO/main.adb
+/ATO/yargs % /ATO/options gnatmake % /ATO/main.adb -o /ATO/exe
+/ATO/yargs % /ATO/arguments /ATO/exe % < /ATO/input

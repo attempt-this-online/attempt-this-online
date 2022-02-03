@@ -1,0 +1,6 @@
+#!/bin/sh
+
+cd /ATO/context
+ln -s /ATO/code /ATO/code.f90
+/ATO/yargs % /ATO/options gfortran % /ATO/code.f90 -o /ATO/exe
+/ATO/yargs % /ATO/arguments /ATO/exe % < /ATO/input
