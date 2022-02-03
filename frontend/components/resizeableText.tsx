@@ -25,12 +25,14 @@ export default function ResizeableText(
     if (dummy.current) {
       dummy.current.value = event.target.value;
       setHeight(dummy.current.scrollHeight);
+      dummy.current.value = '';
     }
   };
   useEffect(() => {
     if (dummy.current) {
       dummy.current.value = value;
       setHeight(dummy.current.scrollHeight);
+      dummy.current.value = '';
     }
   }, [dummy, value, open]);
   return (
