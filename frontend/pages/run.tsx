@@ -313,6 +313,8 @@ function _Run(
   });
 
   const [clipboardCopyModalOpen, setClipboardCopyModalOpen] = useState(false);
+  const clipboardCopyModal = useRef(null);
+  const clipboardCopyButton = useRef(null);
 
   const copyCGCCPost = () => {
     if (!language) {
@@ -421,6 +423,12 @@ function _Run(
                   <button
                     type="button"
                     onClick={() => { setClipboardCopyModalOpen(!clipboardCopyModalOpen); }}
+                    onBlur={() => {
+                      if (clipboardCopyModal.current && !clipboardCopyModal.current.contains(event.relatedTarget)) {
+                        setClipboardCopyModalOpen(false);
+                      }
+                    }}
+                    ref={clipboardCopyButton}
                     className="rounded p-2 bg-blue-600 hover:bg-blue-500 text-white focus:outline-none focus:ring disabled:ring-red-600 disabled:ring disabled:cursor-not-allowed transition"
                   >
                     <ClipboardCopyIcon className="w-6 h-6" />
@@ -428,6 +436,13 @@ function _Run(
                   {clipboardCopyModalOpen && (
                     <fieldset
                       className="absolute top-14 right-0 bg-gray-200 dark:bg-gray-800 p-4 rounded ring-blue-500 ring-opacity-40 ring shadow-lg z-40 flex flex-col w-max"
+                      onBlur={() => {
+                        if (clipboardCopyButton.current && !clipboardCopyButton.current.contains(event.relatedTarget)) {
+                          setClipboardCopyModalOpen(false);
+                        }
+                      }}
+                      ref={clipboardCopyModal}
+                      tabIndex={-1 /* https://stackoverflow.com/q/42764494 */}
                     >
                       <h3 className="-mt-1 mb-2 flex relative">
                         <legend>Copy to clipboard</legend>
