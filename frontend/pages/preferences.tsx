@@ -30,13 +30,13 @@ export default function Preferences() {
       <div className="min-h-screen bg-white dark:bg-gray-900 text-black dark:text-white pt-8 relative flex flex-col">
         <main
           // only included here to provide instant feedback when changing full width mode
-          className={`mb-3 px-4 flex-grow${fullWidthMode ? '' : ' md:container md:mx-auto'}`}
+          className={`mb-3 px-4 grow${fullWidthMode ? '' : ' md:container md:mx-auto'}`}
         >
           <header className="flex mb-2">
             <button className="my-auto p-2 transition hover:bg-gray-300 dark:hover:bg-gray-600 rounded-full" type="button" onClick={() => router.back()}>
               <ArrowLeftIcon className="w-8 h-8 inline" />
             </button>
-            <h1 className="flex-grow my-auto text-4xl md:text-center font-bold">
+            <h1 className="grow my-auto text-4xl md:text-center font-bold">
               Preferences
             </h1>
             <div className="w-12 h-12 inline" />

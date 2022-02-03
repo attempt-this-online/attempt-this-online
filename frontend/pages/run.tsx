@@ -373,7 +373,7 @@ function _Run(
       </Head>
       <div className="min-h-screen bg-white dark:bg-gray-900 text-black dark:text-white relative flex flex-col">
         <Navbar />
-        <div className="flex-grow relative">
+        <div className="grow relative">
           {languageSelectorOpen ? (
             <LanguageSelector {...{ language, languages, setLanguage, setLanguageSelectorOpen }} />
           ) : null}
@@ -410,7 +410,7 @@ function _Run(
                     Change
                   </button>
                 </div>
-                <div className="flex flex-grow justify-between relative">
+                <div className="flex grow justify-between relative">
                   <code className="my-auto mr-4 font-mono bg-gray-200 dark:bg-gray-800 px-2 py-px rounded">
                     {code.length}
                     {' '}

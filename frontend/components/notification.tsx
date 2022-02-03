@@ -5,7 +5,7 @@ export default function Notification(
 ) {
   return (
     <div className="rounded p-3 bg-gray-200 dark:bg-gray-700 shadow-md mx-auto mb-4 flex max-w-full w-80 pointer-events-auto">
-      <div className="flex-grow">
+      <div className="grow">
         {children}
       </div>
       <button type="button" className="transition hover:bg-gray-300 dark:hover:bg-gray-600 rounded-full focus:outline-none px-1" onClick={onClick}>

@@ -63,7 +63,7 @@ export default function LanguageSelector({
           />
           <SearchIcon className="opacity-50 mr-2 my-auto h-6 w-6 inline-block" />
         </label>
-        <div className="flex-grow overflow-y-auto mt-4 mb-2 mx-2 bg-gray-200 dark:bg-gray-800 rounded p-2" role="listbox">
+        <div className="grow overflow-y-auto mt-4 mb-2 mx-2 bg-gray-200 dark:bg-gray-800 rounded p-2" role="listbox">
           {results && results.length > 0 ? results
             .sort(([_, { name: a }], [_2, { name: b }]) => (a < b ? -1 : a > b ? 1 : 0))
             .map(([id, { name }]) => (
@@ -74,7 +74,7 @@ export default function LanguageSelector({
                 onClick={() => { setLanguage(id); setLanguageSelectorOpen(false); }}
                 role="option"
               >
-                <span className="flex-grow">{name}</span>
+                <span className="grow">{name}</span>
                 {id === language ? <span className="bg-gray-300 dark:bg-gray-700 -mx-2 -my-1 py-1 px-2 rounded">Selected</span> : null}
               </button>
             )) : <p className="p-2 text-center">{results === null ? 'Loading...' : 'No results'}</p>}

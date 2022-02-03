@@ -11,7 +11,7 @@ export default function Home() {
       </Head>
       <div className="min-h-screen bg-white dark:bg-gray-900 text-black dark:text-white relative flex flex-col">
         <Navbar />
-        <main className="my-3 px-8 md:container md:mx-auto flex-grow pb-2">
+        <main className="my-3 px-8 md:container md:mx-auto grow pb-2">
           <article id="privacy-policy">
             <h1 className="mb-4 text-4xl font-bold">Privacy Policy</h1>
             <aside className="text-justify italic mb-3">
