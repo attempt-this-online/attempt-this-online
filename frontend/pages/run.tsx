@@ -429,7 +429,7 @@ function _Run(
                       }
                     }}
                     ref={clipboardCopyButton}
-                    className="rounded p-2 bg-blue-600 hover:bg-blue-500 text-white focus:outline-none focus:ring disabled:ring-red-600 disabled:ring disabled:cursor-not-allowed transition"
+                    className="rounded p-2 bg-blue-500 hover:bg-blue-400 text-white focus:outline-none focus:ring disabled:ring-red-600 disabled:ring disabled:cursor-not-allowed transition"
                   >
                     <ClipboardCopyIcon className="w-6 h-6" />
                   </button>
@@ -537,7 +537,7 @@ function _Run(
               <div className="flex mb-6 items-center">
                 <button
                   type="submit"
-                  className="rounded px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white flex focus:outline-none focus:ring disabled:bg-gray-200 disabled:text-black dark:disabled:bg-gray-700 dark:disabled:text-white disabled:cursor-not-allowed transition"
+                  className="rounded px-4 py-2 bg-blue-500 hover:bg-blue-400 text-white flex focus:outline-none focus:ring disabled:bg-gray-200 disabled:text-black dark:disabled:bg-gray-700 dark:disabled:text-white disabled:cursor-not-allowed transition"
                   onKeyDown={keyDownHandler}
                   disabled={!readyToSubmit}
                 >
