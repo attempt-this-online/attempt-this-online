@@ -403,7 +403,7 @@ function _Run(
                   <button
                     type="button"
                     onClick={() => { setLanguageSelectorOpen(true); }}
-                    className="ml-1 rounded px-2 py-1 bg-gray-200 dark:bg-gray-700 focus:outline-none focus:ring transition"
+                    className="ml-1 rounded px-2 py-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none focus:ring hover:bg-gray-300 transition"
                   >
                     Change
                   </button>
