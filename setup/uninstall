@@ -4,7 +4,6 @@ systemctl disable --now ATO.service nginx.service
 sed -i '/^overlay/d' /etc/fstab
 sed -i '/certbot renew && systemctl reload nginx/d' /var/spool/cron/root
 umount /usr/local/lib/ATO/rootfs/*
-pkill -9 uvicorn
 userdel ato
 rm -rf \
     /var/cache/ATO \
