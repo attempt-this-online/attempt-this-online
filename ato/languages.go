@@ -175,4 +175,11 @@ var Languages = map[string]language{
 		Url:     "https://gdcproject.org",
 		Sbcs:    false,
 	},
+	"node": {
+		Name:    "JavaScript (Node.js)",
+		Image:   "attemptthisonline/node",
+		Version: "Latest",
+		Url:     "https://nodejs.org",
+		Sbcs:    false,
+	},
 }
