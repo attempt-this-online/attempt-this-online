@@ -34,7 +34,7 @@ whoami | grep -xFq root || error you must run this script as root
 # - skopeo: for docker image extraction
 # - sudo: privilege management for sandboxing
 # - zsh: for running the runner scripts
-pacman -Syu --noconfirm --needed \
+[ -z "$ATO_NO_DEPS" ] && pacman -Syu --noconfirm --needed \
     base-devel \
     bubblewrap \
     certbot \
@@ -61,13 +61,17 @@ fi
 cd /var/cache/ATO
 
 # install libcgroup
-git clone https://aur.archlinux.org/libcgroup.git
-# makepkg doesn't allow running as root, so use `nobody`
-chown -R nobody:nobody libcgroup
-cd libcgroup
-sudo -u nobody makepkg --skippgpcheck
-pacman -U --noconfirm --needed libcgroup-*.pkg.tar.zst
-cd ../attempt_this_online
+if [ -z "$ATO_NO_DEPS" ]; then
+    git clone https://aur.archlinux.org/libcgroup.git
+    # makepkg doesn't allow running as root, so use `nobody`
+    chown -R nobody:nobody libcgroup
+    cd libcgroup
+    sudo -u nobody makepkg --skippgpcheck
+    pacman -U --noconfirm --needed libcgroup-*.pkg.tar.zst
+    cd ..
+fi
+
+cd attempt_this_online
 
 mkdir -p \
     /usr/local/lib/ATO \
