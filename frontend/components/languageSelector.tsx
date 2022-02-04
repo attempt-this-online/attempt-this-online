@@ -73,6 +73,7 @@ export default function LanguageSelector({
                 className="p-2 rounded flex w-full text-left cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700 transition"
                 onClick={() => { setLanguage(id); setLanguageSelectorOpen(false); }}
                 role="option"
+                aria-selected={id === language}
               >
                 <span className="grow">{name}</span>
                 {id === language ? <span className="bg-gray-300 dark:bg-gray-700 -mx-2 -my-1 py-1 px-2 rounded">Selected</span> : null}
