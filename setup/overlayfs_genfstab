@@ -9,15 +9,12 @@ import json
 import os
 import sys
 
-manifest = sys.argv[1]
+image = sys.argv[1]
 
-with open("/var/cache/ATO/images/" + manifest) as f:
+with open("/var/cache/ATO/images/manifest.json") as f:
     layers = json.load(f)[0]["Layers"]
 
-# TODO: does this need to be reversed?
-layers = ":".join("/usr/local/lib/ATO/layers/" + layer.removesuffix("/layer.tar") for layer in layers[::-1])
-
-image = manifest.removeprefix("manifest_").removesuffix(".json")
+layers = ":".join("/usr/local/lib/ATO/layers/" + layer.removesuffix(".tar") for layer in layers[::-1])
 
 # Create mount point
 os.makedirs(f"/usr/local/lib/ATO/rootfs/{image}", exist_ok=True)

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 set -e
 
@@ -26,13 +26,12 @@ whoami | grep -xFq root || error you must run this script as root
 # - bubblewrap: primary sandboxing mechanism
 # - certbot: generate SSL certificates for nginx
 # - cronie: automate renewal of certbot certificates, cache cleaning, etc.
-# - fuse-overlayfs: union filesystem
-# - docker: to extract images of the various languages
 # - git: to download libcgroup
 # - nginx: web server
 # - nginx-mod-modsecurity: web application firewall
 # - python: runtime for API
 # - sed: configuration editing on installation
+# - skopeo: for docker image extraction
 # - sudo: privilege management for sandboxing
 # - zsh: for running the runner scripts
 pacman -Syu --noconfirm --needed \
@@ -40,12 +39,12 @@ pacman -Syu --noconfirm --needed \
     bubblewrap \
     certbot \
     cronie \
-    docker \
     git \
     nginx \
     nginx-mod-modsecurity \
     python \
     sed \
+    skopeo \
     sudo \
     zsh
 
@@ -131,6 +130,7 @@ systemctl enable --now cronie.service
 install -m 555 -o root -g root yargs /usr/local/bin/ATO_yargs
 
 # steal a statically linked bash from Debian
+# TODO: do this without needing docker
 systemctl start docker.service
 docker run --rm debian bash -c '{ apt-get update; apt-get install bash-static; } >/dev/null 2>&1; cat /bin/bash-static' > /usr/local/bin/ATO_bash
 chown root:root /usr/local/bin/ATO_bash
@@ -145,6 +145,7 @@ systemctl enable ATO.service
 
 # generate flags to be used as proof of compromise
 flag() {
+    # shellcheck disable=SC2018
     tr < /dev/urandom -dc a-z | head -c 32 > "$1"
     chown "$2" "$1"
     chmod 400 "$1"
@@ -159,48 +160,45 @@ mkdir -p /usr/local/share/ATO/overlayfs_upper/ATO /usr/local/share/ATO/overlayfs
 echo Finished system setup.
 echo Now extracting Docker images - this will take a long time...
 
-systemctl start docker.service
-
-mkdir -p /usr/local/lib/ATO/env
+mkdir -p /usr/local/lib/ATO/env /usr/local/lib/ATO/layers
 mkdir -p /var/cache/ATO/images
 while read -r image
 do
     # ignore blank lines or comments
     [ -z "$image" ] || [ "$image" = "#" ] && continue
     echo "$image"
+
+    skopeo copy docker://"$image" docker-archive:>(tar -xC /var/cache/ATO/images)
+    # shellcheck disable=SC2010
+    ls /var/cache/ATO/images |
+    grep -Ex '[0-9a-f]+\.tar' |
+        while read -r filename
+        do
+            # skip duplicate layers
+            layer_id="${filename%.tar}"
+            [ -d "/usr/local/lib/ATO/layers/$layer_id" ] && continue
+            mkdir "/usr/local/lib/ATO/layers/$layer_id"
+            tar -xf "/var/cache/ATO/images/$layer_id.tar" -C \
+                "/usr/local/lib/ATO/layers/$layer_id"
+            rm "/var/cache/ATO/images/$layer_id.tar"
+        done
+
     # replace slash with plus so that it can be used as an individual filename
     image_pathsafe="$(echo "$image" | tr '/' '+')"
-    docker pull "$image"
-    docker save "$image" | tar -xC /var/cache/ATO/images
-    mv /var/cache/ATO/images/manifest.json "/var/cache/ATO/images/manifest_$image_pathsafe.json"
+    setup/overlayfs_genfstab "$image_pathsafe" >> /etc/fstab
+
     # extract environment variables from the image
-    docker image inspect -f '{{json .Config.Env}}' "$image" | setup/parse_env > "/usr/local/lib/ATO/env/$image_pathsafe"
+    skopeo inspect docker://"$image" | setup/parse_env > "/usr/local/lib/ATO/env/$image_pathsafe"
+
+    rm /var/cache/ATO/images/manifest.json
+
 done < images.txt
-
-# shellcheck disable=SC2010
-ls /var/cache/ATO/images | 
-grep -Ex '[0-9a-f]+' |
-    while read -r layer
-    do
-        mkdir -p "/usr/local/lib/ATO/layers/$layer"
-        tar -xf "/var/cache/ATO/images/$layer/layer.tar" -C \
-            "/usr/local/lib/ATO/layers/$layer"
-        rm "/var/cache/ATO/images/$layer/layer.tar"
-    done
-
-# shellcheck disable=SC2010
-ls /var/cache/ATO/images |
-grep -Ex 'manifest_.+\.json' |
-    while read -r manifest
-    do
-        setup/overlayfs_genfstab "$manifest" >> /etc/fstab
-    done
 
 echo Finished extracting images.
 echo Clearing up...
 
-systemctl disable --now docker.service docker.socket
 cd /
+rm -rf /var/cache/ATO
 
 echo Starting up services...
 # mount all overlayfs
