@@ -313,8 +313,8 @@ function _Run(
   });
 
   const [clipboardCopyModalOpen, setClipboardCopyModalOpen] = useState(false);
-  const clipboardCopyModal = useRef(null);
-  const clipboardCopyButton = useRef(null);
+  const clipboardCopyModal = useRef<any>(null);
+  const clipboardCopyButton = useRef<any>(null);
 
   const copyCGCCPost = () => {
     if (!language) {
@@ -423,7 +423,7 @@ function _Run(
                   <button
                     type="button"
                     onClick={() => { setClipboardCopyModalOpen(!clipboardCopyModalOpen); }}
-                    onBlur={() => {
+                    onBlur={(event: any) => {
                       if (clipboardCopyModal.current && !clipboardCopyModal.current.contains(event.relatedTarget)) {
                         setClipboardCopyModalOpen(false);
                       }
@@ -436,7 +436,7 @@ function _Run(
                   {clipboardCopyModalOpen && (
                     <fieldset
                       className="absolute top-14 right-0 bg-gray-200 dark:bg-gray-800 p-4 rounded ring-blue-500 ring-opacity-40 ring shadow-lg z-40 flex flex-col w-max"
-                      onBlur={() => {
+                      onBlur={(event: any) => {
                         if (clipboardCopyButton.current && !clipboardCopyButton.current.contains(event.relatedTarget)) {
                           setClipboardCopyModalOpen(false);
                         }
