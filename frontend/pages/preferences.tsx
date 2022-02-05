@@ -89,7 +89,7 @@ export default function Preferences() {
                 <input type="checkbox" className="mr-2" checked={bigTextBoxes} onChange={handleBigTextBoxesChange} />
                 Big text boxes
               </label>
-              <div className="mx-6">
+              <div className="md:mx-6">
                 <ResizeableText
                   id="demo"
                   value={`Demo of ${bigTextBoxes ? 'big' : 'small'} text box`}
