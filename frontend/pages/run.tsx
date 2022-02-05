@@ -298,19 +298,23 @@ function _Run(
     ],
   );
 
-  const getCurrentURL = () => save({
-    language,
-    options: optionsString,
-    header,
-    headerEncoding,
-    code,
-    codeEncoding,
-    footer,
-    footerEncoding,
-    programArguments: argsString,
-    input,
-    inputEncoding,
-  });
+  const getCurrentURL = () => {
+    const saveCode = save({
+      language,
+      options: optionsString,
+      header,
+      headerEncoding,
+      code,
+      codeEncoding,
+      footer,
+      footerEncoding,
+      programArguments: argsString,
+      input,
+      inputEncoding,
+    });
+    const baseUrl = window.location.host + window.location.pathname;
+    return `https://${baseUrl}?${saveCode}`
+  };
 
   const [clipboardCopyModalOpen, setClipboardCopyModalOpen] = useState(false);
   const clipboardCopyModal = useRef<any>(null);
@@ -338,7 +342,7 @@ function _Run(
 
 <pre><code${syntaxHighlightingClass}>${escape(code)}</code></pre>
 
-[Attempt This Online!](https://ato.pxeger.com/run?${getCurrentURL()})`);
+[Attempt This Online!](${getCurrentURL()})`);
 
     notify('Copied to clipboard!');
   };
@@ -351,7 +355,7 @@ function _Run(
     setClipboardCopyModalOpen(false);
     navigator.clipboard.writeText(
       `${languages[language].name}, ${byteLength} ${pluralise('byte', byteLength)}:`
-      + ` [\`${code}\`](https://ato.pxeger.com/run?${getCurrentURL()})`
+      + ` [\`${code}\`](${getCurrentURL()})`
     );
 
     notify('Copied to clipboard!');
