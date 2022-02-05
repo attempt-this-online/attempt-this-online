@@ -76,9 +76,8 @@ export default function Preferences() {
                 <input type="checkbox" className="mr-2" checked={fontLigaturesEnabled} onChange={handleFontLigaturesChange} />
                 Font Ligatures
               </label>
-              <span className="ml-1">
+              <span className="mx-1">
                 (demo:
-                {' '}
               </span>
               <span>
                 <code className="bg-gray-200 dark:bg-gray-800 px-2 py-px rounded">{'<-> </> :: ||> #! ++ /* */ 0xFF != www'}</code>
