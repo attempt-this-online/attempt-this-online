@@ -36,6 +36,12 @@ const ThemeWrapper = connect(
       storedFullWidthMode = false;
     }
     dispatch({ type: 'setFullWidthMode', fullWidthMode: storedFullWidthMode });
+    let storedBigTextBoxes = await localForage.getItem('ATO_big_text_boxes');
+    if (typeof storedBigTextBoxes !== 'boolean') {
+      storedBigTextBoxes = false;
+    }
+    dispatch({ type: 'setBigTextBoxes', bigTextBoxes: storedBigTextBoxes });
+
     dispatch({ type: 'setLanguagesMetadata', metadata: await API.getMetadata() });
   }) as (() => void), []);
   const systemThemePreference = useSystemThemePreference();

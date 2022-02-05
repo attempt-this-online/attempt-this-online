@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from 'react-redux';
 
 import useSystemThemePreference from 'lib/useSystemThemePreference';
 import Footer from 'components/footer';
+import ResizeableText from 'components/resizeableText';
 
 export default function Preferences() {
   const router = useRouter();
@@ -21,6 +22,10 @@ export default function Preferences() {
   const fullWidthMode = useSelector((state: any) => state.fullWidthMode);
   const handleFullWidthModeChange = async (event: any) => {
     dispatch({ type: 'setFullWidthMode', fullWidthMode: event.target.checked });
+  };
+  const bigTextBoxes = useSelector((state: any) => state.bigTextBoxes);
+  const handleBigTextBoxesChange = async (event: any) => {
+    dispatch({ type: 'setBigTextBoxes', bigTextBoxes: event.target.checked });
   };
   return (
     <>
@@ -79,6 +84,19 @@ export default function Preferences() {
                 <code className="bg-gray-200 dark:bg-gray-800 px-2 py-px rounded">{'<-> </> :: ||> #! ++ /* */ 0xFF != www'}</code>
                 )
               </span>
+            </div>
+            <div className="mt-3">
+              <label className="flex">
+                <input type="checkbox" className="mr-2" checked={bigTextBoxes} onChange={handleBigTextBoxesChange} />
+                Big text boxes
+              </label>
+              <div className="mx-6">
+                <ResizeableText
+                  id="demo"
+                  value={`Demo of ${bigTextBoxes ? 'big' : 'small'} text box`}
+                  disabled={true}
+                />
+              </div>
             </div>
             <div className="flex mt-3">
               <label className="flex">

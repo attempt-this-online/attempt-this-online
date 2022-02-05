@@ -15,6 +15,7 @@ const initialState = {
   fullWidthMode: false,
   theme: 'system',
   fontLigaturesEnabled: true,
+  bigTextBoxes: true,
 };
 
 const reducer = (state = initialState, action: any) => {
@@ -41,6 +42,12 @@ const reducer = (state = initialState, action: any) => {
       return {
         ...state,
         fullWidthMode: action.fullWidthMode!,
+      };
+    case 'setBigTextBoxes':
+      localForage.setItem('ATO_big_text_boxes', action.bigTextBoxes!);
+      return {
+        ...state,
+        bigTextBoxes: action.bigTextBoxes!,
       };
     default:
       return state;
