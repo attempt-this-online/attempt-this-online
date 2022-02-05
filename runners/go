@@ -1,0 +1,7 @@
+#!/bin/sh
+
+cd /ATO/context
+ln -s /ATO/code /ATO/code.go
+mkdir /ATO/go /ATO/tmp
+export GOPATH=/ATO/go TMPDIR=/ATO/tmp GOCACHE=/ATO/tmp
+/ATO/yargs %1 /ATO/options /ATO/yargs %2 /ATO/arguments go run %1 /ATO/code.go %2 < /ATO/input

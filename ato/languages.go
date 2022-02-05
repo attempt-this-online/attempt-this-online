@@ -189,4 +189,11 @@ var Languages = map[string]language{
 		Url:     "https://github.com/Vyxal/Vyxal",
 		Sbcs:    false,
 	},
+	"go": {
+		Name:    "Go",
+		Image:   "attemptthisonline/go",
+		Version: "Latest",
+		Url:     "https://go.dev",
+		Sbcs:    false,
+	},
 }
