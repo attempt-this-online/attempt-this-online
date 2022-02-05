@@ -9,12 +9,6 @@ module.exports = {
         sans: ['Cantarell', 'Fira Sans', 'Roboto', 'Ubuntu', ...defaultTheme.fontFamily.mono],
         mono: ['Fira Code', ...defaultTheme.fontFamily.mono],
       },
-      maxWidth: {
-        qu: '25vw',
-      },
-      minHeight: {
-        6: '6rem',
-      },
     },
   },
   plugins: [],
