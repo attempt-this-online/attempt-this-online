@@ -196,4 +196,11 @@ var Languages = map[string]language{
 		Url:     "https://go.dev",
 		Sbcs:    false,
 	},
+	"perl": {
+		Name:    "Perl",
+		Image:   "attemptthisonline/perl",
+		Version: "Latest",
+		Url:     "https://www.perl.org",
+		Sbcs:    false,
+	},
 }
