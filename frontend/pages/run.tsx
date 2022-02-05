@@ -433,7 +433,7 @@ function _Run(
                       }
                     }}
                     ref={clipboardCopyButton}
-                    className="rounded p-2 bg-blue-500 hover:bg-blue-400 text-white focus:outline-none focus:ring disabled:ring-red-600 disabled:ring disabled:cursor-not-allowed transition"
+                    className="rounded p-2 bg-blue-500 hover:bg-blue-400 text-white focus:outline-none focus:ring transition"
                   >
                     <ClipboardCopyIcon className="w-6 h-6" />
                   </button>
@@ -462,14 +462,14 @@ function _Run(
                         <button
                           type="button"
                           onClick={copyCMC}
-                          className="mr-4 rounded px-4 py-2 bg-gray-300 dark:bg-gray-700 dark:text-white hover:bg-gray-400 dark:hover:bg-gray-600 focus:outline-none focus:ring disabled:ring-red-600 disabled:ring disabled:cursor-not-allowed transition"
+                          className="mr-4 rounded px-4 py-2 bg-gray-300 dark:bg-gray-700 dark:text-white hover:bg-gray-400 dark:hover:bg-gray-600 focus:outline-none focus:ring transition"
                         >
                           <abbr title="Chat Mini Challenge">CMC</abbr>
                         </button>
                         <button
                           type="button"
                           onClick={copyCGCCPost}
-                          className="rounded px-4 py-2 bg-gray-300 dark:bg-gray-700 dark:text-white hover:bg-gray-400 dark:hover:bg-gray-600 focus:outline-none focus:ring disabled:ring-red-600 disabled:ring disabled:cursor-not-allowed transition"
+                          className="rounded px-4 py-2 bg-gray-300 dark:bg-gray-700 dark:text-white hover:bg-gray-400 dark:hover:bg-gray-600 focus:outline-none focus:ring transition"
                         >
                           <abbr title="Code Golf and Coding Challenges (Stack Exchange)">CGCC</abbr> Post
                         </button>
