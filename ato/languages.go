@@ -203,4 +203,11 @@ var Languages = map[string]language{
 		Url:     "https://www.perl.org",
 		Sbcs:    false,
 	},
+	"php": {
+		Name:    "PHP",
+		Image:   "attemptthisonline/php",
+		Version: "Latest",
+		Url:     "https://www.php.net",
+		Sbcs:    false,
+	},
 }
