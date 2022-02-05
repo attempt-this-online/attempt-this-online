@@ -26,7 +26,11 @@ export default function LanguageSelector({
     <div
       className="fixed flex items-center justify-center overflow-auto z-50 bg-black bg-opacity-40 left-0 right-0 top-0 bottom-0"
       onClick={
-        (event: any) => { event.target === event.currentTarget && setLanguageSelectorOpen(false); }
+        (event: any) => {
+          if (event.target === event.currentTarget && language !== null) {
+              setLanguageSelectorOpen(false);
+          }
+        }
       }
       onKeyDown={(event: any) => {
         if (event.key === 'Escape' && language !== null) {
