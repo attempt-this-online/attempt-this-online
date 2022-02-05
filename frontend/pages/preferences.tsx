@@ -66,7 +66,7 @@ export default function Preferences() {
                 <option value="light">Light</option>
               </select>
             </div>
-            <div className="flex mt-3">
+            <div className="flex flex-wrap mt-3">
               <label className="flex">
                 <input type="checkbox" className="mr-2" checked={fontLigaturesEnabled} onChange={handleFontLigaturesChange} />
                 Font Ligatures
@@ -74,6 +74,8 @@ export default function Preferences() {
               <span className="ml-1">
                 (demo:
                 {' '}
+              </span>
+              <span>
                 <code className="bg-gray-200 dark:bg-gray-800 px-2 py-px rounded">{'<-> </> :: ||> #! ++ /* */ 0xFF != www'}</code>
                 )
               </span>
