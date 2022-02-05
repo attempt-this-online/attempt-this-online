@@ -182,4 +182,11 @@ var Languages = map[string]language{
 		Url:     "https://nodejs.org",
 		Sbcs:    false,
 	},
+	"vyxal": {
+		Name:    "Vyxal",
+		Image:   "attemptthisonline/vyxal",
+		Version: "2",
+		Url:     "https://github.com/Vyxal/Vyxal",
+		Sbcs:    false,
+	},
 }
