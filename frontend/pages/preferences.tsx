@@ -32,14 +32,13 @@ export default function Preferences() {
           // only included here to provide instant feedback when changing full width mode
           className={`mb-3 px-4 grow${fullWidthMode ? '' : ' md:container md:mx-auto'}`}
         >
-          <header className="flex mb-2">
-            <button className="my-auto p-2 transition hover:bg-gray-300 dark:hover:bg-gray-600 rounded-full" type="button" onClick={() => router.back()}>
-              <ArrowLeftIcon className="w-8 h-8 inline" />
+          <header className="flex -mt-4 md:mt-0 mb-4 relative">
+            <button className="absolute top-2 transition hover:bg-gray-300 dark:hover:bg-gray-600 rounded-full" type="button" onClick={() => router.back()}>
+              <ArrowLeftIcon className="m-2 w-6 h-6 inline" />
             </button>
-            <h1 className="grow my-auto text-4xl md:text-center font-bold">
+            <h1 className="grow my-auto text-4xl text-center font-bold">
               Preferences
             </h1>
-            <div className="w-12 h-12 inline" />
           </header>
           <p>
             Attempt This Online stores your preferences locally in your browser, and they are never
