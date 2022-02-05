@@ -572,7 +572,7 @@ function _Run(
               onEncodingChange={e => setStdoutEncoding(e.target.value)}
               id="stdout"
               onKeyDown={keyDownHandler}
-              disabled
+              readOnly={true}
             >
               <code>stdout</code>
               {' '}
@@ -584,7 +584,7 @@ function _Run(
               onEncodingChange={e => setStderrEncoding(e.target.value)}
               id="stderr"
               onKeyDown={keyDownHandler}
-              disabled
+              readOnly={true}
             >
               <code>stderr</code>
               {' '}
@@ -601,7 +601,7 @@ function _Run(
                 </button>
               </summary>
               <ResizeableText
-                disabled
+                readOnly={true}
                 value={timing}
                 open={timingOpen}
               />

@@ -93,7 +93,7 @@ export default function Preferences() {
                 <ResizeableText
                   id="demo"
                   value={`Demo of ${bigTextBoxes ? 'big' : 'small'} text box`}
-                  disabled={true}
+                  readOnly={true}
                 />
               </div>
             </div>

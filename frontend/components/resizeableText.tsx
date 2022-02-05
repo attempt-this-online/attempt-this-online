@@ -5,7 +5,7 @@ export default function ResizeableText(
   {
     value,
     onChange = _ => undefined,
-    disabled,
+    readOnly,
     id = undefined,
     onKeyDown = _ => undefined,
     // there seems to be no proper way to get it to resize itself when opening/closing
@@ -13,7 +13,7 @@ export default function ResizeableText(
   }: {
     value: string,
     onChange?: (e: any) => void,
-    disabled: boolean,
+    readOnly: boolean,
     id?: string,
     onKeyDown?: (e: any) => void,
     open: boolean,
@@ -43,7 +43,7 @@ export default function ResizeableText(
       <textarea
         id={id}
         value={value}
-        disabled={disabled}
+        readOnly={readOnly}
         onChange={handleChange}
         onKeyDown={onKeyDown}
         style={{ height: `max(${height + 2 * 8}px, ${(bigTextBoxes ? 3 : 1) * 24 + 2 * 8}px)` }}

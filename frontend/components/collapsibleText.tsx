@@ -10,7 +10,7 @@ function CollapsibleText({
   encoding,
   onEncodingChange,
   id,
-  disabled = false,
+  readOnly = false,
   children,
   onKeyDown,
 }: {
@@ -19,7 +19,7 @@ function CollapsibleText({
   encoding: string,
   onEncodingChange: (event: any) => void,
   id: string,
-  disabled?: boolean,
+  readOnly?: boolean,
   children: ReactNode,
   onKeyDown: (event: any) => void,
 }) {
@@ -56,7 +56,7 @@ function CollapsibleText({
           value={value}
           onChange={event => { setModified(true); onChange?.(event); }}
           onKeyDown={onKeyDown}
-          disabled={disabled}
+          readOnly={readOnly}
           open={open}
         />
         <div className="absolute top-0 right-0">
@@ -81,7 +81,7 @@ function CollapsibleText({
 }
 
 CollapsibleText.defaultProps = {
-  disabled: false,
+  readOnly: false,
 };
 
 export default CollapsibleText;
