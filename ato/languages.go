@@ -231,4 +231,11 @@ var Languages = map[string]language{
 		Url:     "https://elixir-lang.org",
 		Sbcs:    false,
 	},
+	"guile": {
+		Name:    "Guile",
+		Image:   "attemptthisonline/base",
+		Version: "Latest",
+		Url:     "https://www.gnu.org/software/guile/",
+		Sbcs:    false,
+	},
 }
