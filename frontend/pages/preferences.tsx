@@ -94,6 +94,7 @@ export default function Preferences() {
                   id="demo"
                   value={`Demo of ${bigTextBoxes ? 'big' : 'small'} text box`}
                   readOnly={true}
+                  open={true}
                 />
               </div>
             </div>
