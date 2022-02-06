@@ -1,0 +1,6 @@
+#!/bin/sh
+
+cd /ATO/context
+mkdir /ATO/deno
+export DENO_DIR=/ATO/deno
+/ATO/yargs %1 /ATO/options /ATO/yargs %2 /ATO/arguments deno run -A %1 /ATO/code %2 < /ATO/input

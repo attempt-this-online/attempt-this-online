@@ -245,4 +245,11 @@ var Languages = map[string]language{
 		Url:     "https://julialang.org",
 		Sbcs:    false,
 	},
+	"deno": {
+		Name:    "TypeScript (Deno)",
+		Image:   "attemptthisonline/deno",
+		Version: "Latest",
+		Url:     "https://deno.land",
+		Sbcs:    false,
+	},
 }
