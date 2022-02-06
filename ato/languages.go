@@ -210,4 +210,11 @@ var Languages = map[string]language{
 		Url:     "https://www.php.net",
 		Sbcs:    false,
 	},
+	"r": {
+		Name:    "R",
+		Image:   "attemptthisonline/r_but_longer",
+		Version: "Latest",
+		Url:     "https://www.r-project.org",
+		Sbcs:    false,
+	},
 }
