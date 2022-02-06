@@ -238,4 +238,11 @@ var Languages = map[string]language{
 		Url:     "https://www.gnu.org/software/guile/",
 		Sbcs:    false,
 	},
+	"julia": {
+		Name:    "Julia",
+		Image:   "attemptthisonline/julia",
+		Version: "Latest",
+		Url:     "https://julialang.org",
+		Sbcs:    false,
+	},
 }
