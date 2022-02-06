@@ -217,4 +217,11 @@ var Languages = map[string]language{
 		Url:     "https://www.r-project.org",
 		Sbcs:    false,
 	},
+	"erlang": {
+		Name:    "Erlang",
+		Image:   "attemptthisonline/erlang",
+		Version: "Latest",
+		Url:     "https://www.erlang.org",
+		Sbcs:    false,
+	},
 }
