@@ -224,4 +224,11 @@ var Languages = map[string]language{
 		Url:     "https://www.erlang.org",
 		Sbcs:    false,
 	},
+	"elixir": {
+		Name:    "Elixir",
+		Image:   "attemptthisonline/elixir",
+		Version: "Latest",
+		Url:     "https://elixir-lang.org",
+		Sbcs:    false,
+	},
 }
