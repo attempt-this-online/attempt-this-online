@@ -259,4 +259,11 @@ var Languages = map[string]language{
 		Url:     "https://kotlinlang.org",
 		Sbcs:    false,
 	},
+	"rust": {
+		Name:    "Rust",
+		Image:   "attemptthisonline/rust",
+		Version: "Latest",
+		Url:     "https://www.rust-lang.org",
+		Sbcs:    false,
+	},
 }
