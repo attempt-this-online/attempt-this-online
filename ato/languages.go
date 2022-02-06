@@ -252,4 +252,11 @@ var Languages = map[string]language{
 		Url:     "https://deno.land",
 		Sbcs:    false,
 	},
+	"kotlin": {
+		Name:    "Kotlin",
+		Image:   "attemptthisonline/kotlin",
+		Version: "Latest",
+		Url:     "https://kotlinlang.org",
+		Sbcs:    false,
+	},
 }
