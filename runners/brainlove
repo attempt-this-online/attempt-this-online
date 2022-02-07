@@ -1,0 +1,4 @@
+#!/bin/sh
+
+cd /ATO/
+/ATO/yargs %1 /ATO/options /ATO/yargs %2 /ATO/arguments /opt/brainfuck/brainlove %1 code %2 < /ATO/input
