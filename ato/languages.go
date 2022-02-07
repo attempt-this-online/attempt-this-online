@@ -364,4 +364,11 @@ var Languages = map[string]language{
         Url:     "https://github.com/abrudz/ngn-apl",
 		Sbcs:    false,
 	},
+	"factor": {
+		Name:    "Factor",
+		Image:   "attemptthisonline/factor",
+		Version: "Latest",
+        Url:     "https://factorcode.org",
+		Sbcs:    false,
+	},
 }
