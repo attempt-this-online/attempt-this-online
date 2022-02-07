@@ -350,4 +350,11 @@ var Languages = map[string]language{
 		Url:     "https://github.com/TryItOnline/brainfuck",
 		Sbcs:    false,
 	},
+	"bqn": {
+		Name:    "BQN (CBQN)",
+		Image:   "attemptthisonline/cbqn",
+		Version: "Latest",
+        Url:     "https://mlochbaum.github.io/BQN/",
+		Sbcs:    false,
+	},
 }
