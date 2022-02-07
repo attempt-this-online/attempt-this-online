@@ -280,4 +280,11 @@ var Languages = map[string]language{
 		Url:     "https://github.com/JohnEarnest/ok",
 		Sbcs:    false,
 	},
+	"haskell": {
+		Name:    "Haskell",
+		Image:   "attemptthisonline/haskell",
+		Version: "Latest",
+		Url:     "https://www.haskell.org",
+		Sbcs:    false,
+	},
 }
