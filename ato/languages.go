@@ -357,4 +357,11 @@ var Languages = map[string]language{
         Url:     "https://mlochbaum.github.io/BQN/",
 		Sbcs:    false,
 	},
+	"ngn_apl": {
+		Name:    "APL (ngn)",
+		Image:   "attemptthisonline/ngn_apl",
+		Version: "Latest",
+        Url:     "https://github.com/abrudz/ngn-apl",
+		Sbcs:    false,
+	},
 }
