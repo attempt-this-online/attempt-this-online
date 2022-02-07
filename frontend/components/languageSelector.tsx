@@ -69,7 +69,7 @@ export default function LanguageSelector({
         </label>
         <div className="grow overflow-y-auto mt-4 mb-2 mx-2 bg-gray-200 dark:bg-gray-800 rounded p-2" role="listbox">
           {results && results.length > 0 ? results
-            .sort(([_, { name: a }], [_2, { name: b }]) => (a < b ? -1 : a > b ? 1 : 0))
+            .sort(([_, { name: a }], [_2, { name: b }]) => a.localeCompare(b))
             .map(([id, { name }]) => (
               <button
                 type="button"
