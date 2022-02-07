@@ -266,4 +266,11 @@ var Languages = map[string]language{
 		Url:     "https://www.rust-lang.org",
 		Sbcs:    false,
 	},
+	"clang": {
+		Name:    "C (clang)",
+		Image:   "attemptthisonline/clang",
+		Version: "Latest",
+		Url:     "https://clang.llvm.org",
+		Sbcs:    false,
+	},
 }
