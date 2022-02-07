@@ -287,4 +287,11 @@ var Languages = map[string]language{
 		Url:     "https://www.haskell.org",
 		Sbcs:    false,
 	},
+	"j": {
+		Name:    "J",
+		Image:   "attemptthisonline/j_but_longer",
+		Version: "Latest",
+		Url:     "https://www.jsoftware.com",
+		Sbcs:    false,
+	},
 }
