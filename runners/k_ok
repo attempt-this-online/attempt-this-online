@@ -1,0 +1,6 @@
+#!/bin/sh
+
+cd /ATO/context
+mkdir /ATO/tmp
+export HOME=/ATO/tmp
+/ATO/yargs %1 /ATO/options /ATO/yargs %2 /ATO/arguments node /opt/ok/repl.js %1 /ATO/code %2 < /ATO/input

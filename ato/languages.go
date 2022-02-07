@@ -273,4 +273,11 @@ var Languages = map[string]language{
 		Url:     "https://clang.llvm.org",
 		Sbcs:    false,
 	},
+	"k_ok": {
+		Name:    "K (oK)",
+		Image:   "attemptthisonline/ok",
+		Version: "Latest",
+		Url:     "https://github.com/JohnEarnest/ok",
+		Sbcs:    false,
+	},
 }
