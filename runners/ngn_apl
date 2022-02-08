@@ -1,4 +1,4 @@
 #!/bin/sh
 
 cd /ATO/context
-/ATO/yargs %1 /ATO/options /ATO/yargs %2 /ATO/arguments node /opt/apl/apl.js %1 /ATO/code %2 < /ATO/input
+/ATO/yargs %1 /ATO/options /ATO/yargs %2 /ATO/arguments node /opt/apl/apl.js -l %1 /ATO/code %2 < /ATO/input
