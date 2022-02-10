@@ -371,4 +371,11 @@ var Languages = map[string]language{
 		Url:     "https://factorcode.org",
 		Sbcs:    false,
 	},
+	"sbcl": {
+		Name:    "Common Lisp (SBCL)",
+		Image:   "attemptthisonline/sbcl",
+		Version: "Latest",
+		Url:     "http://www.sbcl.org",
+		Sbcs:    false,
+	},
 }
