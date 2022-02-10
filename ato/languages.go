@@ -413,4 +413,11 @@ var Languages = map[string]language{
 		Url:     "https://nim-lang.org/",
 		Sbcs:    false,
 	},
+	"neko": {
+		Name:    "Neko",
+		Image:   "attemptthisonline/neko",
+		Version: "Latest",
+		Url:     "https://nekovm.org/",
+		Sbcs:    false,
+	},
 }
