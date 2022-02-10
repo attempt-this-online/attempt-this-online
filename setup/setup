@@ -184,7 +184,6 @@ do
             mkdir "/usr/local/lib/ATO/layers/$layer_id"
             tar -xf "/var/cache/ATO/images/$layer_id.tar" -C \
                 "/usr/local/lib/ATO/layers/$layer_id"
-            rm "/var/cache/ATO/images/$layer_id.tar"
         done
 
     # replace slash with plus so that it can be used as an individual filename
@@ -194,7 +193,7 @@ do
     # extract environment variables from the image
     skopeo inspect docker://"$image" | setup/parse_env > "/usr/local/lib/ATO/env/$image_pathsafe"
 
-    rm /var/cache/ATO/images/manifest.json
+    rm -rf /var/cache/ATO/images/*
 
 done < images.txt
 
