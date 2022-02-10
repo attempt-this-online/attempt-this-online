@@ -406,4 +406,11 @@ var Languages = map[string]language{
 		Url:     "https://crystal-lang.org/",
 		Sbcs:    false,
 	},
+	"nim": {
+		Name:    "Nim",
+		Image:   "attemptthisonline/nim",
+		Version: "Latest",
+		Url:     "https://nim-lang.org/",
+		Sbcs:    false,
+	},
 }
