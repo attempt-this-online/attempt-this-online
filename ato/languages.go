@@ -392,4 +392,11 @@ var Languages = map[string]language{
 		Url:     "https://github.com/dzaima/APL",
 		Sbcs:    true,
 	},
+	"lua": {
+		Name:    "Lua",
+		Image:   "attemptthisonline/lua",
+		Version: "Latest",
+        Url:     "https://www.lua.org",
+		Sbcs:    true,
+	},
 }
