@@ -378,4 +378,11 @@ var Languages = map[string]language{
 		Url:     "http://www.sbcl.org",
 		Sbcs:    false,
 	},
+	"k_ngn": {
+		Name:    "K (ngn/k)",
+		Image:   "attemptthisonline/ngn_k",
+		Version: "Latest",
+		Url:     "https://codeberg.org/ngn/k",
+		Sbcs:    false,
+	},
 }
