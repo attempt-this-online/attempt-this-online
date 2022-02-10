@@ -396,14 +396,14 @@ var Languages = map[string]language{
 		Name:    "Lua",
 		Image:   "attemptthisonline/lua",
 		Version: "Latest",
-        Url:     "https://www.lua.org",
-		Sbcs:    true,
+		Url:     "https://www.lua.org",
+		Sbcs:    false,
 	},
 	"crystal": {
 		Name:    "Crystal",
 		Image:   "attemptthisonline/crystal",
 		Version: "Latest",
-        Url:     "https://crystal-lang.org/",
-		Sbcs:    true,
+		Url:     "https://crystal-lang.org/",
+		Sbcs:    false,
 	},
 }
