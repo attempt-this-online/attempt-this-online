@@ -385,4 +385,11 @@ var Languages = map[string]language{
 		Url:     "https://codeberg.org/ngn/k",
 		Sbcs:    false,
 	},
+	"apl_dzaima": {
+		Name:    "APL (dzaima/APL)",
+		Image:   "attemptthisonline/dzaima_apl",
+		Version: "Latest",
+		Url:     "https://github.com/dzaima/APL",
+		Sbcs:    true,
+	},
 }
