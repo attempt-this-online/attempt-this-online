@@ -420,4 +420,11 @@ var Languages = map[string]language{
 		Url:     "https://nekovm.org/",
 		Sbcs:    false,
 	},
+	"zig": {
+		Name:    "Zig",
+		Image:   "attemptthisonline/zig",
+		Version: "Latest",
+		Url:     "https://ziglang.org/",
+		Sbcs:    false,
+	},
 }
