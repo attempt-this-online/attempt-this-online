@@ -427,4 +427,11 @@ var Languages = map[string]language{
 		Url:     "https://ziglang.org/",
 		Sbcs:    false,
 	},
+	"slashes": {
+		Name:    "///",
+		Image:   "attemptthisonline/slashes",
+		Version: "Latest",
+		Url:     "https://esolangs.org/wiki////",
+		Sbcs:    false,
+	},
 }
