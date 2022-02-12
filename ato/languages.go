@@ -448,4 +448,11 @@ var Languages = map[string]language{
 		Url:     "https://www.gnu.org/software/gawk/",
 		Sbcs:    false,
 	},
+	"jq": {
+		Name:    "jq",
+		Image:   "attemptthisonline/jq",
+		Version: "Latest",
+		Url:     "https://stedolan.github.io/jq/",
+		Sbcs:    false,
+	},
 }
