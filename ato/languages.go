@@ -434,4 +434,11 @@ var Languages = map[string]language{
 		Url:     "https://esolangs.org/wiki////",
 		Sbcs:    false,
 	},
+	"sed": {
+		Name:    "sed",
+		Image:   "attemptthisonline/base",
+		Version: "Latest",
+		Url:     "https://www.gnu.org/software/sed/",
+		Sbcs:    false,
+	},
 }
