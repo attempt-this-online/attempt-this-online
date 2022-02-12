@@ -441,4 +441,11 @@ var Languages = map[string]language{
 		Url:     "https://www.gnu.org/software/sed/",
 		Sbcs:    false,
 	},
+	"awk": {
+		Name:    "AWK",
+		Image:   "attemptthisonline/base",
+		Version: "Latest",
+		Url:     "https://www.gnu.org/software/gawk/",
+		Sbcs:    false,
+	},
 }
