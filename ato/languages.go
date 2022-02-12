@@ -462,4 +462,11 @@ var Languages = map[string]language{
 		Url:     "https://kislyuk.github.io/yq/",
 		Sbcs:    false,
 	},
+	"bc": {
+		Name:    "bc",
+		Image:   "attemptthisonline/bc",
+		Version: "Latest",
+		Url:     "https://www.gnu.org/software/bc/",
+		Sbcs:    false,
+	},
 }
