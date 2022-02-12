@@ -455,4 +455,11 @@ var Languages = map[string]language{
 		Url:     "https://stedolan.github.io/jq/",
 		Sbcs:    false,
 	},
+	"yq": {
+		Name:    "yq",
+		Image:   "attemptthisonline/jq",
+		Version: "Latest",
+		Url:     "https://kislyuk.github.io/yq/",
+		Sbcs:    false,
+	},
 }
