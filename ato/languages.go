@@ -469,4 +469,11 @@ var Languages = map[string]language{
 		Url:     "https://www.gnu.org/software/bc/",
 		Sbcs:    false,
 	},
+	"dc": {
+		Name:    "dc",
+		Image:   "attemptthisonline/bc",
+		Version: "Latest",
+		Url:     "https://www.gnu.org/software/bc/",
+		Sbcs:    false,
+	},
 }
