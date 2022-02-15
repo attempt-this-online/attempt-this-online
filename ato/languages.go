@@ -476,4 +476,11 @@ var Languages = map[string]language{
 		Url:     "https://www.gnu.org/software/bc/",
 		Sbcs:    false,
 	},
+	"tcl": {
+		Name:    "Tcl",
+		Image:   "attemptthisonline/tcl",
+		Version: "Latest",
+        Url:     "http://tcl.sourceforge.net",
+		Sbcs:    false,
+	},
 }
