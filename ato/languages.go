@@ -483,4 +483,11 @@ var Languages = map[string]language{
         Url:     "http://tcl.sourceforge.net",
 		Sbcs:    false,
 	},
+	"j": {
+		Name:    "J",
+		Image:   "attemptthisonline/j_but_longer",
+		Version: "Latest",
+        Url:     "https://www.jsoftware.com",
+		Sbcs:    false,
+	},
 }
