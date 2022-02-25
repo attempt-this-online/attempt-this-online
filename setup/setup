@@ -134,12 +134,8 @@ systemctl enable --now cronie.service
 install -m 555 -o root -g root yargs /usr/local/bin/ATO_yargs
 
 # steal a statically linked bash from Debian
-# TODO: do this without needing docker
-systemctl start docker.service
-docker run --rm debian bash -c '{ apt-get update; apt-get install bash-static; } >/dev/null 2>&1; cat /bin/bash-static' > /usr/local/bin/ATO_bash
-chown root:root /usr/local/bin/ATO_bash
+curl -L https://github.com/attempt-this-online/static-bash/releases/download/v5.1-6/bash > /usr/local/bin/ATO_bash
 chmod 555 /usr/local/bin/ATO_bash
-systemctl stop docker.service
 
 # configure service
 install -m 555 -o root -g root setup/ATO /usr/local/bin/
