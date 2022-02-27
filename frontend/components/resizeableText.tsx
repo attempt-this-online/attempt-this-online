@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 
 export default function ResizeableText(
@@ -8,18 +8,16 @@ export default function ResizeableText(
     readOnly,
     id = undefined,
     onKeyDown = _ => undefined,
-    // there seems to be no proper way to get it to resize itself when opening/closing
-    open,
+    dummy,
   }: {
     value: string,
     onChange?: (e: any) => void,
     readOnly: boolean,
     id?: string,
     onKeyDown?: (e: any) => void,
-    open: boolean,
+    dummy: any,
   },
 ) {
-  const dummy = useRef<any>(null);
   const [height, setHeight] = useState(24);
   const bigTextBoxes = useSelector((state: any) => state.bigTextBoxes);
   const handleChange = (event: any) => {
@@ -30,16 +28,16 @@ export default function ResizeableText(
       dummy.current.value = '';
     }
   };
-  useEffect(() => {
+  const resize = () => {
     if (dummy.current) {
       dummy.current.value = value;
       setHeight(dummy.current.scrollHeight);
       dummy.current.value = '';
     }
-  }, [dummy, value, open]);
+  };
+  useEffect(resize, [value]);
   return (
     <>
-      <textarea ref={dummy} className="block w-full px-2 rounded font-mono text-base h-0 opacity-0" aria-hidden disabled />
       <textarea
         id={id}
         value={value}

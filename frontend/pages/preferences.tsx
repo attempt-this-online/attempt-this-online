@@ -91,6 +91,7 @@ export default function Preferences() {
               </label>
               <div className="md:mx-6">
                 <ResizeableText
+                  dummy={{ current: null }}
                   id="demo"
                   value={`Demo of ${bigTextBoxes ? 'big' : 'small'} text box`}
                   readOnly={true}

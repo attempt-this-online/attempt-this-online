@@ -370,11 +370,14 @@ function _Run(
       submit(e);
     }
   };
+
+  const dummy = useRef<any>(null);
   return (
     <>
       <Head>
         <title>Run &ndash; Attempt This Online</title>
       </Head>
+      <textarea ref={dummy} className="block w-full px-2 rounded font-mono text-base h-0 opacity-0" aria-hidden disabled />
       <div className="min-h-screen bg-white dark:bg-gray-900 text-black dark:text-white relative flex flex-col">
         <Navbar />
         <div className="grow relative">
@@ -495,6 +498,7 @@ function _Run(
                 onEncodingChange={e => setHeaderEncoding(e.target.value)}
                 id="header"
                 onKeyDown={keyDownHandler}
+                dummy={dummy}
               >
                 Header
               </CollapsibleText>
@@ -505,6 +509,7 @@ function _Run(
                 onEncodingChange={e => setCodeEncoding(e.target.value)}
                 id="code"
                 onKeyDown={keyDownHandler}
+                dummy={dummy}
               >
                 Code
               </CollapsibleText>
@@ -515,6 +520,7 @@ function _Run(
                 onEncodingChange={e => setFooterEncoding(e.target.value)}
                 id="footer"
                 onKeyDown={keyDownHandler}
+                dummy={dummy}
               >
                 Footer
               </CollapsibleText>
@@ -535,6 +541,7 @@ function _Run(
                 onEncodingChange={e => setInputEncoding(e.target.value)}
                 id="input"
                 onKeyDown={keyDownHandler}
+                dummy={dummy}
               >
                 Input
               </CollapsibleText>
@@ -573,6 +580,7 @@ function _Run(
               id="stdout"
               onKeyDown={keyDownHandler}
               readOnly={true}
+              dummy={dummy}
             >
               <code>stdout</code>
               {' '}
@@ -585,6 +593,7 @@ function _Run(
               id="stderr"
               onKeyDown={keyDownHandler}
               readOnly={true}
+              dummy={dummy}
             >
               <code>stderr</code>
               {' '}
@@ -604,6 +613,7 @@ function _Run(
                 readOnly={true}
                 value={timing}
                 open={timingOpen}
+                dummy={dummy}
               />
             </details>
           </main>

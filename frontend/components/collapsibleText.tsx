@@ -13,6 +13,7 @@ function CollapsibleText({
   readOnly = false,
   children,
   onKeyDown,
+  dummy,
 }: {
   value: string,
   onChange?: (event: any) => void,
@@ -22,6 +23,7 @@ function CollapsibleText({
   readOnly?: boolean,
   children: ReactNode,
   onKeyDown: (event: any) => void,
+  dummy: any,
 }) {
   const [open, setOpen] = useState(true);
   const [modified, setModified] = useState(false);
@@ -57,7 +59,7 @@ function CollapsibleText({
           onChange={event => { setModified(true); onChange?.(event); }}
           onKeyDown={onKeyDown}
           readOnly={readOnly}
-          open={open}
+          dummy={dummy}
         />
         <div className="absolute top-0 right-0">
           <label htmlFor={`encodingSelect:${id}`}>
