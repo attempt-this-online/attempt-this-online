@@ -6,7 +6,7 @@ import ResizeableText from 'components/resizeableText';
 
 function CollapsibleText({
   value,
-  onChange,
+  setValue,
   encoding,
   onEncodingChange,
   id,
@@ -16,7 +16,7 @@ function CollapsibleText({
   dummy,
 }: {
   value: string,
-  onChange?: (event: any) => void,
+  setValue?: (event: any) => void,
   encoding: string,
   onEncodingChange: (event: any) => void,
   id: string,
@@ -56,7 +56,7 @@ function CollapsibleText({
         <ResizeableText
           id={id}
           value={value}
-          onChange={event => { setModified(true); onChange?.(event); }}
+          setValue={event => { setModified(true); setValue?.(event); }}
           onKeyDown={onKeyDown}
           readOnly={readOnly}
           dummy={dummy}

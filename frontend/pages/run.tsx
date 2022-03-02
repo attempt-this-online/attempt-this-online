@@ -493,7 +493,7 @@ function _Run(
               </div>
               <CollapsibleText
                 value={header}
-                onChange={e => setHeader(e.target.value)}
+                setValue={setHeader}
                 encoding={headerEncoding}
                 onEncodingChange={e => setHeaderEncoding(e.target.value)}
                 id="header"
@@ -504,7 +504,7 @@ function _Run(
               </CollapsibleText>
               <CollapsibleText
                 value={code}
-                onChange={e => setCode(e.target.value)}
+                setValue={setCode}
                 encoding={codeEncoding ?? 'utf-8'}
                 onEncodingChange={e => setCodeEncoding(e.target.value)}
                 id="code"
@@ -515,7 +515,7 @@ function _Run(
               </CollapsibleText>
               <CollapsibleText
                 value={footer}
-                onChange={e => setFooter(e.target.value)}
+                setValue={setFooter}
                 encoding={footerEncoding}
                 onEncodingChange={e => setFooterEncoding(e.target.value)}
                 id="footer"
@@ -536,7 +536,7 @@ function _Run(
               </div>
               <CollapsibleText
                 value={input}
-                onChange={e => setInput(e.target.value)}
+                setValue={setInput}
                 encoding={inputEncoding}
                 onEncodingChange={e => setInputEncoding(e.target.value)}
                 id="input"

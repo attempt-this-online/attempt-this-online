@@ -41,6 +41,11 @@ const ThemeWrapper = connect(
       storedBigTextBoxes = false;
     }
     dispatch({ type: 'setBigTextBoxes', bigTextBoxes: storedBigTextBoxes });
+    let storedTabBehaviour = await localForage.getItem('ATO_tab_behaviour');
+    if (storedTabBehaviour !== 'focus' && storedTabBehaviour !== 'insert') {
+      storedTabBehaviour = 'insert';
+    }
+    dispatch({ type: 'setTabBehaviour', tabBehaviour: storedTabBehaviour });
 
     dispatch({ type: 'setLanguagesMetadata', metadata: await API.getMetadata() });
   }) as (() => void), []);

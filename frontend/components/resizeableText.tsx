@@ -4,24 +4,24 @@ import { useSelector } from 'react-redux';
 export default function ResizeableText(
   {
     value,
-    onChange = _ => undefined,
     readOnly,
     id = undefined,
     onKeyDown = _ => undefined,
     dummy,
+    setValue = _ => undefined,
   }: {
     value: string,
-    onChange?: (e: any) => void,
     readOnly: boolean,
     id?: string,
     onKeyDown?: (e: any) => void,
     dummy: any,
+    setValue?: (e: string) => void,
   },
 ) {
   const [height, setHeight] = useState(24);
   const bigTextBoxes = useSelector((state: any) => state.bigTextBoxes);
   const handleChange = (event: any) => {
-    onChange(event);
+    setValue(event.target.value);
     if (dummy.current) {
       dummy.current.value = event.target.value;
       setHeight(dummy.current.scrollHeight);
@@ -36,6 +36,22 @@ export default function ResizeableText(
     }
   };
   useEffect(resize, [value]);
+  const tabBehaviour = useSelector((state: any) => state.tabBehaviour);
+  const handleKeyDown = (event: any) => {
+    if (!readOnly && !event.metaKey && !event.altKey && !event.ctrlKey && tabBehaviour === 'insert' && event.key === 'Tab') {
+      event.preventDefault();
+      const start = event.target.selectionStart;
+      const end = event.target.selectionEnd;
+      const newValue = value.slice(0, start) + '\t' + value.slice(end);
+      event.target.value = newValue;
+      event.target.selectionStart = start + 1;
+      event.target.selectionEnd = start + 1;
+      handleChange(event);
+    }
+    else {
+      onKeyDown(event);
+    }
+  }
   return (
     <>
       <textarea
@@ -43,7 +59,7 @@ export default function ResizeableText(
         value={value}
         readOnly={readOnly}
         onChange={handleChange}
-        onKeyDown={onKeyDown}
+        onKeyDown={handleKeyDown}
         style={{ height: `max(${height + 2 * 8}px, ${(bigTextBoxes ? 3 : 1) * 24 + 2 * 8}px)` }}
         className="block w-full my-4 p-2 rounded bg-gray-100 dark:bg-gray-800 font-mono text-base resize-none cursor-text focus:outline-none focus:ring transition"
         autoComplete="off"

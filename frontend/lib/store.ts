@@ -16,6 +16,7 @@ const initialState = {
   theme: 'system',
   fontLigaturesEnabled: true,
   bigTextBoxes: true,
+  tabBehaviour: 'insert',
 };
 
 const reducer = (state = initialState, action: any) => {
@@ -48,6 +49,12 @@ const reducer = (state = initialState, action: any) => {
       return {
         ...state,
         bigTextBoxes: action.bigTextBoxes!,
+      };
+    case 'setTabBehaviour':
+      localForage.setItem('ATO_tab_behaviour', action.tabBehaviour!);
+      return {
+        ...state,
+        tabBehaviour: action.tabBehaviour!,
       };
     default:
       return state;

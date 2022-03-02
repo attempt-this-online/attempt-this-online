@@ -27,6 +27,10 @@ export default function Preferences() {
   const handleBigTextBoxesChange = async (event: any) => {
     dispatch({ type: 'setBigTextBoxes', bigTextBoxes: event.target.checked });
   };
+  const tabBehaviour = useSelector((state: any) => state.tabBehaviour);
+  const handleTabBehaviourChange = (event: any) => {
+    dispatch({ type: 'setTabBehaviour', tabBehaviour: event.target.value });
+  };
   return (
     <>
       <Head>
@@ -105,6 +109,19 @@ export default function Preferences() {
                 Full-width mode (enabled anyway on small screens)
               </label>
             </div>
+          </fieldset>
+          <fieldset className="mt-3 border border-gray-400 dark:border-gray-700 rounded pt-2 pb-4 px-4">
+            <legend className="px-2">Accessibility</legend>
+            <label htmlFor="tabBehaviour" className="my-auto mr-2">Tab key:</label>
+            <select
+              id="tabBehaviour"
+              className="appearance-none p-2 rounded bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 transition cursor-pointer ATO_select focus:outline-none focus:ring"
+              value={tabBehaviour}
+              onChange={handleTabBehaviourChange}
+            >
+              <option value="insert">Inserts a tab character</option>
+              <option value="focus">Cycles element focus</option>
+            </select>
           </fieldset>
         </main>
         <Footer />
