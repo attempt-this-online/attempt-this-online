@@ -624,7 +624,6 @@ function _Run(
               <ResizeableText
                 readOnly={true}
                 value={timing}
-                open={timingOpen}
                 dummy={dummy}
               />
             </details>

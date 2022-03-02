@@ -104,7 +104,6 @@ export default function Preferences() {
                   id="demo"
                   value={BIG_TEXT_BOXES_EXPLANATION[bigTextBoxes]}
                   readOnly={true}
-                  open={true}
                 />
               </div>
             </div>
