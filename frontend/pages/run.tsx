@@ -375,7 +375,11 @@ function _Run(
   return (
     <>
       <Head>
-        <title>Run &ndash; Attempt This Online</title>
+        <title>
+          {language && languages ? languages[language].name : 'Run'}
+          {' '}
+          &ndash; Attempt This Online
+        </title>
       </Head>
       <textarea ref={dummy} className="block w-full px-2 rounded font-mono text-base h-0 opacity-0" aria-hidden disabled />
       <div className="min-h-screen bg-white dark:bg-gray-900 text-black dark:text-white relative flex flex-col">
