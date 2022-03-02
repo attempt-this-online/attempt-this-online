@@ -85,9 +85,9 @@ cd /ATO/context
 ## Making Releases
 - Update version numbers in `frontend/package.json` and `setup/setup`
 - Upgrade dependencies (`cd frontend; npm update; cd ..`)
-- Build package `./build`
 - Stage and commit changes
 - Tag version in git, e.g. `v0.1.2`
 - Push `main` **and the new tag** to GitHub
+- Build package `./build`
 - Upload `setup/setup` and `dist/attempt_this_online.tar.gz` to GitHub release
 - Set description etc. on GitHub release
