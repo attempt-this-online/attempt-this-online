@@ -7,6 +7,11 @@ import useSystemThemePreference from 'lib/useSystemThemePreference';
 import Footer from 'components/footer';
 import ResizeableText from 'components/resizeableText';
 
+const BIG_TEXT_BOXES_EXPLANATION: Record<string, string> = {
+  false: 'Demo of small text box (always minimum possible height)',
+  true: 'Demo of big text box (always at least 3 lines high)',
+};
+
 export default function Preferences() {
   const router = useRouter();
   const dispatch = useDispatch();
@@ -97,7 +102,7 @@ export default function Preferences() {
                 <ResizeableText
                   dummy={{ current: null }}
                   id="demo"
-                  value={`Demo of ${bigTextBoxes ? 'big' : 'small'} text box`}
+                  value={BIG_TEXT_BOXES_EXPLANATION[bigTextBoxes]}
                   readOnly={true}
                   open={true}
                 />
