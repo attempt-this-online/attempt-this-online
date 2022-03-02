@@ -80,7 +80,7 @@ function _Run(
 ) {
   const router = useRouter();
 
-  const [language, setLanguage] = useState<string | null>(null);
+  let [language, setLanguage] = useState<string | null>(null);
   const [header, setHeader] = useState('');
   const [headerEncoding, setHeaderEncoding] = useState('utf-8');
   const [code, setCode] = useState('');
@@ -229,6 +229,13 @@ function _Run(
       setShouldLoad(false);
     }
   }, [router, shouldLoad]);
+
+  if (languages && language && !languages[language]) {
+    alert(`Unknown language:\n${language}`);
+    setLanguage(null);
+    setLanguageSelectorOpen(true);
+    language = null;
+  }
 
   // combination of useRef and useMemo: useRef ignores its argument after the second call, but the
   // argument still has to be computed which is a bit of a waste. useMemo here is not being used to
