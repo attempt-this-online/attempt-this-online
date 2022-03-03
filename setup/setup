@@ -22,11 +22,9 @@ whoami | grep -xFq root || error you must run this script as root
 # [ -e /sys/kernel/security/apparmor/profiles ] || error you must enable apparmor in the kernel - see 'https://wiki.archlinux.org/index.php/AppArmor'
 
 # install dependencies
-# - base-devel: to install libcgroup
 # - bubblewrap: primary sandboxing mechanism
 # - certbot: generate SSL certificates for nginx
 # - cronie: automate renewal of certbot certificates, cache cleaning, etc.
-# - git: to download libcgroup
 # - nginx: web server
 # - nginx-mod-modsecurity: web application firewall
 # - python: runtime for API
@@ -35,11 +33,9 @@ whoami | grep -xFq root || error you must run this script as root
 # - sudo: privilege management for sandboxing
 # - zsh: for running the runner scripts
 [ -z "$ATO_NO_DEPS" ] && pacman -Syu --noconfirm --needed \
-    base-devel \
     bubblewrap \
     certbot \
     cronie \
-    git \
     nginx \
     nginx-mod-modsecurity \
     python \
@@ -58,20 +54,7 @@ else
         | tar -xz -C /var/cache/ATO
 fi
 
-cd /var/cache/ATO
-
-# install libcgroup
-if [ -z "$ATO_NO_DEPS" ]; then
-    git clone https://aur.archlinux.org/libcgroup.git
-    # makepkg doesn't allow running as root, so use `nobody`
-    chown -R nobody:nobody libcgroup
-    cd libcgroup
-    sudo -u nobody makepkg --skippgpcheck
-    pacman -U --noconfirm --needed libcgroup-*.pkg.tar.zst
-    cd ..
-fi
-
-cd attempt_this_online
+cd /var/cache/ATO/attempt_this_online
 
 mkdir -p \
     /usr/local/lib/ATO \
