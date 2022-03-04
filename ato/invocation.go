@@ -76,7 +76,7 @@ type result struct {
 	OutputOps       int64  `json:"output_ops" msgpack:"output_ops"`
 }
 
-func (invocation invocation) invoke(ipHash string) (*result, error) {
+func (invocation invocation) invoke() (*result, error) {
 	unhashedInvocationId, hashedInvocationId := generateInvocationId()
 	dir := path.Join("/run/ATO", hashedInvocationId)
 	if err := os.Mkdir(dir, fs.ModeDir|0755); err != nil {
@@ -107,7 +107,6 @@ func (invocation invocation) invoke(ipHash string) (*result, error) {
 
 	cmd := exec.Command(
 		"/usr/local/bin/ATO_sandbox",
-		ipHash,
 		unhashedInvocationId,
 		invocation.Language,
 		strconv.Itoa(invocation.Timeout),

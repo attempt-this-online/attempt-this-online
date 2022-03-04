@@ -7,7 +7,6 @@ umount /usr/local/lib/ATO/rootfs/*
 userdel ato
 rm -rf \
     /var/cache/ATO \
-    /run/lock/ATO \
     /var/lib/ATO_home \
     /usr/local/lib/ATO \
     /usr/local/share/ATO \

@@ -6,11 +6,10 @@
 
 setopt errexit
 
-client_id=$1
-invocation_id=$2
-language=$3
-timeout=$4
-image=$(printf %s $5 | tr / +)
+invocation_id=$1
+language=$2
+timeout=$3
+image=$(printf %s $4 | tr / +)
 
 # check that the runner exists (also prevents directory traversal)
 ls /usr/local/share/ATO/runners | grep -Fqx $language

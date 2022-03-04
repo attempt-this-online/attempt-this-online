@@ -1,17 +1,7 @@
 #!/bin/sh -e
 # Start script for the Attempt This Online server - to be run as root
 
-# create lock directory
-mkdir -p /run/lock/ATO
-chown ato:ato /run/lock/ATO
-chmod 750 /run/lock/ATO
-
-# create control groups
-cgcreate -a ato:ato -t ato:ato -g memory,cpu,pids:ATO
-
-# initialise IPC directories
 mkdir -p /run/ATO
 chown ato:ato /run/ATO
 chmod 775 /run/ATO
-
 sudo -u ato /usr/local/lib/ATO/server

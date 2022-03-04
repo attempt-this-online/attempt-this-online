@@ -2,14 +2,9 @@ package ato
 
 import (
 	"bytes"
-	"crypto/rand"
-	"crypto/sha256"
-	"encoding/hex"
 	"flag"
-	"hash"
 	"io"
 	"log"
-	"net"
 	"net/http"
 	"time"
 
@@ -101,8 +96,7 @@ func handleWs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ipHash := getHashedIp(r)
-	if result, err := invocation.invoke(ipHash); err != nil {
+	if result, err := invocation.invoke(); err != nil {
 		log.Println("invocation error:", err)
 		closeConnection(conn, websocket.CloseInternalServerErr, "internal error")
 	} else {
@@ -117,41 +111,7 @@ func handleWs(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-const ipSaltSize = 32
-
-func initIpSalt() hash.Hash {
-	ipSalt := make([]byte, ipSaltSize)
-	if _, err := rand.Read( /* write random data to */ ipSalt); err != nil {
-		log.Panic("random generation failed", err)
-	}
-	ipHash_ := sha256.New()
-	ipHash_.Write(ipSalt)
-	return ipHash_
-}
-
-// ipHash saves internal state of partially hashed salt+ip
-var ipHash hash.Hash = initIpSalt()
-
 const trustProxyHeader = true
-
-func getHashedIp(req *http.Request) string {
-	var ip string
-	ip, _, err := net.SplitHostPort(req.RemoteAddr)
-	if err != nil {
-		// shouldn't happen
-		panic(err)
-	}
-	if trustProxyHeader {
-		if ipHeader := req.Header.Get("X-Real-IP"); ipHeader != "" {
-			ip = ipHeader
-		} else {
-			// keep actual IP
-			log.Println("warning: request missing X-Real-IP but trustProxyHeader=true")
-		}
-	}
-	hashed := ipHash.Sum([]byte(ip)) // doesn't change internal state of h
-	return hex.EncodeToString(hashed[:])
-}
 
 func getMetadata(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
