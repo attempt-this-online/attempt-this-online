@@ -16,7 +16,7 @@ export default function Home() {
             <h1 className="mb-4 text-4xl font-bold">Privacy Policy</h1>
             <aside className="text-justify italic mb-3">
               <a href="https://github.com/attempt-this-online/attempt-this-online/commits/main/frontend/pages/legal.tsx" className="underline text-blue-500">
-                Last Updated: April 9th, 2021
+                Last Updated: March 4th, 2022
               </a>
             </aside>
             <p className="text-justify mb-3">
@@ -25,10 +25,9 @@ export default function Home() {
             <ul className="list-disc ml-6 my-2">
               <li>
                 Your IP address. This is used to implement rate-limiting to prevent exhaustion of
-                resources. A unique, hashed, and salted version of your IP address is stored for up
-                to 1 year, and is never associated with any data except the amount of resources you
-                use. Your IP address in an unhashed form may be stored for up to 1 month for
-                security reasons.
+                resources. A hashed version of your IP address may be stored for up to 1 month, and
+                is never associated with any data except the amount of resources you use. Your IP
+                address in an unhashed form may be stored for up to 1 month for security reasons.
               </li>
               <li>
                 Any data you submit in the Run form (code, input, etc.). These are only used to
