@@ -10,10 +10,11 @@ rm -rf \
     /var/lib/ATO_home \
     /usr/local/lib/ATO \
     /usr/local/share/ATO \
-    /usr/local/bin/ATO_run \
+    /usr/local/bin/ATO \
+    /usr/local/bin/ATO_yargs \
+    /usr/local/bin/ATO_bash \
+    /usr/local/bin/ATO_rm \
+    /usr/local/bin/ATO_wrapper \
     /usr/local/bin/ATO_sandbox \
     /usr/local/lib/systemd/system/ATO.service \
     /usr/local/lib/systemd/system/ATO.socket
-systemctl start docker
-docker image prune -af
-systemctl stop docker
