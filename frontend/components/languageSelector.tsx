@@ -20,7 +20,11 @@ export default function LanguageSelector({
   };
   const searchFilter = (value: string) => value.toLowerCase().includes(search.toLowerCase());
   const results = (
-    languages ? Object.entries(languages).filter(([_, { name }]) => searchFilter(name)) : null
+    languages ?
+      Object.entries(languages)
+      .filter(([_, { name }]) => searchFilter(name))
+      .sort(([_, { name: a }], [_2, { name: b }]) => a.localeCompare(b))
+    : null
   );
   return (
     <div
@@ -34,6 +38,10 @@ export default function LanguageSelector({
       }
       onKeyDown={(event: any) => {
         if (event.key === 'Escape' && language !== null) {
+          setLanguageSelectorOpen(false);
+        } else if (event.key === 'Enter' && results.length && search) {
+          const [id, _metadata] = results[0];
+          setLanguage(id);
           setLanguageSelectorOpen(false);
         }
       }}
@@ -69,7 +77,6 @@ export default function LanguageSelector({
         </label>
         <div className="grow overflow-y-auto mt-4 mb-2 mx-2 bg-gray-200 dark:bg-gray-800 rounded p-2" role="listbox">
           {results && results.length > 0 ? results
-            .sort(([_, { name: a }], [_2, { name: b }]) => a.localeCompare(b))
             .map(([id, { name }]) => (
               <button
                 type="button"

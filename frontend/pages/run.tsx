@@ -210,7 +210,7 @@ function _Run(
       // TODO: if loaded data is invalid rather than simply not present, don't open the selector?
       const loadedLanguage = router.query.L || router.query.l;
       if (loadedLanguage) {
-        setLanguage(loadedLanguage);
+        setLanguage(loadedLanguage as string);
       } else {
         setLanguageSelectorOpen(true);
       }
