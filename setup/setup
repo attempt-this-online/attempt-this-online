@@ -145,6 +145,8 @@ echo Now extracting Docker images - this will take a long time...
 
 mkdir -p /usr/local/lib/ATO/env /usr/local/lib/ATO/layers
 mkdir -p /var/cache/ATO/images
+
+[ -z "$ATO_NO_IMAGES" ] && \
 while read -r image
 do
     # ignore blank lines or comments
