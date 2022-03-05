@@ -490,4 +490,11 @@ var Languages = map[string]language{
         Url:     "https://www.jsoftware.com",
 		Sbcs:    false,
 	},
+	"pari_gp": {
+		Name:    "PARI/GP",
+		Image:   "attemptthisonline/pari_gp",
+		Version: "Latest",
+        Url:     "https://pari.math.u-bordeaux.fr",
+		Sbcs:    false,
+	},
 }

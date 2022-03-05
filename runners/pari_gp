@@ -1,0 +1,4 @@
+#!/bin/sh
+
+cd /ATO/context
+/ATO/yargs %1 /ATO/options /ATO/yargs %2 /ATO/arguments gp -q %1 /ATO/code %2 < /ATO/input
