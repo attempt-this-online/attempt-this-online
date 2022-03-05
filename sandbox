@@ -18,12 +18,10 @@ ls /usr/local/share/ATO/runners | grep -Fqx $language
 ls /usr/local/lib/ATO/rootfs | grep -Fqx $image
 
 # ensure minimum lengths
-[[ $#client_id -gt 16 ]]
 [[ $#invocation_id -gt 16 ]]
 [[ $timeout -gt 1 ]] && [[ $timeout -le 60 ]]
 
-# make sure IDs are path-safe by getting a hashed version in hex
-echo -n $client_id | sha256sum | read client_id _
+# make sure ID is path-safe by getting a hashed version in hex
 echo -n $invocation_id | sha256sum | read invocation_id _
 
 # Open a file descriptor where we will write all the status information. See zshmisc(1) § Opening File Descriptors
