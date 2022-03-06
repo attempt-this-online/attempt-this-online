@@ -39,7 +39,7 @@ export default function LanguageSelector({
       onKeyDown={(event: any) => {
         if (event.key === 'Escape' && language !== null) {
           setLanguageSelectorOpen(false);
-        } else if (event.key === 'Enter' && results.length && search) {
+        } else if (event.key === 'Enter' && results?.length && search) {
           const [id, _metadata] = results[0];
           setLanguage(id);
           setLanguageSelectorOpen(false);
