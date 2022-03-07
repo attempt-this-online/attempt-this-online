@@ -43,8 +43,7 @@ ulimit -H -c 0 # i.e., disallow core files
 
 for code value (
     f 1048576 # file size (in 512B blocks, so 512MiB)
-    m 131072  # actual memory (in KiB, so 128MiB)
-    v 262144  # virtual memory address space (in KiB, so 256MiB)
+    m 262144  # memory (in KiB, so 256MiB)
     u 100     # processes (actually threads)
     i 100     # pending signals
     n 100     # open file descriptors
