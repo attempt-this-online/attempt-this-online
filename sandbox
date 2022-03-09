@@ -46,7 +46,6 @@ for code value (
     m 262144  # memory (in KiB, so 256MiB)
     u 100     # processes (actually threads)
     i 100     # pending signals
-    n 100     # open file descriptors
     x 100     # file locks
     q 65536   # bytes in POSIX message queues
 ) {
