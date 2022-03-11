@@ -497,4 +497,11 @@ var Languages = map[string]language{
         Url:     "https://pari.math.u-bordeaux.fr",
 		Sbcs:    false,
 	},
+	"exceptionally": {
+		Name:    "Exceptionally",
+		Image:   "attemptthisonline/exceptionally",
+		Version: "Latest",
+        Url:     "https://github.com/dloscutoff/Esolangs/tree/master/Exceptionally",
+		Sbcs:    false,
+	},
 }
