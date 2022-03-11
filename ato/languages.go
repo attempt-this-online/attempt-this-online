@@ -511,4 +511,11 @@ var Languages = map[string]language{
         Url:     "https://github.com/dloscutoff/Esolangs/tree/master/Regenerate",
 		Sbcs:    false,
 	},
+	"dirac": {
+		Name:    "dirac",
+		Image:   "attemptthisonline/dirac",
+		Version: "Latest",
+        Url:     "https://esolangs.org/wiki/Dirac",
+		Sbcs:    false,
+	},
 }
