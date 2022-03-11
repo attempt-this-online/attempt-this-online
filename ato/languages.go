@@ -518,4 +518,11 @@ var Languages = map[string]language{
         Url:     "https://esolangs.org/wiki/Dirac",
 		Sbcs:    false,
 	},
+	"j_uby": {
+		Name:    "J-uby",
+		Image:   "attemptthisonline/j_uby",
+		Version: "Latest",
+        Url:     "https://github.com/cyoce/J-uby",
+		Sbcs:    false,
+	},
 }
