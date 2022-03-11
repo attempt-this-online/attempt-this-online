@@ -504,4 +504,11 @@ var Languages = map[string]language{
         Url:     "https://github.com/dloscutoff/Esolangs/tree/master/Exceptionally",
 		Sbcs:    false,
 	},
+	"regenerate": {
+		Name:    "Regenerate",
+		Image:   "attemptthisonline/regenerate",
+		Version: "Latest",
+        Url:     "https://github.com/dloscutoff/Esolangs/tree/master/Regenerate",
+		Sbcs:    false,
+	},
 }
