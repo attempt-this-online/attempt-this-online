@@ -525,4 +525,11 @@ var Languages = map[string]language{
         Url:     "https://github.com/cyoce/J-uby",
 		Sbcs:    false,
 	},
+	"dyalog_apl": {
+		Name:    "Dyalog APL",
+		Image:   "dyalog/dyalog",
+		Version: "Latest",
+        Url:     "https://www.dyalog.com/products.htm",
+		Sbcs:    false,
+	},
 }
