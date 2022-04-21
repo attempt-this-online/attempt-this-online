@@ -28,11 +28,21 @@
          local("Fira Mono");
 }
 
-.ATO_no_font_ligatures code, .ATO_no_font_ligatures textarea {
+.ATO_no_font_ligatures code,
+.ATO_no_font_ligatures pre,
+.ATO_no_font_ligatures samp,
+.ATO_no_font_ligatures kbd,
+.ATO_no_font_ligatures textarea.font-mono,
+.ATO_no_font_ligatures input.font-mono {
     font-variant-ligatures: none;
 }
 
-.ATO_font_ligatures code, .ATO_font_ligatures textarea {
+.ATO_font_ligatures code,
+.ATO_font_ligatures pre,
+.ATO_font_ligatures samp,
+.ATO_font_ligatures kbd,
+.ATO_font_ligatures textarea.font-mono,
+.ATO_font_ligatures input.font-mono {
     font-variant-ligatures: normal;
 }
 
