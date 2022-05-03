@@ -358,7 +358,7 @@ var Languages = map[string]language{
 		Sbcs:    false,
 	},
 	/* "ngn_apl": {
-		Name:    "APL (ngn)",
+		Name:    "APL (ngn/apl)",
 		Image:   "attemptthisonline/ngn_apl",
 		Version: "Latest",
 		Url:     "https://github.com/abrudz/ngn-apl",
@@ -526,7 +526,7 @@ var Languages = map[string]language{
 		Sbcs:    false,
 	},
 	"dyalog_apl": {
-		Name:    "Dyalog APL",
+		Name:    "APL (Dyalog APL)",
 		Image:   "dyalog/dyalog",
 		Version: "Latest",
         Url:     "https://www.dyalog.com/products.htm",
