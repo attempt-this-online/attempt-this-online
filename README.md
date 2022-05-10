@@ -3,7 +3,7 @@ Attempt This Online is an online sandbox for testing code in a variety of langua
 related recreational programming. You can find it at [ato.pxeger.com](https://ato.pxeger.com).
 
 - [Installation](docs/installation.md)
-- [REST API](docs/api.md)
+- [API](docs/api.md)
 - [Architecture](docs/architecture.md)
 - [Contributing](docs/contributing.md)
 - [Security Policy](docs/security.md)
