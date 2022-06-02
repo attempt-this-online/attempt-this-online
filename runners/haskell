@@ -4,5 +4,5 @@ cd /ATO/context
 mkdir /ATO/tmp
 export TMPDIR=/ATO/tmp
 ln -s /ATO/code /ATO/code.hs
-/ATO/yargs % /ATO/options /opt/.ghcup/ghc/*/bin/ghc % /ATO/code.hs -o /ATO/exe >&2
+/ATO/yargs % /ATO/options ghc -package-env /opt/ghc_env % /ATO/code.hs -o /ATO/exe >&2
 /ATO/yargs % /ATO/arguments /ATO/exe % < /ATO/input
