@@ -1,0 +1,15 @@
+#!/bin/sh
+
+cd /ATO/context
+
+cat /ATO/input /ATO/code > /ATO/context/tex.tex
+
+/ATO/yargs % /ATO/options tex -interaction nonstopmode % /ATO/context/tex.tex 1>&2
+/ATO/yargs % /ATO/arguments tex4ht % /ATO/context/tex.dvi 1>&2
+
+stored_status="$?"
+
+cat /ATO/context/tex.html
+rm -rf /ATO/context/tex.*
+
+exit "$stored_status"
