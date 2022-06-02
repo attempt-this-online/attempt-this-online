@@ -539,4 +539,12 @@ var Languages = map[string]language{
 		Url:     "https://github.com/Adriandmen/05AB1E",
 		Sbcs:    true,
 	},
+	"tex": {
+		Name:    "TeX",
+		Image:   "attemptthisonline/texlive",
+		Version: "Latest",
+		Url:     "https://tug.org/texlive/doc.html",
+		Sbcs:    true,
+		SE_class: "tex"
+	},
 }
