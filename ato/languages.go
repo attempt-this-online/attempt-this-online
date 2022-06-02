@@ -540,11 +540,11 @@ var Languages = map[string]language{
 		Sbcs:    true,
 	},
 	"tex": {
-		Name:    "TeX",
-		Image:   "attemptthisonline/texlive",
-		Version: "Latest",
-		Url:     "https://tug.org/texlive/doc.html",
-		Sbcs:    true,
-		SE_class: "tex"
+		Name:     "TeX",
+		Image:    "attemptthisonline/texlive",
+		Version:  "Latest",
+		Url:      "https://tug.org/texlive/doc.html",
+		Sbcs:     true,
+		SE_class: "tex",
 	},
 }
