@@ -18,6 +18,7 @@ import { ArgvList, parseList } from 'components/argvList';
 import * as API from 'lib/api';
 import { save, load } from 'lib/urls';
 import { ENCODERS, DECODERS } from 'lib/encoding';
+import stringLength from 'lib/stringLength';
 
 const NEWLINE = '\n'.charCodeAt(0);
 
@@ -263,10 +264,12 @@ function _Run(
     [],
   ));
 
+  const charLength = stringLength(code);
+
   let byteLength: number = 0;
   if (codeEncoding !== null) {
     if (codeEncoding === 'sbcs') {
-      byteLength = code.length;
+      byteLength = stringLength(code);
     } else {
       byteLength = ENCODERS[codeEncoding](code).length;
     }
@@ -436,9 +439,9 @@ function _Run(
                 </div>
                 <div className="flex grow justify-between relative">
                   <code className="my-auto mr-4 font-mono bg-gray-200 dark:bg-gray-800 px-2 py-px rounded">
-                    {code.length}
+                    {charLength}
                     {' '}
-                    {pluralise('char', code.length)}
+                    {pluralise('char', charLength)}
                     {', '}
                     {byteLength}
                     {' '}
