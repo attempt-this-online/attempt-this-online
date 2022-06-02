@@ -14,7 +14,18 @@ image = sys.argv[1]
 with open("/var/cache/ATO/images/manifest.json") as f:
     layers = json.load(f)[0]["Layers"]
 
-layers = ":".join("/usr/local/lib/ATO/layers/" + layer.removesuffix(".tar") for layer in layers[::-1])
+
+def dedup(a):
+    s = set()
+    for i in a:
+        if i in s:
+            continue
+        else:
+            s.add(i)
+            yield i
+
+
+layers = ":".join("/usr/local/lib/ATO/layers/" + layer.removesuffix(".tar") for layer in dedup(layers[::-1]))
 
 # Create mount point
 os.makedirs(f"/usr/local/lib/ATO/rootfs/{image}", exist_ok=True)
