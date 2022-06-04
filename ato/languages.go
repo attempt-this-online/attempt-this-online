@@ -553,5 +553,5 @@ var Languages = map[string]language{
 		Version: "Latest",
 		Url:     "https://github.com/PyGamer0/flax",
 		Sbcs:    true,
-	}
+	},
 }
