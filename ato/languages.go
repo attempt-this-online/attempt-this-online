@@ -548,7 +548,7 @@ var Languages = map[string]language{
 		SE_class: "tex",
 	},
 	"flax": {
-		Name:    "Flax",
+		Name:    "flax",
 		Image:   "attemptthisonline/flax",
 		Version: "Latest",
 		Url:     "https://github.com/PyGamer0/flax",
