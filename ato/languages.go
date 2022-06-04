@@ -547,4 +547,11 @@ var Languages = map[string]language{
 		Sbcs:     true,
 		SE_class: "tex",
 	},
+	"flax": {
+		Name:    "flax",
+		Image:   "attemptthisonline/flax",
+		Version: "Latest",
+		Url:     "https://github.com/PyGamer0/flax",
+		Sbcs:    true,
+	},
 }
