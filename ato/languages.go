@@ -544,7 +544,7 @@ var Languages = map[string]language{
 		Image:    "attemptthisonline/texlive",
 		Version:  "Latest",
 		Url:      "https://tug.org/texlive/doc.html",
-		Sbcs:     true,
+		Sbcs:     false,
 		SE_class: "tex",
 	},
 	"flax": {
@@ -552,6 +552,20 @@ var Languages = map[string]language{
 		Image:   "attemptthisonline/flax",
 		Version: "Latest",
 		Url:     "https://github.com/PyGamer0/flax",
+		Sbcs:    true,
+	},
+	"whitespace": {
+		Name:    "Whitespace",
+		Image:   "attemptthisonline/whitespace",
+		Version: "Latest",
+		Url:     "https://web.archive.org/web/20150618184706/http://compsoc.dur.ac.uk/whitespace/tutorial.php",
+		Sbcs:    false,
+	},
+	"charcoal": {
+		Name:    "Charcoal",
+		Image:   "attemptthisonline/charcoal",
+		Version: "Latest",
+		Url:     "https://github.com/somebody1234/Charcoal",
 		Sbcs:    true,
 	},
 }
