@@ -1,4 +1,4 @@
 #!/bin/sh
 
 cd /ATO/context
-/opt/wspace /ATO/code < /ATO/input
+/usr/local/bin/wspace /ATO/code < /ATO/input
