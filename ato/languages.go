@@ -575,4 +575,11 @@ var Languages = map[string]language{
 		Url:     "https://github.com/barbuz/Husk",
 		Sbcs:    true,
 	},
+	"nibbles": {
+		Name:    "Nibbles",
+		Image:   "attemptthisonline/nibbles",
+		Version: "Latest",
+        Url:     "http://golfscript.com/nibbles/index.html",
+		Sbcs:    false,
+	},
 }

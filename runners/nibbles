@@ -1,0 +1,8 @@
+#!/bin/sh
+
+ln -s /ATO/code /ATO/code.nbl
+mkdir /ATO/tmp
+export TMPDIR=/ATO/tmp
+cp -r /opt/nibbles .
+cd nibbles
+/ATO/yargs %1 /ATO/options /ATO/yargs %2 /ATO/arguments ./nibbles %1 /ATO/code.nbl %2 < /ATO/input
