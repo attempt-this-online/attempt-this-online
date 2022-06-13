@@ -568,4 +568,11 @@ var Languages = map[string]language{
 		Url:     "https://github.com/somebody1234/Charcoal",
 		Sbcs:    true,
 	},
+	"hops": {
+		Name:    "HOPS",
+		Image:   "attemptthisonline/hops",
+		Version: "Latest",
+		Url:     "https://akc.is/hops/",
+		Sbcs:    false,
+	},
 }
