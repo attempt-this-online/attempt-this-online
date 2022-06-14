@@ -1,4 +1,6 @@
 #!/bin/sh
 
+mkdir /ATO/home
+export HOME=/ATO/home
 cd /ATO/context
 /ATO/yargs %1 /ATO/options /ATO/yargs %2 /ATO/arguments hops %1 -f /ATO/code %2 < /ATO/input
