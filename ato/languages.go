@@ -579,7 +579,14 @@ var Languages = map[string]language{
 		Name:    "Nibbles",
 		Image:   "attemptthisonline/nibbles",
 		Version: "Latest",
-        Url:     "http://golfscript.com/nibbles/index.html",
+		Url:     "http://golfscript.com/nibbles/index.html",
+		Sbcs:    false,
+	},
+	"hops": {
+		Name:    "HOPS",
+		Image:   "attemptthisonline/hops",
+		Version: "Latest",
+		Url:     "https://akc.is/hops/",
 		Sbcs:    false,
 	},
 }
