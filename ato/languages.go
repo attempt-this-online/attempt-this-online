@@ -573,6 +573,18 @@ var Languages = map[string]language{
 		Image:   "attemptthisonline/hops",
 		Version: "Latest",
 		Url:     "https://akc.is/hops/",
+	"husk": {
+		Name:    "Husk",
+		Image:   "attemptthisonline/husk",
+		Version: "Latest",
+		Url:     "https://github.com/barbuz/Husk",
+		Sbcs:    true,
+	},
+	"nibbles": {
+		Name:    "Nibbles",
+		Image:   "attemptthisonline/nibbles",
+		Version: "Latest",
+        Url:     "http://golfscript.com/nibbles/index.html",
 		Sbcs:    false,
 	},
 }

@@ -1,0 +1,7 @@
+#!/bin/sh
+
+mkdir /ATO/tmp
+export TMPDIR=/ATO/tmp
+cp -r /opt/husk .
+cd husk
+/ATO/yargs %1 /ATO/options /ATO/yargs %2 /ATO/arguments /opt/husk/husk -u %1 -f /ATO/code %2 < /ATO/input
