@@ -589,4 +589,11 @@ var Languages = map[string]language{
 		Url:     "https://akc.is/hops/",
 		Sbcs:    false,
 	},
+	"pyth": {
+		Name:    "Pyth",
+		Image:   "attemptthisonline/pyth",
+		Version: "Latest",
+		Url:     "https://github.com/isaacg1/pyth",
+		Sbcs:    false,
+	},
 }
