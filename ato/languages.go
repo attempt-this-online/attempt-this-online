@@ -596,4 +596,11 @@ var Languages = map[string]language{
 		Url:     "https://github.com/isaacg1/pyth",
 		Sbcs:    false,
 	},
+	"k_ktye": {
+		Name:    "K (ktye/i)",
+		Image:   "attemptthisonline/ktye_k",
+		Version: "Latest",
+		Url:     "https://github.com/ktye/i",
+		Sbcs:    false,
+	},
 }
