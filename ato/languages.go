@@ -596,4 +596,11 @@ var Languages = map[string]language{
 		Url:     "https://github.com/isaacg1/pyth",
 		Sbcs:    false,
 	},
+	"lolcode": {
+		Name:    "LOLCODE",
+		Image:   "attemptthisonline/lolcode",
+		Version: "Latest",
+		Url:     "https://github.com/justinmeza/lci",
+		Sbcs:    false,
+	},
 }
