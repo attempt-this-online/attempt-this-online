@@ -170,6 +170,8 @@ func (invocation invocation) invoke() (*result, error) {
 		}
 	}
 
+	cmd.Wait()
+
 	if encodedStatus, err := os.ReadFile(path.Join(dir, "status")); err == nil {
 		if err = json.Unmarshal(encodedStatus, &result); err != nil {
 			return nil, err
