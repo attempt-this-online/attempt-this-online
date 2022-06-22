@@ -36,14 +36,22 @@ exec {info_fd}>/run/ATO/$invocation_id/info
 # -H means hard limit - processes absolutely cannot go past this
 # the soft limits are slightly less than the hard limits so that processes have a chance to recover
 
+# use a cgroup to manage memory limits
+# TODO: dynamically work out $cg path, rather than relying on hard-coded cgroup fs mount point and systemd cgroup layout
+cg=/sys/fs/cgroup/system.slice/ATO.service/$invocation_id
+# ensure cgroup is cleaned up
+trap "rmdir $cg" EXIT
+# create the cgroup
+mkdir -p $cg
+
 (  # enter a subshell; the limits don't apply outside it
+read subshell_pid _ </proc/self/stat
 
 # core file size
 ulimit -H -c 0 # i.e., disallow core files
 
 for code value (
     f 1048576 # file size (in 512B blocks, so 512MiB)
-    m 262144  # memory (in KiB, so 256MiB)
     u 100     # processes (actually threads)
     i 100     # pending signals
     x 100     # file locks
@@ -52,6 +60,12 @@ for code value (
     ulimit -S -$code $[value - 2]
     ulimit -H -$code $value
 }
+
+echo 209715200 >$cg/memory.high # create memory pressure if 200MiB used
+echo 268435456 >$cg/memory.max  # absolute maximum memory 256MiB
+echo 0 >$cg/memory.swap.max     # disallow swap
+# join cgroup in this subshell
+echo $subshell_pid >$cg/cgroup.procs
 
 # (I wish it was possible to add comments between line continuations)
 # - env -i: start with a clean/empty environment

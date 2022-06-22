@@ -2,11 +2,13 @@
 Description=Attempt This Online, a clone of Try It Online
 
 [Service]
-ExecStart=/usr/local/bin/ATO
+User=ato
+ExecStart=+/usr/local/bin/ATO
 Restart=on-failure
 StartLimitBurst=3
 StartLimitInterval=60s
 TimeoutStopSec=5s
+Delegate=true
 
 [Install]
 WantedBy=multi-user.target
