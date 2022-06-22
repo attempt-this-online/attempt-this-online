@@ -47,9 +47,6 @@ mkdir -p $cg
 (  # enter a subshell; the limits don't apply outside it
 read subshell_pid _ </proc/self/stat
 
-# core file size
-ulimit -H -c 0 # i.e., disallow core files
-
 for code value (
     f 1048576 # file size (in 512B blocks, so 512MiB)
     u 100     # processes (actually threads)
