@@ -1,10 +1,11 @@
 #!/bin/sh -e
 # Start script for the Attempt This Online server - to be run as root
 
-# move self into a subtree of ATO.service, because otherwise ATO.service itself cannot be configured properly. See https://www.kernel.org/doc/html/latest/admin-guide/cgroup-v2.html#no-internal-process-constraint
 base_cg=/sys/fs/cgroup/system.slice/ATO.service
 mkdir -p "$base_cg/server"
+# move self into a subtree of ATO.service, because otherwise ATO.service itself cannot be configured properly. See https://www.kernel.org/doc/html/latest/admin-guide/cgroup-v2.html#no-internal-process-constraint
 echo "$$" > "$base_cg/server/cgroup.procs"
+echo +memory > "$base_cg/cgroup.subtree_control"
 
 mkdir -p /run/ATO
 chown ato:ato /run/ATO
