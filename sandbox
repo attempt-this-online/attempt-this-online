@@ -53,6 +53,7 @@ for code value (
     i 100     # pending signals
     x 100     # file locks
     q 65536   # bytes in POSIX message queues
+    t 61      # CPU-seconds
 ) {
     ulimit -S -$code $[value - 2]
     ulimit -H -$code $value
