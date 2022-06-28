@@ -1,0 +1,9 @@
+[package]
+name = "attempt-this-online"
+version = "0.1.16"
+edition = "2021"
+default-run = "attempt-this-online"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
