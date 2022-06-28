@@ -18,7 +18,7 @@ gcc -Wall -Werror -static yargs.c -o dist/attempt_this_online/yargs
 echo Building tarball... >&2
 cp target/release/attempt-this-online dist/attempt_this_online/server 
 # list images
-cargo run --bin list_images > dist/attempt_this_online/images.txt
+jq -r '.[].image' < languages.json | sort -u > dist/attempt_this_online/images.txt
 cp -R frontend/out dist/attempt_this_online/public
 cp -R \
     setup/ \
