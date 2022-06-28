@@ -22,15 +22,11 @@ export default function ResizeableText(
   const bigTextBoxes = useSelector((state: any) => state.bigTextBoxes);
   const handleChange = (event: any) => {
     setValue(event.target.value);
-    if (dummy.current) {
-      dummy.current.value = event.target.value;
-      setHeight(dummy.current.scrollHeight);
-      dummy.current.value = '';
-    }
+    resize(event.target.value);
   };
-  const resize = () => {
+  const resize = (x = value) => {
     if (dummy.current) {
-      dummy.current.value = value;
+      dummy.current.value = x;
       setHeight(dummy.current.scrollHeight);
       dummy.current.value = '';
     }
