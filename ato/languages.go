@@ -610,4 +610,11 @@ var Languages = map[string]language{
 		Url:     "https://github.com/justinmeza/lci",
 		Sbcs:    false,
 	},
+	"cognate": {
+		Name:    "Cognate",
+		Image:   "attemptthisonline/cognate",
+		Version: "Latest",
+		Url:     "https://cognate-lang.github.io",
+		Sbcs:    false,
+	},
 }
