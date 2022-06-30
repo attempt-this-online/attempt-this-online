@@ -1,0 +1,8 @@
+#!/bin/sh
+
+mkdir /ATO/tmp
+export TMPDIR=/ATO/tmp
+ln -s /ATO/code /ATO/program.cog
+/ATO/yargs % /ATO/options cognac % /ATO/program.cog
+cd /ATO/context
+/ATO/yargs % /ATO/arguments /ATO/program % < /ATO/input
