@@ -176,7 +176,7 @@ function _Run(
       Kernel time: ${data.kernel / 1e9} s
       User time: ${data.kernel / 1e9} s
       Maximum lifetime memory usage: ${data.max_mem} KiB
-      Waits (volunatry context switches): ${data.waits}
+      Waits (voluntary context switches): ${data.waits}
       Preemptions (involuntary context switches): ${data.preemptions}
       Minor page faults: ${data.minor_page_faults}
       Major page faults: ${data.major_page_faults}
