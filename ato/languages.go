@@ -258,6 +258,7 @@ var Languages = map[string]language{
 		Version: "Latest",
 		Url:     "https://kotlinlang.org",
 		Sbcs:    false,
+		SE_class: "kotlin",
 	},
 	"rust": {
 		Name:    "Rust",
@@ -265,6 +266,7 @@ var Languages = map[string]language{
 		Version: "Latest",
 		Url:     "https://www.rust-lang.org",
 		Sbcs:    false,
+		SE_class: "rust",
 	},
 	"clang": {
 		Name:    "C (clang)",
@@ -272,6 +274,7 @@ var Languages = map[string]language{
 		Version: "Latest",
 		Url:     "https://clang.llvm.org",
 		Sbcs:    false,
+		SE_class: "C",
 	},
 	"k_ok": {
 		Name:    "K (oK)",
@@ -286,6 +289,7 @@ var Languages = map[string]language{
 		Version: "Latest",
 		Url:     "https://www.haskell.org",
 		Sbcs:    false,
+		SE_class: "haskell"
 	},
 	"quipu": {
 		Name:    "Quipu",
@@ -377,6 +381,7 @@ var Languages = map[string]language{
 		Version: "Latest",
 		Url:     "http://www.sbcl.org",
 		Sbcs:    false,
+		SE_class: "lisp",
 	},
 	"k_ngn": {
 		Name:    "K (ngn/k)",
@@ -398,6 +403,7 @@ var Languages = map[string]language{
 		Version: "Latest",
 		Url:     "https://www.lua.org",
 		Sbcs:    false,
+		SE_class: "lua",
 	},
 	"crystal": {
 		Name:    "Crystal",
@@ -412,6 +418,7 @@ var Languages = map[string]language{
 		Version: "Latest",
 		Url:     "https://nim-lang.org/",
 		Sbcs:    false,
+		SE_class: "nim",
 	},
 	"neko": {
 		Name:    "Neko",
