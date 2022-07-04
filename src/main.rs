@@ -15,5 +15,7 @@ async fn main() {
 
 async fn handle_ws(websocket: warp::ws::WebSocket) {
     let (mut sender, _) = websocket.split();
-    sender.send(warp::ws::Message::text("Hello, World!")).await.unwrap();
+    let mut buf = Vec::new();
+    rmp::encode::write_str(&mut buf, "Hello, World!").unwrap();
+    sender.send(warp::ws::Message::binary(buf)).await.unwrap();
 }
