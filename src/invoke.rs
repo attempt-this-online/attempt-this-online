@@ -38,18 +38,18 @@ fn main() -> std::process::ExitCode {
         }
     };
     let _ = request; // TODO: use request
-    let encoded_output =
-    match rmp_serde::to_vec_named(&Response{stdout: b"hello".to_vec(), stderr: b"goodbye".to_vec()}) {
-        Ok(r) => { r }
+    let encoded_output = match rmp_serde::to_vec_named(&Response {
+        stdout: b"hello".to_vec(),
+        stderr: b"goodbye".to_vec(),
+    }) {
+        Ok(r) => r,
         Err(e) => {
             log_error!("error encoding output: {}", e);
             return std::process::ExitCode::from(INTERNAL_ERROR);
         }
     };
     match std::io::stdout().write_all(&encoded_output[..]) {
-        Ok(()) => {
-            std::process::ExitCode::from(NORMAL)
-        }
+        Ok(()) => std::process::ExitCode::from(NORMAL),
         Err(e) => {
             log_error!("error writing output: {}", e);
             std::process::ExitCode::from(INTERNAL_ERROR)
