@@ -1,26 +1,13 @@
+mod codes;
+use crate::codes::*;
 use futures_util::stream::SplitSink;
 use futures_util::SinkExt;
 use futures_util::StreamExt;
-use serde::{Deserialize, Serialize};
+use std::process::Stdio;
+use tokio::io::AsyncWriteExt;
+use tokio::process::Command;
 use warp::Filter;
 use warp::ws::*;
-
-#[derive(Serialize)]
-struct Response {
-    stdout: Vec<u8>,
-    stderr: Vec<u8>,
-}
-
-#[allow(dead_code)]
-#[derive(Deserialize)]
-struct Request {
-    language: String,
-    code: Vec<u8>,
-    input: Vec<u8>,
-    arguments: Vec<Vec<u8>>,
-    options: Vec<Vec<u8>>,
-    timeout: i32,
-}
 
 const MAX_REQUEST_SIZE: usize = 1 << 16; // 64KiB
 
@@ -47,32 +34,16 @@ async fn handle_ws(websocket: WebSocket) {
                 return sender;
             }
         };
-        let request =
-        match rmp_serde::from_slice::<Request>(message.as_bytes()) {
-            Ok(r) => { r }
-            Err(e) => {
-                let msg = format!("error deserialising request: {}", e);
-                eprintln!("{}", msg);
-                return handle_ws_error(sender, msg, 1008).await;
-            }
-        };
         let response =
-        match invoke(request).await {
+        match invoke(message.as_bytes()).await {
             Ok(r) => { r }
-            Err(e) => {
+            Err((code, e)) => {
                 let msg = format!("internal error: {}", e);
-                return handle_ws_error(sender, msg, 1011).await;
+                eprintln!("{}", msg);
+                return handle_ws_error(sender, msg, (code as u16) + WEBSOCKET_BASE).await;
             }
         };
-        let encoded =
-        match rmp_serde::to_vec_named(&response) {
-            Ok(r) => { r }
-            Err(e) => {
-                eprintln!("error serialising response: {}", e);
-                return sender;
-            }
-        };
-        match sender.feed(Message::binary(encoded)).await {
+        match sender.feed(Message::binary(response)).await {
             Ok(()) => {}
             Err(e) => {
                 eprintln!("error feeding websocket: {}", e);
@@ -96,8 +67,38 @@ async fn handle_ws_error(mut sender: SplitSink<WebSocket, Message>, error: Strin
     return sender;
 }
 
-async fn invoke(request: Request) -> Result<Response, String> {
-    // TODO: implement invocations
-    let _ = request;
-    Ok(Response{stdout: "hello".into(), stderr: "goodbye".into()})
+async fn invoke(input: &[u8]) -> Result<Vec<u8>, (u8, String)> {
+    let command = Command::new("ATO_invoke")
+        .stderr(Stdio::inherit())
+        .stdout(Stdio::piped())
+        .stdin(Stdio::piped())
+        .spawn();
+    let mut child =
+    match command {
+        Ok(c) => { c }
+        Err(e) => {
+            return Err((INTERNAL_ERROR, format!("error spawning ATO_invoke: {}", e)))
+        }
+    };
+    let mut stdin = child.stdin.take().expect("stdin should not have been taken");
+    if let Err(e) = stdin.write_all(input).await {
+        return Err((INTERNAL_ERROR, format!("error writing stdin of ATO_invoke: {}", e)))
+    }
+    let output = match child.wait_with_output().await {
+        Ok(o) => { o }
+        Err(e) => {
+            return Err((INTERNAL_ERROR, format!("error waiting for ATO_invoke: {}", e)))
+        }
+    };
+    if !output.status.success() {
+        Err((
+                output.status.code().unwrap_or(11) as u8,
+                format!(
+                    "error running ATO_invoke:\n{}",
+                    std::string::String::from_utf8_lossy(&output.stdout[..]),
+                ),
+        ))
+    } else {
+        Ok(output.stdout)
+    }
 }
