@@ -21,52 +21,49 @@ async fn main() {
 }
 
 async fn handle_ws(websocket: WebSocket) {
-    let (sender, receiver) = websocket.split();
-    let mut sender = receiver
-        .fold(sender, |mut sender, received| async {
-            let message = match received {
-                Ok(r) => r,
-                Err(e) => {
-                    // TODO: handle error
-                    eprintln!("error reading from websocket: {}", e);
-                    return sender;
-                }
-            };
-            let response = match invoke(message.as_bytes()).await {
-                Ok(r) => r,
-                Err((code, e)) => {
-                    let msg = format!("internal error: {}", e);
-                    eprintln!("{}", msg);
-                    return handle_ws_error(sender, msg, (code as u16) + WEBSOCKET_BASE).await;
-                }
-            };
-            match sender.feed(Message::binary(response)).await {
-                Ok(()) => {}
-                Err(e) => {
-                    eprintln!("error feeding websocket: {}", e);
-                }
-            };
-            sender
-        })
-        .await;
-    if let Err(e) = sender.flush().await {
-        eprintln!("error flushing websocket: {}", e);
-    }
-    if let Err(e) = sender.close().await {
-        eprintln!("error closing websocket: {}", e);
-    }
+    let (mut sender, mut receiver) = websocket.split();
+    while let Some(received) = receiver.next().await {
+        let message = match received {
+            Ok(r) => r,
+            Err(e) => {
+                // TODO: handle error
+                eprintln!("error reading from websocket: {}", e);
+                continue;
+            }
+        };
+        if message.is_close() {
+            if let Err(e) = receiver.reunite(sender).unwrap().close().await {
+                eprintln!("error closing websocket: {}", e);
+            }
+            break;
+        }
+        let response = match invoke(message.as_bytes()).await {
+            Ok(r) => r,
+            Err((code, e)) => {
+                let msg = format!("internal error: {}", e);
+                eprintln!("{}", msg);
+                handle_ws_error(&mut sender, msg, (code as u16) + WEBSOCKET_BASE).await;
+                continue;
+            }
+        };
+        match sender.send(Message::binary(response)).await {
+            Ok(()) => {}
+            Err(e) => {
+                eprintln!("error sending to websocket: {}", e);
+            }
+        };
+    };
 }
 
 async fn handle_ws_error(
-    mut sender: SplitSink<WebSocket, Message>,
+    sender: &mut SplitSink<WebSocket, Message>,
     error: String,
     code: u16,
-) -> SplitSink<WebSocket, Message> {
+) {
     if let Err(e) = sender.send(Message::close_with(code, error)).await {
         // can't do anything but log it
         eprintln!("error sending close code: {}", e);
     }
-    sender
 }
 
 async fn invoke(input: &[u8]) -> Result<Vec<u8>, (u8, String)> {

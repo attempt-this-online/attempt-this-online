@@ -1,6 +1,7 @@
 mod codes;
 use crate::codes::*;
 use serde::{Deserialize, Serialize};
+use serde_bytes::ByteBuf;
 use std::io::Write;
 
 macro_rules! log_error {
@@ -14,18 +15,18 @@ macro_rules! log_error {
 
 #[derive(Serialize)]
 struct Response {
-    stdout: Vec<u8>,
-    stderr: Vec<u8>,
+    stdout: ByteBuf,
+    stderr: ByteBuf,
 }
 
 #[allow(dead_code)]
 #[derive(Deserialize)]
 struct Request {
     language: String,
-    code: Vec<u8>,
-    input: Vec<u8>,
-    arguments: Vec<Vec<u8>>,
-    options: Vec<Vec<u8>>,
+    code: ByteBuf,
+    input: ByteBuf,
+    arguments: Vec<ByteBuf>,
+    options: Vec<ByteBuf>,
     timeout: i32,
 }
 
@@ -39,8 +40,8 @@ fn main() -> std::process::ExitCode {
     };
     let _ = request; // TODO: use request
     let encoded_output = match rmp_serde::to_vec_named(&Response {
-        stdout: b"hello".to_vec(),
-        stderr: b"goodbye".to_vec(),
+        stdout: ByteBuf::from(b"hello".to_vec()),
+        stderr: ByteBuf::from(b"goodbye".to_vec()),
     }) {
         Ok(r) => r,
         Err(e) => {
