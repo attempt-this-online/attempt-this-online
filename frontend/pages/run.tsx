@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import {
   SyntheticEvent, useMemo, useRef, useState, useEffect,
 } from 'react';
-import { escape, throttle } from 'lodash';
+import { throttle } from 'lodash';
 import { ExclamationCircleIcon, ClipboardCopyIcon, XIcon } from '@heroicons/react/solid';
 
 import CollapsibleText from 'components/collapsibleText';

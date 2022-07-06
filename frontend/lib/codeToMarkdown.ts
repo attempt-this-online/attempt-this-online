@@ -8,12 +8,13 @@ const rLineOfBackticks = /^\s*```\s*$/m;
 const rNewLine = /^/gm;
 
 export default function codeToMarkdown(code: string, language: string | undefined): string {
+  const langComment = language ? `<!-- language: lang-${language} -->\n` : '';
   if (code === '') {
     return '<pre><code></code></pre>';
   } if (!rLineOfBackticks.test(code) && !rUnprintable.test(code)) {
     return `\`\`\`${language ?? ''}\n${code}\n\`\`\`\``;
   } if (rLineOfSpaces.test(code) || rSurroundingLinefeed.test(code) || rUnprintable.test(code)) {
-    return `<pre><code>${code.replace(rEscapees, character => {
+    return `${langComment}<pre><code>${code.replace(rEscapees, character => {
       switch (character) {
         case '\0':
           return '';
@@ -29,6 +30,5 @@ export default function codeToMarkdown(code: string, language: string | undefine
     })}\n</code></pre>`;
   }
 
-  return `<!-- language: lang-${language ?? ''} -->\n${
-    code.replace(rNewLine, '    ')}`;
+  return `${langComment}${code.replace(rNewLine, '    ')}`;
 }
