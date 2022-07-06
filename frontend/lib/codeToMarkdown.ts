@@ -1,3 +1,5 @@
+// modified from code from TIO, © Dennis Mitchell. Used under the MIT License:
+// https://github.com/TryItOnline/tryitonline/blob/master/LICENSE
 const rLineOfSpaces = /^\s+$/m;
 const rSurroundingLinefeed = /^\n|\n$/;
 // eslint-disable-next-line no-control-regex
