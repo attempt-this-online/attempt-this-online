@@ -19,6 +19,7 @@ import * as API from 'lib/api';
 import { save, load } from 'lib/urls';
 import { ENCODERS, DECODERS } from 'lib/encoding';
 import stringLength from 'lib/stringLength';
+import codeToMarkdown from '../lib/codeToMarkdown';
 
 const NEWLINE = '\n'.charCodeAt(0);
 
@@ -342,21 +343,17 @@ function _Run(
       return;
     }
     setClipboardCopyModalOpen(false);
-    let syntaxHighlightingClass: string;
-    if (languages[language].SE_class) {
-      syntaxHighlightingClass = ` class="lang-${escape(languages[language].SE_class)}"`;
-    } else {
-      syntaxHighlightingClass = '';
-    }
     let title: string;
     if (languages[language].url) {
       title = `[${languages[language].name}](${languages[language].url})`;
     } else {
       title = languages[language].name;
     }
+
+    const markdownCode = codeToMarkdown(code, languages[language].SE_class);
     navigator.clipboard.writeText(`# ${title}, ${byteLength} ${pluralise('byte', byteLength)}
 
-<pre><code${syntaxHighlightingClass}>${escape(code)}</code></pre>
+${markdownCode}
 
 [Attempt This Online!](${getCurrentURL()})`);
 
