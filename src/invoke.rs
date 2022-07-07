@@ -71,6 +71,7 @@ fn main() -> std::process::ExitCode {
 enum ValidationError<'a> {
     NoSuchLanguage(&'a String),
     NullByteInArgument,
+    InvalidTimeout(i32),
 }
 
 impl<'a> std::fmt::Display for ValidationError<'a> {
@@ -78,11 +79,15 @@ impl<'a> std::fmt::Display for ValidationError<'a> {
         match self {
             ValidationError::NoSuchLanguage(name) => write!(f, "no such language: {}", name),
             ValidationError::NullByteInArgument => write!(f, "argument contains null byte"),
+            ValidationError::InvalidTimeout(val) => write!(f, "timeout not in range 1-60: {}", val),
         }
     }
 }
 
 fn validate(request: &Request) -> Result<&Language, ValidationError> {
+    if request.timeout < 1 || request.timeout > 60 {
+        return Err(ValidationError::InvalidTimeout(request.timeout));
+    }
     for arg in request.options.iter().chain(request.arguments.iter()) {
         if arg.contains(&0) {
             return Err(ValidationError::NullByteInArgument);
