@@ -37,13 +37,8 @@ async fn handle_ws(websocket: WebSocket) {
         let response = match invoke(message.as_bytes()).await {
             Ok(r) => r,
             Err((code, e)) => {
-                let msg = if code == POLICY_VIOLATION {
-                    e
-                } else {
-                    format!("internal error: {}", e)
-                };
                 if let Err(e) = sender
-                    .send(Message::close_with(WEBSOCKET_BASE + code as u16, msg))
+                    .send(Message::close_with(WEBSOCKET_BASE + code as u16, e))
                     .await
                 {
                     // can't do anything but log it
@@ -73,7 +68,7 @@ async fn invoke(input: &[u8]) -> Result<Vec<u8>, (u8, String)> {
         .spawn();
     let mut child = match command {
         Ok(c) => c,
-        Err(e) => return Err((INTERNAL_ERROR, format!("error spawning ATO_invoke: {}", e))),
+        Err(e) => return Err((INTERNAL_ERROR, format!("internal error: error spawning ATO_invoke: {}", e))),
     };
     let mut stdin = child
         .stdin
@@ -82,7 +77,7 @@ async fn invoke(input: &[u8]) -> Result<Vec<u8>, (u8, String)> {
     if let Err(e) = stdin.write_all(input).await {
         return Err((
             INTERNAL_ERROR,
-            format!("error writing stdin of ATO_invoke: {}", e),
+            format!("internal error: error writing stdin of ATO_invoke: {}", e),
         ));
     }
     let output = match child.wait_with_output().await {
@@ -90,7 +85,7 @@ async fn invoke(input: &[u8]) -> Result<Vec<u8>, (u8, String)> {
         Err(e) => {
             return Err((
                 INTERNAL_ERROR,
-                format!("error waiting for ATO_invoke: {}", e),
+                format!("internal error: error waiting for ATO_invoke: {}", e),
             ))
         }
     };
@@ -99,11 +94,11 @@ async fn invoke(input: &[u8]) -> Result<Vec<u8>, (u8, String)> {
         let code = match output.status.code() {
             Some(c) => c as u8,
             None => {
-                eprintln!("error running ATO_invoke: {}", output.status);
+                eprintln!("internal error: error running ATO_invoke: {}", output.status);
                 INTERNAL_ERROR
             }
         };
-        Err((code, msg.into()))
+        Err((code, msg.trim_end().into()))
     } else {
         Ok(output.stdout)
     }

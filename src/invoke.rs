@@ -5,21 +5,19 @@ use clone3::Clone3;
 use defer_lite::defer;
 use hex::ToHex;
 use nix::{
-    fcntl::{OFlag, splice, SpliceFFlags},
     dir::Dir,
-    poll::*,
-    sys::memfd::*,
-    // sys::signal::*,
-    // sys::signalfd::*,
+    fcntl::OFlag,
+    poll::{PollFd, PollFlags, poll},
     sys::stat::Mode,
-    unistd::*,
+    unistd::{close, dup2, execve, pipe},
 };
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 use serde_bytes::ByteBuf;
+use std::fs::File;
 use std::io::{Read, Write};
 use std::os::unix::io::FromRawFd;
-use std::path::*;
+use std::path::{Path, PathBuf};
 
 macro_rules! log_error {
     ($($x:expr),*) => {
@@ -32,7 +30,7 @@ macro_rules! log_error {
 
 macro_rules! check {
     ($x:expr, $f:literal $(, $($a:literal),+)? $(,)?) => {
-        $x.map_err(|e| format!($f, e, $($($a,)*)?))?
+        $x.map_err(|e| format!($f, $($($a,)*)? e))?
     };
     ($x:expr $(,)?) => {
         $x.map_err(|e| e.to_string())?
@@ -149,6 +147,11 @@ fn invoke(request: &Request, language: &Language) -> Result<Response, String> {
         "error opening cgroup dir: {}",
     );
 
+    // Currently the child process will just block forever if it tries to write more than
+    // $MAX_PIPE_SIZE bytes to stdout or stderr; we rely purely on this mechanism to prevent
+    // excessive output. If the process gets to this point (where it's blocking forever), it will
+    // eventually time out and die. This means the read_to_end calls below won't try to read an
+    // infinite or very large stream.
     let (stdout_r, stdout_w) = check!(pipe(), "error creating stdout pipe: {}");
     let (stderr_r, stderr_w) = check!(pipe(), "error creating stderr pipe: {}");
 
@@ -175,47 +178,19 @@ fn invoke(request: &Request, language: &Language) -> Result<Response, String> {
         check!(close(stderr_r), "error closing stderr read end: {}");
         check!(dup2(stderr_w, STDERR_FD), "error dup2ing stderr: {}");
         check!(close(stderr_w), "error closing stderr write end: {}");
+        println!("hello from the main child");
         drop_caps()?;
         // TODO: pivot_root
         // TODO: various bind mounts
         // TODO: write stdin and code to /ATO files
         let result = execve(cstr!("TODO"), &[cstr!("TODO")], &[cstr!("TODO")]);
         let e = result.err().expect("execve should never return if successful");
+        eprintln!("error running execve: {}", e);
         std::process::exit(e as i32);
     }
     // in parent
-
-    macro_rules! copy_stdxx {
-        ($name:literal, $max:ident, $pipe:ident) => {{
-            let file = check!(memfd_create(cstr!($name), MemFdCreateFlag::empty()), "error creating {} memfd: {}", $name);
-            let mut clone3 = Clone3::default();
-            // ensure it's killed by putting it into the cgroup which we gonna kill soon
-            clone3.flag_into_cgroup(&cgroup_fd);
-            if check!(unsafe { clone3.call() }, "error clone3ing {} reader: {}", $name) == 0 {
-                let mut remaining = $max as isize;
-                while remaining > 0 {
-                    match splice($pipe, None, file, None, remaining as usize, SpliceFFlags::empty()) {
-                        Err(e) => {
-                            eprintln!("error splicing {}: {}", $name, e);
-                            std::process::exit(e as i32);
-                        }
-                        Ok(0) => {
-                            // EOF
-                            break;
-                        }
-                        Ok(spliced) => {
-                            remaining -= spliced as isize;
-                        }
-                    }
-                }
-                std::process::exit(0);
-            }
-            unsafe { std::fs::File::from_raw_fd(file) }
-        }}
-    }
-
-    let mut stdout_f = copy_stdxx!("stdout", MAX_STDOUT_SIZE, stdout_r);
-    let mut stderr_f = copy_stdxx!("stderr", MAX_STDERR_SIZE, stderr_r);
+    check!(close(stdout_w), "error closing stdout write end: {}");
+    check!(close(stderr_w), "error closing stderr write end: {}");
 
     // wait for the process to finish, but with the given timeout:
     // if the timeout expires before the process finishes,
@@ -227,13 +202,13 @@ fn invoke(request: &Request, language: &Language) -> Result<Response, String> {
     let timed_out = poll_result == 0;
 
     let mut stdout = Vec::new();
-    check!(stdout_f.read_to_end(&mut stdout), "error reading stdout: {}");
+    check!(unsafe { File::from_raw_fd(stdout_r) }.read_to_end(&mut stdout), "error reading stdout: {}");
     let mut stderr = Vec::new();
-    check!(stderr_f.read_to_end(&mut stderr), "error reading stderr: {}");
+    check!(unsafe { File::from_raw_fd(stderr_r) }.read_to_end(&mut stderr), "error reading stderr: {}");
 
     Ok(Response {
         stdout: ByteBuf::from(stdout),
-        stderr: ByteBuf::from(b"goodbye".to_vec()),
+        stderr: ByteBuf::from(stderr),
         timed_out,
     })
 }
@@ -244,8 +219,8 @@ fn drop_caps() -> Result<(), String> {
 }
 
 fn cleanup_cgroup(cgroup: &Path) {
-    if let Err(e) = std::fs::write(cgroup, "1") {
-        eprintln!("error killing contents of cgroup: {}", e)
+    if let Err(e) = std::fs::write(cgroup.join("cgroup.kill"), "1") {
+        eprintln!("error killing cgroup: {}", e)
         // but continue anyway if possible
     }
     if let Err(e) = std::fs::remove_dir(&cgroup) {
@@ -261,7 +236,8 @@ fn create_cgroup() -> Result<PathBuf, String> {
 }
 
 // TODO: dynamically work out the cgroup path
-const CGROUP_PATH: &str = "/sys/fs/cgroup/system.slice/ATO.service";
+// const CGROUP_PATH: &str = "/sys/fs/cgroup/system.slice/ATO.service";
+const CGROUP_PATH: &str = "/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/ATOtest";
 #[allow(non_upper_case_globals)]
 const KiB: u64 = 1024;
 #[allow(non_upper_case_globals)]
@@ -273,9 +249,9 @@ const MAX_STDOUT_SIZE: u64 = 128 * KiB;
 const MAX_STDERR_SIZE: u64 = 32 * KiB;
 
 fn setup_cgroup(path: &PathBuf) -> Result<(), String> {
-    check!(std::fs::write(path.join("memory.high"), MEMORY_HIGH.to_string()));
-    check!(std::fs::write(path.join("memory.max"), MEMORY_MAX.to_string()));
-    check!(std::fs::write(path.join("memory.swap.max"), "0"));
+    check!(std::fs::write(path.join("memory.high"), MEMORY_HIGH.to_string()), "error writing cgroup memory.high: {}");
+    check!(std::fs::write(path.join("memory.max"), MEMORY_MAX.to_string()), "error writing cgroup memory.max: {}");
+    check!(std::fs::write(path.join("memory.swap.max"), "0"), "error writing cgroup memory swap.max: {}");
     Ok(())
 }
 
