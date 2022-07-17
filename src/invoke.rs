@@ -37,6 +37,19 @@ macro_rules! check {
     }
 }
 
+macro_rules! check_cont {
+    ($x:expr, $f:literal $(, $($a:literal),+)? $(,)?) => {
+        if let Err(e) = $x {
+            eprintln!($f, $($($a,)*)? e);
+        }
+    };
+    ($x:expr $(,)?) => {
+        if let Err(e) = $x {
+            eprintln!("{}", e);
+        }
+    }
+}
+
 macro_rules! cstr {
     ($x:literal) => {
         unsafe { std::ffi::CStr::from_bytes_with_nul_unchecked(concat!($x, "\0").as_bytes()) }
@@ -219,13 +232,8 @@ fn drop_caps() -> Result<(), String> {
 }
 
 fn cleanup_cgroup(cgroup: &Path) {
-    if let Err(e) = std::fs::write(cgroup.join("cgroup.kill"), "1") {
-        eprintln!("error killing cgroup: {}", e)
-        // but continue anyway if possible
-    }
-    if let Err(e) = std::fs::remove_dir(&cgroup) {
-        eprintln!("error removing cgroup dir: {}", e)
-    }
+    check_cont!(std::fs::write(cgroup.join("cgroup.kill"), "1"));
+    check_cont!(std::fs::remove_dir(&cgroup));
 }
 
 fn create_cgroup() -> Result<PathBuf, String> {
