@@ -1,0 +1,4 @@
+#!/bin/sh
+
+cd /ATO/context
+node /opt/knight/bin/knight.js -f /ATO/code < /ATO/input
