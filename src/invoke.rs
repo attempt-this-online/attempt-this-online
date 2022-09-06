@@ -191,12 +191,11 @@ fn invoke(request: &Request, language: &Language) -> Result<Response, String> {
         check!(close(stderr_r), "error closing stderr read end: {}");
         check!(dup2(stderr_w, STDERR_FD), "error dup2ing stderr: {}");
         check!(close(stderr_w), "error closing stderr write end: {}");
-        println!("hello from the main child");
         drop_caps()?;
         // TODO: pivot_root
         // TODO: various bind mounts
         // TODO: write stdin and code to /ATO files
-        let result = execve(cstr!("TODO"), &[cstr!("TODO")], &[cstr!("TODO")]);
+        let result = execve(cstr!("TODO"), &[cstr!("TODO")], &[cstr!("TODO=TODO")]);
         let e = result.err().expect("execve should never return if successful");
         eprintln!("error running execve: {}", e);
         std::process::exit(e as i32);
