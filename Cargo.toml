@@ -19,7 +19,6 @@ lazy_static = "1.4.*"
 nix = "0.24.*"
 rand = "0.8.*"
 hex = "0.4.*"
-defer-lite = "1.0.*"
 clone3 = "0.2.*"
 
 [[bin]]

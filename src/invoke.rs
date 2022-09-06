@@ -19,7 +19,6 @@ use std::fs::File;
 use std::io::{Read, Write};
 use std::os::unix::io::FromRawFd;
 use std::path::PathBuf;
-use std::time::{Instant, Duration};
 
 macro_rules! log_error {
     ($($x:expr),*) => {
@@ -159,7 +158,7 @@ impl Drop for Cgroup<'_> {
     fn drop(&mut self) {
         check_cont!(std::fs::write(self.cgroup.join("cgroup.kill"), "1"), "error killing cgroup: {}");
 
-        let timer = Instant::now();
+        let timer = std::time::Instant::now();
         let mut attempt_counter = 0;
         while let Err(e) = std::fs::remove_dir(&self.cgroup) {
             if e.kind() == std::io::ErrorKind::ResourceBusy {
