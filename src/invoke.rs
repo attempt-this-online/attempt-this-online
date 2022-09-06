@@ -1,8 +1,9 @@
+#![feature(io_error_more, duration_constants)]
+
 mod codes;
 mod languages;
 use crate::{codes::*, languages::*};
 use clone3::Clone3;
-use defer_lite::defer;
 use hex::ToHex;
 use nix::{
     dir::Dir,
@@ -17,7 +18,8 @@ use serde_bytes::ByteBuf;
 use std::fs::File;
 use std::io::{Read, Write};
 use std::os::unix::io::FromRawFd;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
+use std::time::{Instant, Duration};
 
 macro_rules! log_error {
     ($($x:expr),*) => {
@@ -144,16 +146,43 @@ fn validate(request: &Request) -> Result<&Language, ValidationError> {
     }
 }
 
-const STDIN_FD: std::os::unix::io::RawFd = 0;
 const STDOUT_FD: std::os::unix::io::RawFd = 1;
 const STDERR_FD: std::os::unix::io::RawFd = 2;
+
+struct Cgroup<'a> {
+    cgroup: &'a PathBuf,
+}
+
+const CGROUP_REMOVE_MAX_ATTEMPT_TIME: u128 = 100; // ms
+
+impl Drop for Cgroup<'_> {
+    fn drop(&mut self) {
+        check_cont!(std::fs::write(self.cgroup.join("cgroup.kill"), "1"), "error killing cgroup: {}");
+
+        let timer = Instant::now();
+        let mut attempt_counter = 0;
+        while let Err(e) = std::fs::remove_dir(&self.cgroup) {
+            if e.kind() == std::io::ErrorKind::ResourceBusy {
+                // cgroup not succesfully killed yet: retry?
+                let elapsed = timer.elapsed().as_millis();
+                if elapsed < CGROUP_REMOVE_MAX_ATTEMPT_TIME {
+                    attempt_counter += 1;
+                    std::thread::yield_now();
+                    continue;
+                } else {
+                    eprintln!("giving up removing cgroup after {}ms and {} attempts", elapsed, attempt_counter);
+                }
+            } else {
+                eprintln!("error removing cgroup: {}", e);
+            }
+        }
+    }
+}
 
 fn invoke(request: &Request, language: &Language) -> Result<Response, String> {
     let _ = (request, language);
     let cgroup = create_cgroup()?;
-    defer! { // using defer is easier than making a special type to represent the cgroup
-        cleanup_cgroup(&cgroup);
-    }
+    let cgroup_cleanup = Cgroup{ cgroup: &cgroup };
     setup_cgroup(&cgroup)?;
     let cgroup_fd = check!(
         Dir::open(&cgroup, OFlag::O_DIRECTORY | OFlag::O_PATH, Mode::empty()),
@@ -195,7 +224,7 @@ fn invoke(request: &Request, language: &Language) -> Result<Response, String> {
         // TODO: pivot_root
         // TODO: various bind mounts
         // TODO: write stdin and code to /ATO files
-        let result = execve(cstr!("TODO"), &[cstr!("TODO")], &[cstr!("TODO=TODO")]);
+        let result = execve(cstr!("./inside"), &[cstr!("inside"), cstr!("arg1")], &[cstr!("TODO=TODO")]);
         let e = result.err().expect("execve should never return if successful");
         eprintln!("error running execve: {}", e);
         std::process::exit(e as i32);
@@ -206,12 +235,15 @@ fn invoke(request: &Request, language: &Language) -> Result<Response, String> {
 
     // wait for the process to finish, but with the given timeout:
     // if the timeout expires before the process finishes,
-    // it will be killed by the deferred cleanup_cgroup call above
+    // it will be killed when the cgroup struct is dropped
     let mut poll_arg = PollFd::new(pidfd, PollFlags::POLLIN);
     let mut poll_args = std::slice::from_mut(&mut poll_arg);
     // poll wants milliseconds; request.timeout is seconds
     let poll_result = check!(poll(&mut poll_args, request.timeout * 1000));
     let timed_out = poll_result == 0;
+
+    // kill process
+    drop(cgroup_cleanup);
 
     let mut stdout = Vec::new();
     check!(unsafe { File::from_raw_fd(stdout_r) }.read_to_end(&mut stdout), "error reading stdout: {}");
@@ -228,11 +260,6 @@ fn invoke(request: &Request, language: &Language) -> Result<Response, String> {
 fn drop_caps() -> Result<(), String> {
     // TODO
     Ok(())
-}
-
-fn cleanup_cgroup(cgroup: &Path) {
-    check_cont!(std::fs::write(cgroup.join("cgroup.kill"), "1"));
-    check_cont!(std::fs::remove_dir(&cgroup));
 }
 
 fn create_cgroup() -> Result<PathBuf, String> {
