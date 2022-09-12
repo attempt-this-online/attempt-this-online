@@ -187,7 +187,7 @@ var Languages = map[string]language{
 		Image:   "attemptthisonline/vyxal",
 		Version: "2",
 		Url:     "https://github.com/Vyxal/Vyxal",
-		Sbcs:    false,
+		Sbcs:    true,
 	},
 	"go": {
 		Name:    "Go",
