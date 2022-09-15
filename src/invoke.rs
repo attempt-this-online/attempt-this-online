@@ -1,16 +1,18 @@
-#![feature(io_error_more, duration_constants)]
+#![feature(io_error_more, duration_constants, never_type)]
 
 mod codes;
 mod languages;
 use crate::{codes::*, languages::*};
 use clone3::Clone3;
+use close_fds::close_open_fds;
 use hex::ToHex;
 use nix::{
     dir::Dir,
-    fcntl::OFlag,
+    fcntl::{OFlag, open},
+    mount::{mount, MsFlags},
     poll::{PollFd, PollFlags, poll},
     sys::stat::Mode,
-    unistd::{close, dup2, execve, pipe},
+    unistd::{close, dup2, execve, fchdir, pipe, pivot_root},
 };
 use rand::Rng;
 use serde::{Deserialize, Serialize};
@@ -20,15 +22,15 @@ use std::io::{Read, Write};
 use std::os::unix::io::FromRawFd;
 use std::path::PathBuf;
 
-macro_rules! log_error {
+/// like println but writes to both stderr and stdout
+macro_rules! eoprintln {
     ($($x:expr),*) => {
-        // so user sees the error
         println!($($x,)*);
-        // so ATO system log sees the error
         eprintln!($($x,)*);
     }
 }
 
+/// like the ? postfix operator, but formats errors to strings
 macro_rules! check {
     ($x:expr, $f:literal $(, $($a:literal),+)? $(,)?) => {
         $x.map_err(|e| format!($f, $($($a,)*)? e))?
@@ -38,7 +40,8 @@ macro_rules! check {
     }
 }
 
-macro_rules! check_cont {
+/// log `Err`s to stderr but don't stop execution
+macro_rules! check_continue {
     ($x:expr, $f:literal $(, $($a:literal),+)? $(,)?) => {
         if let Err(e) = $x {
             eprintln!($f, $($($a,)*)? e);
@@ -51,6 +54,7 @@ macro_rules! check_cont {
     }
 }
 
+/// convert a string literal into a C string object
 macro_rules! cstr {
     ($x:literal) => {
         unsafe { std::ffi::CStr::from_bytes_with_nul_unchecked(concat!($x, "\0").as_bytes()) }
@@ -79,35 +83,35 @@ fn main() -> std::process::ExitCode {
     let request = match rmp_serde::from_read::<_, Request>(std::io::stdin()) {
         Ok(r) => r,
         Err(e) => {
-            log_error!("decode error: {}", e);
+            eoprintln!("decode error: {}", e);
             return std::process::ExitCode::from(POLICY_VIOLATION);
         }
     };
     let language = match validate(&request) {
         Ok(l) => l,
         Err(e) => {
-            log_error!("invalid request: {}", e);
+            eoprintln!("invalid request: {}", e);
             return std::process::ExitCode::from(POLICY_VIOLATION);
         }
     };
     let result = match invoke(&request, language) {
         Ok(r) => r,
         Err(e) => {
-            log_error!("internal error: {}", e);
+            eoprintln!("internal error: {}", e);
             return std::process::ExitCode::from(INTERNAL_ERROR);
         }
     };
     let encoded_output = match rmp_serde::to_vec_named(&result) {
         Ok(r) => r,
         Err(e) => {
-            log_error!("error encoding output: {}", e);
+            eoprintln!("error encoding output: {}", e);
             return std::process::ExitCode::from(INTERNAL_ERROR);
         }
     };
     match std::io::stdout().write_all(&encoded_output[..]) {
         Ok(()) => std::process::ExitCode::from(NORMAL),
         Err(e) => {
-            log_error!("error writing output: {}", e);
+            eoprintln!("error writing output: {}", e);
             std::process::ExitCode::from(INTERNAL_ERROR)
         }
     }
@@ -156,7 +160,10 @@ const CGROUP_REMOVE_MAX_ATTEMPT_TIME: u128 = 100; // ms
 
 impl Drop for Cgroup<'_> {
     fn drop(&mut self) {
-        check_cont!(std::fs::write(self.cgroup.join("cgroup.kill"), "1"), "error killing cgroup: {}");
+        if let Err(e) = std::fs::write(self.cgroup.join("cgroup.kill"), "1") {
+            eprintln!("error killing cgroup: {}", e);
+            return
+        }
 
         let timer = std::time::Instant::now();
         let mut attempt_counter = 0;
@@ -174,12 +181,12 @@ impl Drop for Cgroup<'_> {
             } else {
                 eprintln!("error removing cgroup: {}", e);
             }
+            break;
         }
     }
 }
 
 fn invoke(request: &Request, language: &Language) -> Result<Response, String> {
-    let _ = (request, language);
     let cgroup = create_cgroup()?;
     let cgroup_cleanup = Cgroup{ cgroup: &cgroup };
     setup_cgroup(&cgroup)?;
@@ -210,55 +217,188 @@ fn invoke(request: &Request, language: &Language) -> Result<Response, String> {
         .flag_pidfd(&mut pidfd)
         .flag_into_cgroup(&cgroup_fd)
         ;
-    if check!(unsafe { clone3.call() }, "error clone3ing main child: {}") == 0 {
-        // in child
-        check!(close(stdout_r), "error closing stdout read end: {}");
-        check!(dup2(stdout_w, STDOUT_FD), "error dup2ing stdout: {}");
+    if check!(unsafe { clone3.call() }, "error clone3ing main child: {}") == 0 { // in child
+        // avoid suicide
+        std::mem::forget(cgroup_cleanup);
+
+        // close unused pipe ends to ensure proper synchronisation
+        check_continue!(close(stdout_r), "error closing stdout read end: {}");
+        check_continue!(close(stderr_r), "error closing stderr read end: {}");
+
+        run_child(&request, &language, stdout_w, stderr_w);
+        // run_child should never return if successful, so we exit assuming failure
+        std::process::exit(2);
+    } else { // in parent
+        // close unused pipe ends
         check!(close(stdout_w), "error closing stdout write end: {}");
-        // do stderr last so error reporting works for as long as possible
-        check!(close(stderr_r), "error closing stderr read end: {}");
-        check!(dup2(stderr_w, STDERR_FD), "error dup2ing stderr: {}");
         check!(close(stderr_w), "error closing stderr write end: {}");
-        drop_caps()?;
-        // TODO: pivot_root
-        // TODO: various bind mounts
-        // TODO: write stdin and code to /ATO files
-        let result = execve(cstr!("./inside"), &[cstr!("inside"), cstr!("arg1")], &[cstr!("TODO=TODO")]);
-        let e = result.err().expect("execve should never return if successful");
-        eprintln!("error running execve: {}", e);
-        std::process::exit(e as i32);
+
+        // wait for the process to finish, but with the given timeout:
+        // if the timeout expires before the process finishes,
+        // it will be killed when the cgroup struct is dropped
+        let mut poll_arg = PollFd::new(pidfd, PollFlags::POLLIN);
+        let mut poll_args = std::slice::from_mut(&mut poll_arg);
+        // poll wants milliseconds; request.timeout is seconds
+        let poll_result = check!(poll(&mut poll_args, request.timeout * 1000));
+        let timed_out = poll_result == 0;
+
+        // kill process
+        drop(cgroup_cleanup);
+
+        let mut stdout = Vec::new();
+        check!(unsafe { File::from_raw_fd(stdout_r) }.read_to_end(&mut stdout), "error reading stdout: {}");
+        let mut stderr = Vec::new();
+        check!(unsafe { File::from_raw_fd(stderr_r) }.read_to_end(&mut stderr), "error reading stderr: {}");
+
+        Ok(Response {
+            stdout: ByteBuf::from(stdout),
+            stderr: ByteBuf::from(stderr),
+            timed_out,
+        })
     }
-    // in parent
-    check!(close(stdout_w), "error closing stdout write end: {}");
-    check!(close(stderr_w), "error closing stderr write end: {}");
+}
 
-    // wait for the process to finish, but with the given timeout:
-    // if the timeout expires before the process finishes,
-    // it will be killed when the cgroup struct is dropped
-    let mut poll_arg = PollFd::new(pidfd, PollFlags::POLLIN);
-    let mut poll_args = std::slice::from_mut(&mut poll_arg);
-    // poll wants milliseconds; request.timeout is seconds
-    let poll_result = check!(poll(&mut poll_args, request.timeout * 1000));
-    let timed_out = poll_result == 0;
+fn run_child(request: &Request, language: &Language, stdout_w: i32, stderr_w: i32) -> (/* never returns on success */) {
+    // to have reliable error reporting, the state of stdout and stderr must be managed carefully:
 
-    // kill process
-    drop(cgroup_cleanup);
+    // here, stdout points directly to the client websocket, so we mustn't print junk to stdout.
+    // stderr points to the systemd log as normal, so we log errors to stderr only
 
-    let mut stdout = Vec::new();
-    check!(unsafe { File::from_raw_fd(stdout_r) }.read_to_end(&mut stdout), "error reading stdout: {}");
-    let mut stderr = Vec::new();
-    check!(unsafe { File::from_raw_fd(stderr_r) }.read_to_end(&mut stderr), "error reading stderr: {}");
+    // replace current stdout with the pipe we created for it
+    if let Err(e) = dup2(stdout_w, STDOUT_FD) {
+        eprintln!("error dup2ing stdout: {}", e);
+        return
+    }
+    // stdout now points to a pipe that the parent handles, so we messages to it will reach the
+    // user safely and we don't need to worry about junk.
+    // so we should log errors to both stderr and stdout
 
-    Ok(Response {
-        stdout: ByteBuf::from(stdout),
-        stderr: ByteBuf::from(stderr),
-        timed_out,
-    })
+    if let Err(e) = setup_child(&request, &language) {
+        eoprintln!("internal error: {}", e);
+        return
+    }
+
+    if let Err(e) = dup2(stderr_w, STDERR_FD) {
+        eoprintln!("error dup2ing stderr: {}", e);
+        return
+    }
+    // stderr now points to the user; the systemd log is now unreachable
+    // we log errors to stderr only because logging to both would cause pointless duplication
+
+    // close all remaining FDs, including dangling stdxxx_w pipes
+    // this is safe because it's right before an exec
+    unsafe { close_open_fds(3, &[]) } // should never error
+
+    if let Err(e) = execve(cstr!("./inside"), &[cstr!("inside"), cstr!("arg1")], &[cstr!("TODO=TODO")]) {
+        eprintln!("internal error: error running execve: {}", e)
+    } else {
+        eprintln!("internal error: execve should never return if successful")
+    }
+}
+
+fn setup_child(request: &Request, language: &Language) -> Result<(), String> {
+    drop_caps()?;
+    setup_filesystem(&language)?;
+
+    let _ = request;
+    Ok(())
 }
 
 fn drop_caps() -> Result<(), String> {
     // TODO
     Ok(())
+}
+
+fn setup_filesystem(language: &Language) -> Result<(), String> {
+    let old_cwd = check!(open(".", OFlag::O_DIRECTORY | OFlag::O_PATH, Mode::empty()), "error opening old working directory: {}");
+    
+    let rootfs_path = get_rootfs(&language);
+    let rootfs_string = rootfs_path.to_str().expect("rootfs path is invalid UTF-8");
+
+    // set the propogation type of all mounts to private - this is because:
+    // 1. pivot_root below requires . and its parent to be mounted private
+    // 2. when we bind-mount stuff we don't want that to propogate to the parent namespace
+    check!(mount::<str, str, str, str>(
+        None,
+        "/",
+        None,
+        MsFlags::MS_PRIVATE | MsFlags::MS_REC,
+        None,
+    ), "error setting / to MS_PRIVATE: {}");
+
+    // bind-mount . onto itself; this has no effect, other than making the kernel consider . a
+    // mount point, which is required for pivot_root to work
+    check!(mount::<str, str, str, str>(
+        Some(&rootfs_string),
+        &rootfs_string,
+        None,
+        MsFlags::MS_BIND | MsFlags::MS_REC,
+        None,
+    ), "error bind-mounting new rootfs onto itself: {}");
+
+    // mark rootfs as private as well (unncessary?)
+    check!(mount::<str, str, str, str>(
+        None,
+        &rootfs_string,
+        None,
+        MsFlags::MS_PRIVATE | MsFlags::MS_REC,
+        None,
+    ), "error setting new rootfs to MS_PRIVATE: {}");
+
+    // no idea why we do this (copied from crun strace)
+    check!(mount::<str, str, str, str>(
+        None,
+        &rootfs_string,
+        None,
+        MsFlags::MS_REMOUNT | MsFlags::MS_BIND,
+        None,
+    ), "error re-bind-mounting new rootfs: {}");
+
+    // not sure why we need a file descriptor to this?
+    let rootfs = check!(
+        open(&rootfs_path,
+             OFlag::O_DIRECTORY | OFlag::O_PATH | OFlag::O_CLOEXEC,
+             Mode::empty()
+        ), "error opening new rootfs: {}");
+
+    check!(mount::<str, str, str, str>(
+        None,
+        &format!("/proc/self/fd/{}", rootfs),
+        None,
+        MsFlags::MS_RDONLY | MsFlags::MS_REMOUNT | MsFlags::MS_BIND,
+        None,
+    ), "error mounting (?): {}");
+
+    check!(fchdir(rootfs), "error changing directory to new rootfs: {}");
+
+    // swap (or "pivot") the meanings of / and .
+    // so now, / points to the new container rootfs, and . points to the old system root
+    // (note that this means . is not actually anywhere in the directory tree!)
+    check!(pivot_root(".", "."), "error pivoting root: {}");
+
+    check!(mount::<str, str, str, str>(
+        Some("tmpfs"),
+        "/ATO",
+        Some("tmpfs"),
+        MsFlags::MS_NOSUID | MsFlags::MS_NODEV,
+        None,
+    ));
+
+    // TODO: bind mounts
+
+    // cwd after pivot_root is not techincally well-defined
+    // so TODO really we should chdir to old root?
+    check!(fchdir(old_cwd), "error changing directory to old cwd: {}");
+
+    Ok(())
+}
+
+const IMAGE_BASE_PATH: &str = "/usr/local/lib/ATO/rootfs/";
+
+fn get_rootfs(language: &Language) -> PathBuf {
+    let mut path = PathBuf::from(IMAGE_BASE_PATH);
+    path.push(language.image.replace("/", "+"));
+    path
 }
 
 fn create_cgroup() -> Result<PathBuf, String> {
