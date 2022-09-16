@@ -8,11 +8,11 @@ use close_fds::close_open_fds;
 use hex::ToHex;
 use nix::{
     dir::Dir,
-    fcntl::{OFlag, open},
+    fcntl::OFlag,
     mount::{mount, MsFlags},
     poll::{PollFd, PollFlags, poll},
     sys::stat::Mode,
-    unistd::{close, dup2, execve, fchdir, pipe, pivot_root},
+    unistd::{chdir, close, dup2, execve, Gid, mkdir, pipe, pivot_root, setresgid, setresuid, symlinkat, Uid},
 };
 use rand::Rng;
 use serde::{Deserialize, Serialize};
@@ -32,7 +32,7 @@ macro_rules! eoprintln {
 
 /// like the ? postfix operator, but formats errors to strings
 macro_rules! check {
-    ($x:expr, $f:literal $(, $($a:literal),+)? $(,)?) => {
+    ($x:expr, $f:literal $(, $($a:expr),+)? $(,)?) => {
         $x.map_err(|e| format!($f, $($($a,)*)? e))?
     };
     ($x:expr $(,)?) => {
@@ -42,7 +42,7 @@ macro_rules! check {
 
 /// log `Err`s to stderr but don't stop execution
 macro_rules! check_continue {
-    ($x:expr, $f:literal $(, $($a:literal),+)? $(,)?) => {
+    ($x:expr, $f:literal $(, $($a:expr),+)? $(,)?) => {
         if let Err(e) = $x {
             eprintln!($f, $($($a,)*)? e);
         }
@@ -203,6 +203,9 @@ fn invoke(request: &Request, language: &Language) -> Result<Response, String> {
     let (stdout_r, stdout_w) = check!(pipe(), "error creating stdout pipe: {}");
     let (stderr_r, stderr_w) = check!(pipe(), "error creating stderr pipe: {}");
 
+    let uid = Uid::current();
+    let gid = Gid::current();
+
     let mut pidfd = -1;
     let mut clone3 = Clone3::default();
     clone3
@@ -217,6 +220,7 @@ fn invoke(request: &Request, language: &Language) -> Result<Response, String> {
         .flag_pidfd(&mut pidfd)
         .flag_into_cgroup(&cgroup_fd)
         ;
+    // this is safe because we only ever use one thread in this program
     if check!(unsafe { clone3.call() }, "error clone3ing main child: {}") == 0 { // in child
         // avoid suicide
         std::mem::forget(cgroup_cleanup);
@@ -225,7 +229,7 @@ fn invoke(request: &Request, language: &Language) -> Result<Response, String> {
         check_continue!(close(stdout_r), "error closing stdout read end: {}");
         check_continue!(close(stderr_r), "error closing stderr read end: {}");
 
-        run_child(&request, &language, stdout_w, stderr_w);
+        run_child(&request, &language, stdout_w, stderr_w, uid, gid);
         // run_child should never return if successful, so we exit assuming failure
         std::process::exit(2);
     } else { // in parent
@@ -258,7 +262,14 @@ fn invoke(request: &Request, language: &Language) -> Result<Response, String> {
     }
 }
 
-fn run_child(request: &Request, language: &Language, stdout_w: i32, stderr_w: i32) -> (/* never returns on success */) {
+fn run_child(
+    request: &Request,
+    language: &Language,
+    stdout_w: i32,
+    stderr_w: i32,
+    outside_uid: Uid,
+    outside_gid: Gid,
+) -> (/* never returns on success */) {
     // to have reliable error reporting, the state of stdout and stderr must be managed carefully:
 
     // here, stdout points directly to the client websocket, so we mustn't print junk to stdout.
@@ -273,7 +284,7 @@ fn run_child(request: &Request, language: &Language, stdout_w: i32, stderr_w: i3
     // user safely and we don't need to worry about junk.
     // so we should log errors to both stderr and stdout
 
-    if let Err(e) = setup_child(&request, &language) {
+    if let Err(e) = setup_child(&request, &language, outside_uid, outside_gid) {
         eoprintln!("internal error: {}", e);
         return
     }
@@ -285,22 +296,48 @@ fn run_child(request: &Request, language: &Language, stdout_w: i32, stderr_w: i3
     // stderr now points to the user; the systemd log is now unreachable
     // we log errors to stderr only because logging to both would cause pointless duplication
 
-    // close all remaining FDs, including dangling stdxxx_w pipes
+    // close all remaining FDs except STDIO (0/1/2), including dangling stdxxx_w pipes
     // this is safe because it's right before an exec
     unsafe { close_open_fds(3, &[]) } // should never error
 
-    if let Err(e) = execve(cstr!("./inside"), &[cstr!("inside"), cstr!("arg1")], &[cstr!("TODO=TODO")]) {
+    if let Err(e) = execve(cstr!("/usr/bin/ls"), &[cstr!("ls"), cstr!("-la"), cstr!("/sys")], &[cstr!("TODO=TODO")]) {
         eprintln!("internal error: error running execve: {}", e)
     } else {
         eprintln!("internal error: execve should never return if successful")
     }
 }
 
-fn setup_child(request: &Request, language: &Language) -> Result<(), String> {
+fn setup_child(
+    request: &Request,
+    language: &Language,
+    outside_uid: Uid,
+    outside_gid: Gid,
+) -> Result<(), String> {
+    set_ids(outside_uid, outside_gid)?;
+    mount_rootfs(get_rootfs(&language))?;
     drop_caps()?;
-    setup_filesystem(&language)?;
 
     let _ = request;
+    Ok(())
+}
+
+fn set_ids(outside_uid: Uid, outside_gid: Gid) -> Result<(), String> {
+    // we're currently nobody (65534) inside the container which doesn't allow us to do anything
+    // so we declare ourselves root inside the container, which requires a mapping for who we
+    // become from the perspective of processes outside the container
+
+    const ROOT_U: Uid = Uid::from_raw(0);
+    const ROOT_G: Gid = Gid::from_raw(0);
+
+    let uid_map = format!("{} {} 1\n", ROOT_U, outside_uid);
+    check!(std::fs::write("/proc/self/uid_map", uid_map), "error writing uid_map: {}");
+    // we need to set this in order to be able to use gid_map
+    check!(std::fs::write("/proc/self/setgroups", "deny"), "error denying setgroups: {}");
+    let gid_map = format!("{} {} 1\n", ROOT_G, outside_gid);
+    check!(std::fs::write("/proc/self/gid_map", gid_map), "error writing gid_map: {}");
+
+    check!(setresuid(ROOT_U, ROOT_U, ROOT_U), "error setting UIDs: {}");
+    check!(setresgid(ROOT_G, ROOT_G, ROOT_G), "error setting GIDs: {}");
     Ok(())
 }
 
@@ -309,15 +346,12 @@ fn drop_caps() -> Result<(), String> {
     Ok(())
 }
 
-fn setup_filesystem(language: &Language) -> Result<(), String> {
-    let old_cwd = check!(open(".", OFlag::O_DIRECTORY | OFlag::O_PATH, Mode::empty()), "error opening old working directory: {}");
-    
-    let rootfs_path = get_rootfs(&language);
+fn mount_rootfs(rootfs_path: PathBuf) -> Result<(), String> {
     let rootfs_string = rootfs_path.to_str().expect("rootfs path is invalid UTF-8");
 
     // set the propogation type of all mounts to private - this is because:
-    // 1. pivot_root below requires . and its parent to be mounted private
-    // 2. when we bind-mount stuff we don't want that to propogate to the parent namespace
+    // 1. when we bind-mount stuff we don't want that to propogate to the parent namespace
+    // 2. pivot_root below requires . and its parent to be mounted private anyway
     check!(mount::<str, str, str, str>(
         None,
         "/",
@@ -326,69 +360,79 @@ fn setup_filesystem(language: &Language) -> Result<(), String> {
         None,
     ), "error setting / to MS_PRIVATE: {}");
 
-    // bind-mount . onto itself; this has no effect, other than making the kernel consider . a
-    // mount point, which is required for pivot_root to work
+    // bind-mount rootfs onto itself for two reasons:
+    // 1. the kernel now considers it a mount point, which is required for pivot_root to work
+    // 2. we can make it read-only
     check!(mount::<str, str, str, str>(
         Some(&rootfs_string),
         &rootfs_string,
         None,
-        MsFlags::MS_BIND | MsFlags::MS_REC,
+        MsFlags::MS_BIND | MsFlags::MS_RDONLY | MsFlags::MS_REC,
         None,
     ), "error bind-mounting new rootfs onto itself: {}");
 
-    // mark rootfs as private as well (unncessary?)
-    check!(mount::<str, str, str, str>(
-        None,
-        &rootfs_string,
-        None,
-        MsFlags::MS_PRIVATE | MsFlags::MS_REC,
-        None,
-    ), "error setting new rootfs to MS_PRIVATE: {}");
+    check!(chdir(rootfs_string), "error changing directory to new rootfs: {}");
+    // now . points to the new rootfs
 
-    // no idea why we do this (copied from crun strace)
-    check!(mount::<str, str, str, str>(
-        None,
-        &rootfs_string,
-        None,
-        MsFlags::MS_REMOUNT | MsFlags::MS_BIND,
-        None,
-    ), "error re-bind-mounting new rootfs: {}");
-
-    // not sure why we need a file descriptor to this?
-    let rootfs = check!(
-        open(&rootfs_path,
-             OFlag::O_DIRECTORY | OFlag::O_PATH | OFlag::O_CLOEXEC,
-             Mode::empty()
-        ), "error opening new rootfs: {}");
-
-    check!(mount::<str, str, str, str>(
-        None,
-        &format!("/proc/self/fd/{}", rootfs),
-        None,
-        MsFlags::MS_RDONLY | MsFlags::MS_REMOUNT | MsFlags::MS_BIND,
-        None,
-    ), "error mounting (?): {}");
-
-    check!(fchdir(rootfs), "error changing directory to new rootfs: {}");
+    setup_filesystem()?;
 
     // swap (or "pivot") the meanings of / and .
     // so now, / points to the new container rootfs, and . points to the old system root
     // (note that this means . is not actually anywhere in the directory tree!)
     check!(pivot_root(".", "."), "error pivoting root: {}");
 
-    check!(mount::<str, str, str, str>(
-        Some("tmpfs"),
-        "/ATO",
-        Some("tmpfs"),
-        MsFlags::MS_NOSUID | MsFlags::MS_NODEV,
-        None,
-    ));
+    // cwd after pivot_root is not well-defined, so we have to go somewhere
+    // since we need to go to /ATO at some point anyway, let's got there
+    check!(chdir("/ATO"), "error changing directory to /ATO: {}");
+    Ok(())
+}
 
-    // TODO: bind mounts
+fn setup_filesystem() -> Result<(), String> {
+    macro_rules! mount_ {
+        ($src:expr, $dest:expr, $type:expr, $($flag:ident)|*, $options:expr) => {
+            check!(mount::<str, str, str, str>($src, $dest, $type, MsFlags::empty() $(| MsFlags::$flag)*, $options), "error mounting {}: {}", $dest)
+        }
+    }
+    macro_rules! mount {
+        ($dest:literal, $type:literal, $($flag:ident)|*) =>
+            { mount_!(Some($type), $dest, Some($type), $($flag)|*, None) };
+        ($dest:expr, $type:literal, $($flag:ident)|*, $options:literal) =>
+            { mount_!(Some($type), $dest, Some($type), $($flag)|*, Some($options)) };
+        ($src:expr, $dest:expr, $type:expr, $($flag:ident)|*) =>
+            { mount_!(Some($src), $dest, Some($type), $($flag)|*, None) };
+        ($src:expr, $dest:expr, , $($flag:ident)|*) =>
+            { mount_!(Some($src), $dest, None, $($flag)|*, None) };
+        ($src:expr, $dest:expr, $type:expr, $($flag:ident)|*, $options:literal) =>
+            { mount_!(Some($src), $dest, Some($type), $($flag)|*, Some($options)) };
+    }
 
-    // cwd after pivot_root is not techincally well-defined
-    // so TODO really we should chdir to old root?
-    check!(fchdir(old_cwd), "error changing directory to old cwd: {}");
+    mount!("./ATO", "tmpfs", MS_NOSUID | MS_NODEV);
+    mount!("./proc", "proc",);
+    mount!("./dev", "tmpfs", MS_NOSUID | MS_STRICTATIME, "mode=755,size=65535k");
+    check!(mkdir("./dev/pts", Mode::empty()), "error creating mount point for /dev/pts: {}");
+    mount!("./dev/pts", "devpts", MS_NOSUID | MS_NOEXEC, "newinstance,ptmxmode=0666,mode=0620");
+    check!(mkdir("./dev/shm", Mode::empty()), "error creating mount point for /dev/shm: {}");
+    mount!("shm", "./dev/shm", "tmpfs", MS_NOSUID | MS_NODEV | MS_NOEXEC, "mode=1777,size=65536k");
+    check!(mkdir("./dev/mqueue", Mode::empty()), "error creating mount point for /dev/mqueue: {}");
+    mount!("./dev/mqueue", "mqueue", MS_NOSUID | MS_NODEV | MS_NOEXEC);
+    mount!("./sys", "sysfs", MS_NOSUID | MS_NODEV | MS_NOEXEC);
+    mount!("./sys/fs/cgroup", "cgroup2", MS_NOSUID | MS_NODEV | MS_NOEXEC | MS_RELATIME);
+
+    for dev in ["full", "null", "random", "tty", "urandom", "zero"] {
+        let src = "/dev/".to_owned() + dev;
+        let dest = "./dev/".to_owned() + dev;
+        drop(check!(File::create(&dest), "error creating mount point for /dev/{}: {}", dev));
+        mount!(&src, &dest, , MS_NOSUID | MS_NOEXEC | MS_BIND);
+    }
+
+    check!(symlinkat("/proc/self/fd", None, "dev/fd"), "error creating /dev/fd: {}");
+    check!(symlinkat("/proc/self/fd/0", None, "dev/stdin"), "error creating /dev/stdin: {}");
+    check!(symlinkat("/proc/self/fd/1", None, "dev/stdout"), "error creating /dev/stdout: {}");
+    check!(symlinkat("/proc/self/fd/2", None, "dev/stderr"), "error creating /dev/stderr: {}");
+    check!(symlinkat("/proc/kcore", None, "dev/core"), "error creating /dev/core: {}");
+    check!(symlinkat("pts/ptmx", None, "dev/ptmx"), "error creating /dev/ptmx: {}");
+
+    // TODO: bind mount input files etc.
 
     Ok(())
 }
