@@ -2,6 +2,7 @@
 
 mod codes;
 mod languages;
+use capctl::{caps, prctl};
 use crate::{codes::*, languages::*};
 use clone3::Clone3;
 use close_fds::close_open_fds;
@@ -186,6 +187,39 @@ impl Drop for Cgroup<'_> {
     }
 }
 
+fn create_cgroup() -> Result<PathBuf, String> {
+    let mut path = PathBuf::from(CGROUP_PATH);
+    path.push(random_id());
+    check!(std::fs::create_dir(&path), "error creating cgroup dir: {}");
+    Ok(path)
+}
+
+// TODO: dynamically work out the cgroup path
+// const CGROUP_PATH: &str = "/sys/fs/cgroup/system.slice/ATO.service";
+const CGROUP_PATH: &str = "/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/ATOtest";
+#[allow(non_upper_case_globals)]
+const KiB: u64 = 1024;
+#[allow(non_upper_case_globals)]
+const MiB: u64 = KiB * KiB;
+const MEMORY_HIGH: u64 = 200 * MiB;
+const MEMORY_MAX: u64 = 256 * MiB;
+
+const MAX_STDOUT_SIZE: u64 = 128 * KiB;
+const MAX_STDERR_SIZE: u64 = 32 * KiB;
+
+fn setup_cgroup(path: &PathBuf) -> Result<(), String> {
+    check!(std::fs::write(path.join("memory.high"), MEMORY_HIGH.to_string()), "error writing cgroup memory.high: {}");
+    check!(std::fs::write(path.join("memory.max"), MEMORY_MAX.to_string()), "error writing cgroup memory.max: {}");
+    check!(std::fs::write(path.join("memory.swap.max"), "0"), "error writing cgroup memory swap.max: {}");
+    Ok(())
+}
+
+const RANDOM_ID_SIZE: usize = 16;
+
+fn random_id() -> String {
+    rand::thread_rng().gen::<[u8; RANDOM_ID_SIZE]>().encode_hex::<String>()
+}
+
 fn invoke(request: &Request, language: &Language) -> Result<Response, String> {
     let cgroup = create_cgroup()?;
     let cgroup_cleanup = Cgroup{ cgroup: &cgroup };
@@ -314,10 +348,10 @@ fn setup_child(
     outside_gid: Gid,
 ) -> Result<(), String> {
     set_ids(outside_uid, outside_gid)?;
-    mount_rootfs(get_rootfs(&language))?;
+    setup_filesystem(get_rootfs(&language))?;
+    setup_request_files(&request)?;
     drop_caps()?;
-
-    let _ = request;
+    // TODO: set_resource_limits()?;
     Ok(())
 }
 
@@ -341,16 +375,39 @@ fn set_ids(outside_uid: Uid, outside_gid: Gid) -> Result<(), String> {
     Ok(())
 }
 
-fn drop_caps() -> Result<(), String> {
-    // TODO
-    Ok(())
+macro_rules! mount_ {
+    ($src:expr, $dest:expr, $type:expr, $($flag:ident)|*, $options:expr) => {
+        check!(mount::<str, str, str, str>($src, $dest, $type, MsFlags::empty() $(| MsFlags::$flag)*, $options), "error mounting {}: {}", $dest)
+    }
+}
+macro_rules! mount {
+    ($dest:literal, $type:literal, $($flag:ident)|*) =>
+        { mount_!(Some($type), $dest, Some($type), $($flag)|*, None) };
+    ($dest:expr, $type:literal, $($flag:ident)|*, $options:literal) =>
+        { mount_!(Some($type), $dest, Some($type), $($flag)|*, Some($options)) };
+    ($src:expr, $dest:expr, $type:expr, $($flag:ident)|*) =>
+        { mount_!(Some($src), $dest, Some($type), $($flag)|*, None) };
+    ($src:expr, $dest:expr, , $($flag:ident)|*) =>
+        { mount_!(Some($src), $dest, None, $($flag)|*, None) };
+    ($src:expr, $dest:expr, $type:expr, $($flag:ident)|*, $options:literal) =>
+        { mount_!(Some($src), $dest, Some($type), $($flag)|*, Some($options)) };
 }
 
-fn mount_rootfs(rootfs_path: PathBuf) -> Result<(), String> {
+const IMAGE_BASE_PATH: &str = "/usr/local/lib/ATO/rootfs/";
+
+fn get_rootfs(language: &Language) -> PathBuf {
+    let mut path = PathBuf::from(IMAGE_BASE_PATH);
+    path.push(language.image.replace("/", "+"));
+    path
+}
+
+fn setup_filesystem(rootfs_path: PathBuf) -> Result<(), String> {
     let rootfs_string = rootfs_path.to_str().expect("rootfs path is invalid UTF-8");
 
     // set the propogation type of all mounts to private - this is because:
     // 1. when we bind-mount stuff we don't want that to propogate to the parent namespace
+    // 2. we don't want any potential mounts in the parent namespace to appear here and mess things
+    //    up either
     // 2. pivot_root below requires . and its parent to be mounted private anyway
     check!(mount::<str, str, str, str>(
         None,
@@ -374,7 +431,7 @@ fn mount_rootfs(rootfs_path: PathBuf) -> Result<(), String> {
     check!(chdir(rootfs_string), "error changing directory to new rootfs: {}");
     // now . points to the new rootfs
 
-    setup_filesystem()?;
+    setup_special_files()?;
 
     // swap (or "pivot") the meanings of / and .
     // so now, / points to the new container rootfs, and . points to the old system root
@@ -387,25 +444,8 @@ fn mount_rootfs(rootfs_path: PathBuf) -> Result<(), String> {
     Ok(())
 }
 
-fn setup_filesystem() -> Result<(), String> {
-    macro_rules! mount_ {
-        ($src:expr, $dest:expr, $type:expr, $($flag:ident)|*, $options:expr) => {
-            check!(mount::<str, str, str, str>($src, $dest, $type, MsFlags::empty() $(| MsFlags::$flag)*, $options), "error mounting {}: {}", $dest)
-        }
-    }
-    macro_rules! mount {
-        ($dest:literal, $type:literal, $($flag:ident)|*) =>
-            { mount_!(Some($type), $dest, Some($type), $($flag)|*, None) };
-        ($dest:expr, $type:literal, $($flag:ident)|*, $options:literal) =>
-            { mount_!(Some($type), $dest, Some($type), $($flag)|*, Some($options)) };
-        ($src:expr, $dest:expr, $type:expr, $($flag:ident)|*) =>
-            { mount_!(Some($src), $dest, Some($type), $($flag)|*, None) };
-        ($src:expr, $dest:expr, , $($flag:ident)|*) =>
-            { mount_!(Some($src), $dest, None, $($flag)|*, None) };
-        ($src:expr, $dest:expr, $type:expr, $($flag:ident)|*, $options:literal) =>
-            { mount_!(Some($src), $dest, Some($type), $($flag)|*, Some($options)) };
-    }
-
+fn setup_special_files() -> Result<(), String> {
+    // TODO: set up file size limits here
     mount!("./ATO", "tmpfs", MS_NOSUID | MS_NODEV);
     mount!("./proc", "proc",);
     mount!("./dev", "tmpfs", MS_NOSUID | MS_STRICTATIME, "mode=755,size=65535k");
@@ -432,48 +472,40 @@ fn setup_filesystem() -> Result<(), String> {
     check!(symlinkat("/proc/kcore", None, "dev/core"), "error creating /dev/core: {}");
     check!(symlinkat("pts/ptmx", None, "dev/ptmx"), "error creating /dev/ptmx: {}");
 
-    // TODO: bind mount input files etc.
-
     Ok(())
 }
 
-const IMAGE_BASE_PATH: &str = "/usr/local/lib/ATO/rootfs/";
-
-fn get_rootfs(language: &Language) -> PathBuf {
-    let mut path = PathBuf::from(IMAGE_BASE_PATH);
-    path.push(language.image.replace("/", "+"));
-    path
-}
-
-fn create_cgroup() -> Result<PathBuf, String> {
-    let mut path = PathBuf::from(CGROUP_PATH);
-    path.push(random_id());
-    check!(std::fs::create_dir(&path), "error creating cgroup dir: {}");
-    Ok(path)
-}
-
-// TODO: dynamically work out the cgroup path
-// const CGROUP_PATH: &str = "/sys/fs/cgroup/system.slice/ATO.service";
-const CGROUP_PATH: &str = "/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/ATOtest";
-#[allow(non_upper_case_globals)]
-const KiB: u64 = 1024;
-#[allow(non_upper_case_globals)]
-const MiB: u64 = KiB * KiB;
-const MEMORY_HIGH: u64 = 200 * MiB;
-const MEMORY_MAX: u64 = 256 * MiB;
-
-const MAX_STDOUT_SIZE: u64 = 128 * KiB;
-const MAX_STDERR_SIZE: u64 = 32 * KiB;
-
-fn setup_cgroup(path: &PathBuf) -> Result<(), String> {
-    check!(std::fs::write(path.join("memory.high"), MEMORY_HIGH.to_string()), "error writing cgroup memory.high: {}");
-    check!(std::fs::write(path.join("memory.max"), MEMORY_MAX.to_string()), "error writing cgroup memory.max: {}");
-    check!(std::fs::write(path.join("memory.swap.max"), "0"), "error writing cgroup memory swap.max: {}");
+fn setup_request_files(request: &Request) -> Result<(), String> {
+    check!(std::fs::write("/ATO/code", &request.code), "error writing /ATO/code: {}");
+    // TODO: stream input in instead of writing it to a file?
+    check!(std::fs::write("/ATO/input", &request.input), "error writing /ATO/input: {}");
+    check!(std::fs::write("/ATO/arguments", join_args(&request.arguments)), "error writing /ATO/arguments: {}");
+    check!(std::fs::write("/ATO/options", join_args(&request.options)), "error writing /ATO/options: {}");
     Ok(())
 }
 
-const RANDOM_ID_SIZE: usize = 16;
+fn join_args(args: &Vec<ByteBuf>) -> ByteBuf {
+    let mut b = ByteBuf::new();
+    for a in args {
+        b.extend(a);
+        b.extend([0]);
+    }
+    b
+}
 
-fn random_id() -> String {
-    rand::thread_rng().gen::<[u8; RANDOM_ID_SIZE]>().encode_hex::<String>()
+fn drop_caps() -> Result<(), String> {
+    // drop as many privileges as possible
+    // for more info on caps, see man capabilities(7)
+
+    // important: make sure this code is written to drop all capabilities, even those we may not
+    // know about at compile time because of a kernel version mismatch.
+    // https://docs.rs/capctl/latest/capctl/#handling-of-newly-added-capabilities
+
+    check!(caps::bounding::clear(), "error dropping bounding capabilities: {}");
+    check!(caps::ambient::clear(), "error dropping ambient capabilities: {}");
+    // CAP_SETPCAP is required to drop bounding caps, so we have to drop it last
+    check!(caps::CapState::empty().set_current(), "error dropping capabilities: {}");
+    // ensure we can't get new privileges from files with set[ug]id or capability xattrs
+    check!(prctl::set_no_new_privs(), "error setting NO_NEW_PRIVS flag: {}");
+    Ok(())
 }
