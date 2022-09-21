@@ -124,11 +124,11 @@ async function runWs({
 }
 
 async function getMetadata() {
-  const response = await fetch(`${BASE_URL}/api/v0/metadata`, { method: 'GET' });
+  const response = await fetch(`/languages.json`, { method: 'GET' });
   if (!response.ok || !response.body) {
     throw new Error(await response.text());
   }
-  return await msgpack.decodeAsync(response.body) as Record<string, MetadataItem>;
+  return await response.json() as Record<string, MetadataItem>;
 }
 
 export {
