@@ -27,7 +27,6 @@ whoami | grep -xFq root || error you must run this script as root
 # - cronie: automate renewal of certbot certificates, cache cleaning, etc.
 # - nginx: web server
 # - nginx-mod-modsecurity: web application firewall
-# - python: runtime for API
 # - sed: configuration editing on installation
 # - skopeo: for docker image extraction
 # - sudo: privilege management for sandboxing
@@ -38,7 +37,6 @@ whoami | grep -xFq root || error you must run this script as root
     cronie \
     nginx \
     nginx-mod-modsecurity \
-    python \
     sed \
     skopeo \
     sudo \
@@ -102,12 +100,8 @@ systemctl enable nginx.service
 install -dm 750 -o root -g http /var/www/_letsencrypt
 # we can't start nginx because the certificate isn't there, but we can't obtain a certificate if nginx isn't running
 # so start a temporary Python web server
-# TODO(pxeger): work around for letsencrypt issues without needing a temp Python server (certbot standalone mode?)
-python -m http.server --directory /var/www/_letsencrypt 80 & PYSERVERPID="$!"
 # TODO get option for email
-certbot certonly -n --webroot -w /var/www/_letsencrypt -d "$1" -d "www.$1" --agree-tos --register-unsafely-without-email
-# end that Python web server
-kill -TERM "$PYSERVERPID"
+certbot certonly -n --standalone -d "$1" -d "www.$1" --agree-tos --register-unsafely-without-email
 # configure cronie to automatically renew certificates
 # (every day at 10:07)
 echo "7 10 * * * certbot renew && systemctl reload nginx" >> /var/spool/cron/root
