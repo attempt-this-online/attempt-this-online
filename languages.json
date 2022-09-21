@@ -4,7 +4,8 @@
         "image": "attemptthisonline/05ab1e",
         "version": "Latest",
         "url": "https://github.com/Adriandmen/05AB1E",
-        "sbcs": true
+        "sbcs": true,
+        "SE_class": ""
     },
     "alphuck": {
         "name": "Alphuck",
@@ -32,7 +33,8 @@
         "image": "attemptthisonline/bash",
         "version": "Latest",
         "url": "https://www.gnu.org/software/bash/",
-        "sbcs": false
+        "sbcs": false,
+        "SE_class": "bash"
     },
     "bc": {
         "name": "bc",
@@ -74,7 +76,8 @@
         "image": "attemptthisonline/base",
         "version": "11",
         "url": "https://gcc.gnu.org",
-        "sbcs": false
+        "sbcs": false,
+        "SE_class": "c"
     },
     "charcoal": {
         "name": "Charcoal",
@@ -88,14 +91,24 @@
         "image": "attemptthisonline/clang",
         "version": "Latest",
         "url": "https://clang.llvm.org",
-        "sbcs": false
+        "sbcs": false,
+        "SE_class": "c"
+
+    },
+    "cognate": {
+        "name": "Cognate",
+        "image": "attemptthisonline/cognate",
+        "version": "Latest",
+        "Url": "https://cognate-lang.github.io",
+        "Sbcs": false
     },
     "cplusplus_gcc": {
         "name": "C++ (GCC)",
         "image": "attemptthisonline/gcc",
         "version": "11",
         "url": "https://gcc.gnu.org",
-        "sbcs": false
+        "sbcs": false,
+        "SE_class": "cpp"
     },
     "crystal": {
         "name": "Crystal",
@@ -116,7 +129,8 @@
         "image": "attemptthisonline/deno",
         "version": "Latest",
         "url": "https://deno.land",
-        "sbcs": false
+        "sbcs": false,
+        "SE_class": "typescript"
     },
     "dirac": {
         "name": "dirac",
@@ -144,7 +158,8 @@
         "image": "attemptthisonline/erlang",
         "version": "Latest",
         "url": "https://www.erlang.org",
-        "sbcs": false
+        "sbcs": false,
+        "SE_class": "erlang"
     },
     "exceptionally": {
         "name": "Exceptionally",
@@ -207,28 +222,32 @@
         "image": "attemptthisonline/go",
         "version": "Latest",
         "url": "https://go.dev",
-        "sbcs": false
+        "sbcs": false,
+        "SE_class": "go"
     },
     "go_gcc": {
         "name": "Go (GCC)",
         "image": "attemptthisonline/gcc",
         "version": "11",
         "url": "https://gcc.gnu.org",
-        "sbcs": false
+        "sbcs": false,
+        "SE_class": "go"
     },
     "guile": {
         "name": "Guile",
         "image": "attemptthisonline/base",
         "version": "Latest",
         "url": "https://www.gnu.org/software/guile/",
-        "sbcs": false
+        "sbcs": false,
+        "SE_class": "lisp"
     },
     "haskell": {
         "name": "Haskell",
         "image": "attemptthisonline/haskell",
         "version": "Latest",
         "url": "https://www.haskell.org",
-        "sbcs": false
+        "sbcs": false,
+        "SE_class": "haskell"
     },
     "hops": {
         "name": "HOPS",
@@ -256,7 +275,8 @@
         "image": "attemptthisonline/j_uby",
         "version": "Latest",
         "url": "https://github.com/cyoce/J-uby",
-        "sbcs": false
+        "sbcs": false,
+        "SE_class": "ruby"
     },
     "java": {
         "name": "Java",
@@ -308,12 +328,20 @@
         "url": "https://github.com/JohnEarnest/ok",
         "sbcs": false
     },
+    "knight": {
+        "name": "Knight",
+        "image": "attemptthisonline/knight",
+        "version": "Latest",
+        "Url": "https://github.com/knight-lang/knight-lang",
+        "Sbcs": false
+    },
     "kotlin": {
         "name": "Kotlin",
         "image": "attemptthisonline/kotlin",
         "version": "Latest",
         "url": "https://kotlinlang.org",
-        "sbcs": false
+        "sbcs": false,
+        "SE_class": "kotlin"
     },
     "lolcode": {
         "name": "LOLCODE",
@@ -327,7 +355,8 @@
         "image": "attemptthisonline/lua",
         "version": "Latest",
         "url": "https://www.lua.org",
-        "sbcs": false
+        "sbcs": false,
+        "SE_class": "lua"
     },
     "neko": {
         "name": "Neko",
@@ -355,21 +384,24 @@
         "image": "attemptthisonline/node",
         "version": "Latest",
         "url": "https://nodejs.org",
-        "sbcs": false
+        "sbcs": false,
+        "SE_class": "javascript"
     },
     "objective_c_gcc": {
         "name": "Objective-C (GCC)",
         "image": "attemptthisonline/gcc",
         "version": "11",
         "url": "https://gcc.gnu.org",
-        "sbcs": false
+        "sbcs": false,
+        "SE_class": "objectivec"
     },
     "objective_cplusplus_gcc": {
         "name": "Objective-C++ (GCC)",
         "image": "attemptthisonline/gcc",
         "version": "11",
         "url": "https://gcc.gnu.org",
-        "sbcs": false
+        "sbcs": false,
+        "SE_class": "objectivec"
     },
     "ooocode": {
         "name": "oOo CODE",
@@ -390,14 +422,16 @@
         "image": "attemptthisonline/perl",
         "version": "Latest",
         "url": "https://www.perl.org",
-        "sbcs": false
+        "sbcs": false,
+        "SE_class": "perl"
     },
     "php": {
         "name": "PHP",
         "image": "attemptthisonline/php",
         "version": "Latest",
         "url": "https://www.php.net",
-        "sbcs": false
+        "sbcs": false,
+        "SE_class": "php"
     },
     "pip": {
         "name": "Pip",
@@ -441,7 +475,8 @@
         "image": "attemptthisonline/r_but_longer",
         "version": "Latest",
         "url": "https://www.r-project.org",
-        "sbcs": false
+        "sbcs": false,
+        "SE_class": "r"
     },
     "random_brainfuck": {
         "name": "Random Brainfuck",
@@ -470,28 +505,32 @@
         "image": "attemptthisonline/rust",
         "version": "Latest",
         "url": "https://www.rust-lang.org",
-        "sbcs": false
+        "sbcs": false,
+        "SE_class": "rust"
     },
     "sbcl": {
         "name": "Common Lisp (SBCL)",
         "image": "attemptthisonline/sbcl",
         "version": "Latest",
         "url": "http://www.sbcl.org",
-        "sbcs": false
+        "sbcs": false,
+        "SE_class": "lisp"
     },
     "scala2": {
         "name": "Scala 2",
         "image": "attemptthisonline/scala2",
         "version": "2",
         "url": "https://www.scala-lang.org/",
-        "sbcs": false
+        "sbcs": false,
+        "SE_class": "scala"
     },
     "scala3": {
         "name": "Scala 3",
         "image": "attemptthisonline/scala3",
         "version": "3",
         "url": "https://www.scala-lang.org/",
-        "sbcs": false
+        "sbcs": false,
+        "SE_class": "scala"
     },
     "sed": {
         "name": "sed",
@@ -541,7 +580,7 @@
         "image": "attemptthisonline/vyxal",
         "version": "2",
         "url": "https://github.com/Vyxal/Vyxal",
-        "sbcs": false
+        "sbcs": true
     },
     "whitespace": {
         "name": "Whitespace",
