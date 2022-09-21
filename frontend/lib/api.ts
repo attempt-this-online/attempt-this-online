@@ -5,22 +5,22 @@ const CLOSE_NORMAL = 1000;
 
 interface RunAPIResponse {
   stdout: Uint8Array;
-  stdout_truncated: boolean;
+  // stdout_truncated: boolean;
   stderr: Uint8Array;
-  stderr_truncated: boolean;
-  status_type: 'exited' | 'killed' | 'core_dumped' | 'unknown';
-  status_value: number;
+  // stderr_truncated: boolean;
+  // status_type: 'exited' | 'killed' | 'core_dumped' | 'unknown';
+  // status_value: number;
   timed_out: boolean;
-  real: number;
-  kernel: number;
-  user: number;
-  max_mem: number;
-  waits: number;
-  preemptions: number;
-  major_page_faults: number;
-  minor_page_faults: number;
-  input_ops: number;
-  output_ops: number;
+  // real: number;
+  // kernel: number;
+  // user: number;
+  // max_mem: number;
+  // waits: number;
+  // preemptions: number;
+  // major_page_faults: number;
+  // minor_page_faults: number;
+  // input_ops: number;
+  // output_ops: number;
 }
 
 interface MetadataItem {
