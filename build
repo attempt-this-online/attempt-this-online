@@ -17,12 +17,12 @@ gcc -Wall -Werror -static yargs.c -o dist/attempt_this_online/yargs
 
 echo Building tarball... >&2
 cp target/release/attempt-this-online dist/attempt_this_online/server 
+cp target/release/invoke dist/attempt_this_online/invoke
 # list images
 jq -r '.[].image' < languages.json | sort -u > dist/attempt_this_online/images.txt
 cp -R frontend/out dist/attempt_this_online/public
 cp -R \
     setup/ \
-    sandbox \
     runners/ \
     dist/attempt_this_online/
 cd dist
