@@ -24,7 +24,7 @@ guide](https://guides.github.com/introduction/flow/) on the matter.
    - if the language is particularly complex (or just slow) to build from source, a pre-built version can be used
      (example: [Java](https://github.com/attempt-this-online/languages/blob/main/languages/java/Dockerfile))
    - make a pull request to add it to the repository (from where it will be built and pushed to Docker Hub automatically)
-2. Add the language's metadata to `ato/languages.go`; set the *key* to an identifier-safe name for the
+2. Add the language's metadata to `languages.json`; set the *key* to an identifier-safe name for the
    language (avoid special characters); in the value, set these fields:
    - name (should be human-readable - this is what will be presented to the user in the UI)
    - image (name of the Docker image used to run the code)
@@ -32,7 +32,7 @@ guide](https://guides.github.com/introduction/flow/) on the matter.
    - URL (homepage of the language)
    - SBCS (set to `true` if the language's code uses a single-byte character set; this will change the behaviour of the
      byte counter in the frontend to assume all characters comprise one byte (rather than using UTF-8))
-   - SE_class (provide this only if StackExchange has built-in syntax highlighting for the language; this will be added
+   - se_class (provide this only if StackExchange has built-in syntax highlighting for the language; this will be added
      when a CGCC post template is generated. See [here](https://meta.stackexchange.com/q/184108) for details)
 3. Create a runner script in `runners/`. Here is an example showing the general idea:
 
