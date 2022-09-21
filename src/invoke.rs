@@ -191,15 +191,14 @@ impl Drop for Cgroup<'_> {
 }
 
 fn create_cgroup() -> Result<PathBuf, String> {
+    // TODO: dynamically work out the cgroup path
+    const CGROUP_PATH: &str = "/sys/fs/cgroup/system.slice/ATO.service";
     let mut path = PathBuf::from(CGROUP_PATH);
     path.push(random_id());
     check!(std::fs::create_dir(&path), "error creating cgroup dir: {}");
     Ok(path)
 }
 
-// TODO: dynamically work out the cgroup path
-// const CGROUP_PATH: &str = "/sys/fs/cgroup/system.slice/ATO.service";
-const CGROUP_PATH: &str = "/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/ATOtest";
 #[allow(non_upper_case_globals)]
 const KiB: u64 = 1024;
 #[allow(non_upper_case_globals)]
