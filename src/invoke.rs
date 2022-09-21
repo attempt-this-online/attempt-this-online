@@ -18,6 +18,7 @@ use nix::{
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 use serde_bytes::ByteBuf;
+use std::ffi::{CStr, CString};
 use std::fs::File;
 use std::io::{Read, Write};
 use std::os::unix::io::FromRawFd;
@@ -58,7 +59,7 @@ macro_rules! check_continue {
 /// convert a string literal into a C string object
 macro_rules! cstr {
     ($x:literal) => {
-        unsafe { std::ffi::CStr::from_bytes_with_nul_unchecked(concat!($x, "\0").as_bytes()) }
+        unsafe { CStr::from_bytes_with_nul_unchecked(concat!($x, "\0").as_bytes()) }
     }
 }
 
@@ -331,6 +332,14 @@ fn run_child(
     // stdout now points to a pipe that the parent handles, so we messages to it will reach the user safely and we don't need to worry about junk.
     // so we should log errors to both stderr and stdout
 
+    let env = match load_env(&language) {
+        Ok(r) => r,
+        Err(e) => {
+            eoprintln!("ATO internal error: {}", e);
+            return
+        }
+    };
+
     if let Err(e) = setup_child(&request, &language, outside_uid, outside_gid) {
         eoprintln!("ATO internal error: {}", e);
         return
@@ -349,13 +358,22 @@ fn run_child(
     unsafe { close_open_fds(FIRST_NON_STDIO_FD, &[]) } // should never error
 
     // TODO: wrap runner to gather statistics again?
-    // TODO: load environment variables per image
-    if let Err(e) = execve(cstr!("/ATO/runner"), &[cstr!("/ATO/runner")], &[cstr!("TODO=TODO")]) {
+    if let Err(e) = execve(cstr!("/ATO/runner"), &[cstr!("/ATO/runner")], &env) {
     // if let Err(e) = execve(cstr!("/bin/sh"), &[cstr!("bash"), cstr!("-c"), cstr!("ls -la /ATO")], &[cstr!("TODO=TODO")]) {
         eprintln!("ATO internal error: error running execve: {}", e)
     } else {
         eprintln!("ATO internal error: execve should never return if successful")
     }
+}
+
+fn load_env(language: &Language) -> Result<Vec<CString>, String> {
+    const ENV_BASE_PATH: &str = "/usr/local/lib/ATO/env/";
+    let path = String::from(ENV_BASE_PATH) + &language.image.replace("/", "+");
+    check!(std::fs::read(path), "error reading image env file: {}")
+        .split_inclusive(|b| *b == 0) // split after null bytes, and include them in the results
+        .map(|s| CString::from_vec_with_nul(s.to_vec()))
+        .collect::<Result<Vec<_>, _>>() // collects errors too
+        .map_err(|e| format!("error building env string: {}", e))
 }
 
 fn setup_child(
