@@ -13,7 +13,7 @@ display. This assumes ATO is being run with the default full setup.
         - `options` (bytes[]): the command-line arguments to give to the language compiler or interpreter
         - `timeout` (int): the maximum number of seconds to run the program for
 - [`nginx`](https://en.wikipedia.org/wiki/Nginx) server receives the request
-- `nginx` forwards the request to the Rust API server over the local port `4568`
+- `nginx` forwards the request to the Rust API server over the local port `8500`
 - Rust backend ([`main.rs`]) spawns the Rust sandbox program ([`invoke.rs`]), feeding the websocket request into its
   STDIN
 - `msgpack` request is decoded and validated in `invoke.rs`
