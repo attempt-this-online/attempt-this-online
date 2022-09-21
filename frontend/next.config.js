@@ -8,9 +8,6 @@ module.exports = {
     config.plugins.push(new webpack.DefinePlugin({ buildId: JSON.stringify(buildId) }));
     return config;
   },
-  future: {
-    webpack5: true,
-  },
   eslint: {
     ignoreDuringBuilds: true,
   },
