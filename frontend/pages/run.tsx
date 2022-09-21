@@ -9,7 +9,7 @@ import { throttle } from 'lodash';
 import { ExclamationCircleIcon, ClipboardCopyIcon, XIcon } from '@heroicons/react/solid';
 
 import CollapsibleText from 'components/collapsibleText';
-import ResizeableText from 'components/resizeableText';
+// import ResizeableText from 'components/resizeableText';
 import LanguageSelector from 'components/languageSelector';
 import Footer from 'components/footer';
 import Navbar from 'components/navbar';
@@ -25,6 +25,7 @@ const NEWLINE = '\n'.charCodeAt(0);
 
 const EMPTY_BUFFER = new Uint8Array([]);
 
+/*
 const SIGNALS: Record<number, string> = {
   1: 'SIGHUP',
   2: 'SIGINT',
@@ -71,6 +72,7 @@ const statusToString = (type: 'exited' | 'killed' | 'core_dumped' | 'unknown', v
       return 'Unknown status';
   }
 };
+*/
 
 const pluralise = (string: string, n: number) => (n === 1 ? string : `${string}s`);
 
@@ -97,10 +99,10 @@ function _Run(
   const [stderr, setStderr] = useState(EMPTY_BUFFER);
   const [stderrEncoding, setStderrEncoding] = useState('utf-8');
 
-  const [statusType, setStatusType] = useState<'exited' | 'killed' | 'core_dumped' | 'unknown' | null>(null);
-  const [statusValue, setStatusValue] = useState<number | null>(null);
-  const [timing, setTiming] = useState('');
-  const [timingOpen, setTimingOpen] = useState(false);
+  // const [statusType, setStatusType] = useState<'exited' | 'killed' | 'core_dumped' | 'unknown' | null>(null);
+  // const [statusValue, setStatusValue] = useState<number | null>(null);
+  // const [timing, setTiming] = useState('');
+  // const [timingOpen, setTimingOpen] = useState(false);
 
   const [languageSelectorOpen, setLanguageSelectorOpen] = useState(false);
 
@@ -168,6 +170,7 @@ function _Run(
     setStdout(data.stdout);
     setStderr(data.stderr);
 
+    /*
     setStatusType(data.status_type);
     setStatusValue(data.status_value);
 
@@ -185,16 +188,19 @@ function _Run(
       Output operations: ${data.output_ops}
       `.trim().split('\n').map(s => s.trim()).join('\n'),
     );
+    */
 
     if (data.timed_out) {
       notify('The program ran for over 60 seconds and timed out');
     }
+    /*
     if (data.stdout_truncated) {
       notify('stdout exceeded 128KiB and was truncated');
     }
     if (data.stderr_truncated) {
       notify('stderr exceeded 32KiB and was truncated');
     }
+    */
 
     setSubmitting(false);
   };
@@ -350,7 +356,7 @@ function _Run(
       title = languages[language].name;
     }
 
-    const markdownCode = codeToMarkdown(code, languages[language].SE_class);
+    const markdownCode = codeToMarkdown(code, languages[language].se_class);
     navigator.clipboard.writeText(`# ${title}, ${byteLength} ${pluralise('byte', byteLength)}
 
 ${markdownCode}
@@ -582,11 +588,11 @@ ${markdownCode}
                     />
                   )}
                 </button>
-                {statusType && (
+                {/* statusType && (
                 <p className="ml-4">
                   {statusToString(statusType, statusValue!)}
                 </p>
-                )}
+                ) */}
               </div>
             </form>
             <CollapsibleText
@@ -615,6 +621,7 @@ ${markdownCode}
               {' '}
               output
             </CollapsibleText>
+            {/*
             <details open={timingOpen} className="my-6">
               <summary className="cursor-pointer focus-within:ring rounded pl-2 hover:bg-gray-200 dark:hover:bg-gray-700 transition py-1 -mt-3 -mb-1">
                 <button
@@ -631,6 +638,7 @@ ${markdownCode}
                 dummy={dummy}
               />
             </details>
+            */}
             <textarea ref={dummy} className="block w-full px-2 rounded font-mono text-base h-0 opacity-0" aria-hidden disabled />
           </main>
         </div>

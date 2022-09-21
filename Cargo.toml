@@ -1,0 +1,28 @@
+[package]
+name = "attempt-this-online"
+version = "0.1.16"
+edition = "2021"
+default-run = "attempt-this-online"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+warp = "0.3.*"
+tokio = { version = "1.*", features = ["full"] }
+futures-util = "0.3.*"
+rmp = "0.8.*"
+serde = { version = "1.0.*", features = ["derive"] }
+serde_bytes = "0.11.*"
+serde_json = "1.0.*"
+rmp-serde = "1.1.*"
+lazy_static = "1.4.*"
+nix = "0.24.*"
+rand = "0.8.*"
+hex = "0.4.*"
+clone3 = "0.2.*"
+close_fds = "0.3.*"
+capctl = "0.2.*"
+
+[[bin]]
+name = "invoke"
+path = "src/invoke.rs"

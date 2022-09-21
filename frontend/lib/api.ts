@@ -5,29 +5,29 @@ const CLOSE_NORMAL = 1000;
 
 interface RunAPIResponse {
   stdout: Uint8Array;
-  stdout_truncated: boolean;
+  // stdout_truncated: boolean;
   stderr: Uint8Array;
-  stderr_truncated: boolean;
-  status_type: 'exited' | 'killed' | 'core_dumped' | 'unknown';
-  status_value: number;
+  // stderr_truncated: boolean;
+  // status_type: 'exited' | 'killed' | 'core_dumped' | 'unknown';
+  // status_value: number;
   timed_out: boolean;
-  real: number;
-  kernel: number;
-  user: number;
-  max_mem: number;
-  waits: number;
-  preemptions: number;
-  major_page_faults: number;
-  minor_page_faults: number;
-  input_ops: number;
-  output_ops: number;
+  // real: number;
+  // kernel: number;
+  // user: number;
+  // max_mem: number;
+  // waits: number;
+  // preemptions: number;
+  // major_page_faults: number;
+  // minor_page_faults: number;
+  // input_ops: number;
+  // output_ops: number;
 }
 
 interface MetadataItem {
   name: string;
   image: string;
   version: string;
-  SE_class: string;
+  se_class: string;
   sbcs: string;
   url: string;
 }
@@ -124,11 +124,11 @@ async function runWs({
 }
 
 async function getMetadata() {
-  const response = await fetch(`${BASE_URL}/api/v0/metadata`, { method: 'GET' });
+  const response = await fetch(`/languages.json`, { method: 'GET' });
   if (!response.ok || !response.body) {
     throw new Error(await response.text());
   }
-  return await msgpack.decodeAsync(response.body) as Record<string, MetadataItem>;
+  return await response.json() as Record<string, MetadataItem>;
 }
 
 export {

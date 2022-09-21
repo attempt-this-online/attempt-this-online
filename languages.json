@@ -1,0 +1,622 @@
+{
+    "05ab1e": {
+        "name": "05AB1E",
+        "image": "attemptthisonline/05ab1e",
+        "version": "Latest",
+        "url": "https://github.com/Adriandmen/05AB1E",
+        "sbcs": true,
+        "se_class": ""
+    },
+    "alphuck": {
+        "name": "Alphuck",
+        "image": "attemptthisonline/tio_brainfuck",
+        "version": "Unknown",
+        "url": "https://github.com/TryItOnline/brainfuck",
+        "sbcs": false
+    },
+    "apl_dzaima": {
+        "name": "APL (dzaima/APL)",
+        "image": "attemptthisonline/dzaima_apl",
+        "version": "Latest",
+        "url": "https://github.com/dzaima/APL",
+        "sbcs": true
+    },
+    "awk": {
+        "name": "AWK",
+        "image": "attemptthisonline/base",
+        "version": "Latest",
+        "url": "https://www.gnu.org/software/gawk/",
+        "sbcs": false
+    },
+    "bash": {
+        "name": "Bash",
+        "image": "attemptthisonline/bash",
+        "version": "Latest",
+        "url": "https://www.gnu.org/software/bash/",
+        "sbcs": false,
+        "se_class": "bash"
+    },
+    "bc": {
+        "name": "bc",
+        "image": "attemptthisonline/bc",
+        "version": "Latest",
+        "url": "https://www.gnu.org/software/bc/",
+        "sbcs": false
+    },
+    "bqn": {
+        "name": "BQN (CBQN)",
+        "image": "attemptthisonline/cbqn",
+        "version": "Latest",
+        "url": "https://mlochbaum.github.io/BQN/",
+        "sbcs": false
+    },
+    "brainbool": {
+        "name": "Brainbool",
+        "image": "attemptthisonline/tio_brainfuck",
+        "version": "Unknown",
+        "url": "https://github.com/TryItOnline/brainfuck",
+        "sbcs": false
+    },
+    "brainfuck": {
+        "name": "Brainfuck",
+        "image": "attemptthisonline/tio_brainfuck",
+        "version": "the only version",
+        "url": "https://github.com/TryItOnline/brainfuck",
+        "sbcs": false
+    },
+    "brainlove": {
+        "name": "Brainlove",
+        "image": "attemptthisonline/tio_brainfuck",
+        "version": "Unknown",
+        "url": "https://github.com/TryItOnline/brainfuck",
+        "sbcs": false
+    },
+    "c_gcc": {
+        "name": "C (GCC)",
+        "image": "attemptthisonline/base",
+        "version": "11",
+        "url": "https://gcc.gnu.org",
+        "sbcs": false,
+        "se_class": "c"
+    },
+    "charcoal": {
+        "name": "Charcoal",
+        "image": "attemptthisonline/charcoal",
+        "version": "Latest",
+        "url": "https://github.com/somebody1234/Charcoal",
+        "sbcs": true
+    },
+    "clang": {
+        "name": "C (clang)",
+        "image": "attemptthisonline/clang",
+        "version": "Latest",
+        "url": "https://clang.llvm.org",
+        "sbcs": false,
+        "se_class": "c"
+
+    },
+    "cognate": {
+        "name": "Cognate",
+        "image": "attemptthisonline/cognate",
+        "version": "Latest",
+        "url": "https://cognate-lang.github.io",
+        "sbcs": false
+    },
+    "cplusplus_gcc": {
+        "name": "C++ (GCC)",
+        "image": "attemptthisonline/gcc",
+        "version": "11",
+        "url": "https://gcc.gnu.org",
+        "sbcs": false,
+        "se_class": "cpp"
+    },
+    "crystal": {
+        "name": "Crystal",
+        "image": "attemptthisonline/crystal",
+        "version": "Latest",
+        "url": "https://crystal-lang.org/",
+        "sbcs": false
+    },
+    "dc": {
+        "name": "dc",
+        "image": "attemptthisonline/bc",
+        "version": "Latest",
+        "url": "https://www.gnu.org/software/bc/",
+        "sbcs": false
+    },
+    "deno": {
+        "name": "TypeScript (Deno)",
+        "image": "attemptthisonline/deno",
+        "version": "Latest",
+        "url": "https://deno.land",
+        "sbcs": false,
+        "se_class": "typescript"
+    },
+    "dirac": {
+        "name": "dirac",
+        "image": "attemptthisonline/dirac",
+        "version": "Latest",
+        "url": "https://esolangs.org/wiki/Dirac",
+        "sbcs": false
+    },
+    "dyalog_apl": {
+        "name": "APL (Dyalog APL)",
+        "image": "dyalog/dyalog",
+        "version": "Latest",
+        "url": "https://www.dyalog.com/products.htm",
+        "sbcs": false
+    },
+    "elixir": {
+        "name": "Elixir",
+        "image": "attemptthisonline/elixir",
+        "version": "Latest",
+        "url": "https://elixir-lang.org",
+        "sbcs": false
+    },
+    "erlang": {
+        "name": "Erlang",
+        "image": "attemptthisonline/erlang",
+        "version": "Latest",
+        "url": "https://www.erlang.org",
+        "sbcs": false,
+        "se_class": "erlang"
+    },
+    "exceptionally": {
+        "name": "Exceptionally",
+        "image": "attemptthisonline/exceptionally",
+        "version": "Latest",
+        "url": "https://github.com/dloscutoff/Esolangs/tree/master/Exceptionally",
+        "sbcs": false
+    },
+    "extended_brainfuck_type_I": {
+        "name": "Extended Brainfuck Type I",
+        "image": "attemptthisonline/tio_brainfuck",
+        "version": "Unknown",
+        "url": "https://github.com/TryItOnline/brainfuck",
+        "sbcs": false
+    },
+    "factor": {
+        "name": "Factor",
+        "image": "attemptthisonline/factor",
+        "version": "Latest",
+        "url": "https://factorcode.org",
+        "sbcs": false
+    },
+    "flax": {
+        "name": "flax",
+        "image": "attemptthisonline/flax",
+        "version": "Latest",
+        "url": "https://github.com/PyGamer0/flax",
+        "sbcs": true
+    },
+    "funky2": {
+        "name": "Funky2",
+        "image": "attemptthisonline/funky2",
+        "version": "Latest",
+        "url": "https://funky2.a-ta.co/",
+        "sbcs": false
+    },
+    "gdc": {
+        "name": "D (GDC)",
+        "image": "attemptthisonline/gcc",
+        "version": "11",
+        "url": "https://gdcproject.org",
+        "sbcs": false
+    },
+    "gfortran": {
+        "name": "Fortran (GFortran)",
+        "image": "attemptthisonline/gcc",
+        "version": "11",
+        "url": "https://gcc.gnu.org/fortran",
+        "sbcs": false
+    },
+    "gnat": {
+        "name": "Ada (GNAT)",
+        "image": "attemptthisonline/gcc",
+        "version": "11",
+        "url": "https://en.wikipedia.org/wiki/GNAT",
+        "sbcs": false
+    },
+    "go": {
+        "name": "Go",
+        "image": "attemptthisonline/go",
+        "version": "Latest",
+        "url": "https://go.dev",
+        "sbcs": false,
+        "se_class": "go"
+    },
+    "go_gcc": {
+        "name": "Go (GCC)",
+        "image": "attemptthisonline/gcc",
+        "version": "11",
+        "url": "https://gcc.gnu.org",
+        "sbcs": false,
+        "se_class": "go"
+    },
+    "guile": {
+        "name": "Guile",
+        "image": "attemptthisonline/base",
+        "version": "Latest",
+        "url": "https://www.gnu.org/software/guile/",
+        "sbcs": false,
+        "se_class": "lisp"
+    },
+    "haskell": {
+        "name": "Haskell",
+        "image": "attemptthisonline/haskell",
+        "version": "Latest",
+        "url": "https://www.haskell.org",
+        "sbcs": false,
+        "se_class": "haskell"
+    },
+    "hops": {
+        "name": "HOPS",
+        "image": "attemptthisonline/hops",
+        "version": "Latest",
+        "url": "https://akc.is/hops/",
+        "sbcs": false
+    },
+    "husk": {
+        "name": "Husk",
+        "image": "attemptthisonline/husk",
+        "version": "Latest",
+        "url": "https://github.com/barbuz/Husk",
+        "sbcs": true
+    },
+    "j": {
+        "name": "J",
+        "image": "attemptthisonline/j_but_longer",
+        "version": "Latest",
+        "url": "https://www.jsoftware.com",
+        "sbcs": false
+    },
+    "j_uby": {
+        "name": "J-uby",
+        "image": "attemptthisonline/j_uby",
+        "version": "Latest",
+        "url": "https://github.com/cyoce/J-uby",
+        "sbcs": false,
+        "se_class": "ruby"
+    },
+    "java": {
+        "name": "Java",
+        "image": "attemptthisonline/java",
+        "version": "Latest",
+        "url": "https://en.wikipedia.org/wiki/Java_(programming_language)",
+        "sbcs": false,
+        "se_class": "java"
+    },
+    "jelly": {
+        "name": "Jelly",
+        "image": "attemptthisonline/jelly",
+        "version": "70c9fd93",
+        "url": "https://github.com/DennisMitchell/jellylanguage",
+        "sbcs": true
+    },
+    "jq": {
+        "name": "jq",
+        "image": "attemptthisonline/jq",
+        "version": "Latest",
+        "url": "https://stedolan.github.io/jq/",
+        "sbcs": false
+    },
+    "julia": {
+        "name": "Julia",
+        "image": "attemptthisonline/julia",
+        "version": "Latest",
+        "url": "https://julialang.org",
+        "sbcs": false
+    },
+    "k_ktye": {
+        "name": "K (ktye/i)",
+        "image": "attemptthisonline/ktye_k",
+        "version": "Latest",
+        "url": "https://github.com/ktye/i",
+        "sbcs": false
+    },
+    "k_ngn": {
+        "name": "K (ngn/k)",
+        "image": "attemptthisonline/ngn_k",
+        "version": "Latest",
+        "url": "https://codeberg.org/ngn/k",
+        "sbcs": false
+    },
+    "k_ok": {
+        "name": "K (oK)",
+        "image": "attemptthisonline/ok",
+        "version": "Latest",
+        "url": "https://github.com/JohnEarnest/ok",
+        "sbcs": false
+    },
+    "knight": {
+        "name": "Knight",
+        "image": "attemptthisonline/knight",
+        "version": "Latest",
+        "url": "https://github.com/knight-lang/knight-lang",
+        "sbcs": false
+    },
+    "kotlin": {
+        "name": "Kotlin",
+        "image": "attemptthisonline/kotlin",
+        "version": "Latest",
+        "url": "https://kotlinlang.org",
+        "sbcs": false,
+        "se_class": "kotlin"
+    },
+    "lolcode": {
+        "name": "LOLCODE",
+        "image": "attemptthisonline/lolcode",
+        "version": "Latest",
+        "url": "https://github.com/justinmeza/lci",
+        "sbcs": false
+    },
+    "lua": {
+        "name": "Lua",
+        "image": "attemptthisonline/lua",
+        "version": "Latest",
+        "url": "https://www.lua.org",
+        "sbcs": false,
+        "se_class": "lua"
+    },
+    "neko": {
+        "name": "Neko",
+        "image": "attemptthisonline/neko",
+        "version": "Latest",
+        "url": "https://nekovm.org/",
+        "sbcs": false
+    },
+    "nibbles": {
+        "name": "Nibbles",
+        "image": "attemptthisonline/nibbles",
+        "version": "Latest",
+        "url": "http://golfscript.com/nibbles/index.html",
+        "sbcs": false
+    },
+    "nim": {
+        "name": "Nim",
+        "image": "attemptthisonline/nim",
+        "version": "Latest",
+        "url": "https://nim-lang.org/",
+        "sbcs": false
+    },
+    "node": {
+        "name": "JavaScript (Node.js)",
+        "image": "attemptthisonline/node",
+        "version": "Latest",
+        "url": "https://nodejs.org",
+        "sbcs": false,
+        "se_class": "javascript"
+    },
+    "objective_c_gcc": {
+        "name": "Objective-C (GCC)",
+        "image": "attemptthisonline/gcc",
+        "version": "11",
+        "url": "https://gcc.gnu.org",
+        "sbcs": false,
+        "se_class": "objectivec"
+    },
+    "objective_cplusplus_gcc": {
+        "name": "Objective-C++ (GCC)",
+        "image": "attemptthisonline/gcc",
+        "version": "11",
+        "url": "https://gcc.gnu.org",
+        "sbcs": false,
+        "se_class": "objectivec"
+    },
+    "ooocode": {
+        "name": "oOo CODE",
+        "image": "attemptthisonline/tio_brainfuck",
+        "version": "Unknown",
+        "url": "https://github.com/TryItOnline/brainfuck",
+        "sbcs": false
+    },
+    "pari_gp": {
+        "name": "PARI/GP",
+        "image": "attemptthisonline/pari_gp",
+        "version": "Latest",
+        "url": "https://pari.math.u-bordeaux.fr",
+        "sbcs": false
+    },
+    "perl": {
+        "name": "Perl",
+        "image": "attemptthisonline/perl",
+        "version": "Latest",
+        "url": "https://www.perl.org",
+        "sbcs": false,
+        "se_class": "perl"
+    },
+    "php": {
+        "name": "PHP",
+        "image": "attemptthisonline/php",
+        "version": "Latest",
+        "url": "https://www.php.net",
+        "sbcs": false,
+        "se_class": "php"
+    },
+    "pip": {
+        "name": "Pip",
+        "image": "attemptthisonline/pip",
+        "version": "Latest",
+        "url": "https://github.com/dloscutoff/pip",
+        "sbcs": false
+    },
+    "pyth": {
+        "name": "Pyth",
+        "image": "attemptthisonline/pyth",
+        "version": "Latest",
+        "url": "https://github.com/isaacg1/pyth",
+        "sbcs": false
+    },
+    "python": {
+        "name": "Python",
+        "image": "attemptthisonline/python_with_common_libraries",
+        "version": "Latest",
+        "url": "https://www.python.org",
+        "sbcs": false,
+        "se_class": "python"
+    },
+    "python2": {
+        "name": "Python 2",
+        "image": "attemptthisonline/python2",
+        "version": "2",
+        "url": "https://docs.python.org/2/",
+        "sbcs": false,
+        "se_class": "python2"
+    },
+    "quipu": {
+        "name": "Quipu",
+        "image": "attemptthisonline/quipu",
+        "version": "Latest",
+        "url": "https://github.com/cgccuser/quipu",
+        "sbcs": false
+    },
+    "r": {
+        "name": "R",
+        "image": "attemptthisonline/r_but_longer",
+        "version": "Latest",
+        "url": "https://www.r-project.org",
+        "sbcs": false,
+        "se_class": "r"
+    },
+    "random_brainfuck": {
+        "name": "Random Brainfuck",
+        "image": "attemptthisonline/tio_brainfuck",
+        "version": "Unknown",
+        "url": "https://github.com/TryItOnline/brainfuck",
+        "sbcs": false
+    },
+    "regenerate": {
+        "name": "Regenerate",
+        "image": "attemptthisonline/regenerate",
+        "version": "Latest",
+        "url": "https://github.com/dloscutoff/Esolangs/tree/master/Regenerate",
+        "sbcs": false
+    },
+    "ruby": {
+        "name": "Ruby",
+        "image": "attemptthisonline/ruby",
+        "version": "Latest",
+        "url": "https://www.ruby-lang.org/",
+        "sbcs": false,
+        "se_class": "ruby"
+    },
+    "rust": {
+        "name": "Rust",
+        "image": "attemptthisonline/rust",
+        "version": "Latest",
+        "url": "https://www.rust-lang.org",
+        "sbcs": false,
+        "se_class": "rust"
+    },
+    "sbcl": {
+        "name": "Common Lisp (SBCL)",
+        "image": "attemptthisonline/sbcl",
+        "version": "Latest",
+        "url": "http://www.sbcl.org",
+        "sbcs": false,
+        "se_class": "lisp"
+    },
+    "scala2": {
+        "name": "Scala 2",
+        "image": "attemptthisonline/scala2",
+        "version": "2",
+        "url": "https://www.scala-lang.org/",
+        "sbcs": false,
+        "se_class": "scala"
+    },
+    "scala3": {
+        "name": "Scala 3",
+        "image": "attemptthisonline/scala3",
+        "version": "3",
+        "url": "https://www.scala-lang.org/",
+        "sbcs": false,
+        "se_class": "scala"
+    },
+    "sed": {
+        "name": "sed",
+        "image": "attemptthisonline/base",
+        "version": "Latest",
+        "url": "https://www.gnu.org/software/sed/",
+        "sbcs": false
+    },
+    "slashes": {
+        "name": "///",
+        "image": "attemptthisonline/slashes",
+        "version": "Latest",
+        "url": "https://esolangs.org/wiki////",
+        "sbcs": false
+    },
+    "tcl": {
+        "name": "Tcl",
+        "image": "attemptthisonline/tcl",
+        "version": "Latest",
+        "url": "http://tcl.sourceforge.net",
+        "sbcs": false
+    },
+    "tex": {
+        "name": "TeX",
+        "image": "attemptthisonline/texlive",
+        "version": "Latest",
+        "url": "https://tug.org/texlive/doc.html",
+        "sbcs": false,
+        "se_class": "tex"
+    },
+    "tictac": {
+        "name": "Tictac",
+        "image": "attemptthisonline/tictac",
+        "version": "Latest",
+        "url": "https://github.com/pxeger/tictac",
+        "sbcs": true
+    },
+    "tinybf": {
+        "name": "TinyBF",
+        "image": "attemptthisonline/tio_brainfuck",
+        "version": "Unknown",
+        "url": "https://github.com/TryItOnline/brainfuck",
+        "sbcs": false
+    },
+    "vyxal": {
+        "name": "Vyxal",
+        "image": "attemptthisonline/vyxal",
+        "version": "2",
+        "url": "https://github.com/Vyxal/Vyxal",
+        "sbcs": true
+    },
+    "whitespace": {
+        "name": "Whitespace",
+        "image": "attemptthisonline/whitespace",
+        "version": "Latest",
+        "url": "https://web.archive.org/web/20150618184706/http://compsoc.dur.ac.uk/whitespace/tutorial.php",
+        "sbcs": false
+    },
+    "whython": {
+        "name": "Whython",
+        "image": "attemptthisonline/whython",
+        "version": "Latest",
+        "url": "https://github.com/pxeger/whython",
+        "sbcs": false,
+        "se_class": "python"
+    },
+    "yq": {
+        "name": "yq",
+        "image": "attemptthisonline/jq",
+        "version": "Latest",
+        "url": "https://kislyuk.github.io/yq/",
+        "sbcs": false
+    },
+    "zig": {
+        "name": "Zig",
+        "image": "attemptthisonline/zig",
+        "version": "Latest",
+        "url": "https://ziglang.org/",
+        "sbcs": false
+    },
+    "zsh": {
+        "name": "Zsh",
+        "image": "attemptthisonline/zsh",
+        "version": "5",
+        "url": "https://www.zsh.org/",
+        "sbcs": false,
+        "se_class": "bash"
+    }
+}

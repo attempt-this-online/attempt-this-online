@@ -1,9 +1,7 @@
 #!/usr/bin/python
+# Put environment variables from `skopeo inspect` into a file for `invoke` to apply to processes using this image
 import json
 import sys
 
 for string in json.load(sys.stdin)["Env"]:
-    # Put environment variables from `docker inspect` into the format for `yargs` to pass to `bwrap` to set environment
-    # variables in the container
-    key, value = string.split("=", maxsplit=1)
-    sys.stdout.write(f"--setenv\0{key}\0{value}\0")
+    sys.stdout.write(string + "\0")

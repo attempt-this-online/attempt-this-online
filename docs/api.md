@@ -14,9 +14,13 @@ Socket flow is pretty simple; the sequence of messages looks like this:
 Websocket close codes are:
 - Normal closure (1000): everything was ok
 - Unsupported data (1003): received a text message instead of a binary message
-- Policy violation (1008): request was otherwise invalid. The close reason may contain additional details
-    - For full details of potential causes of this message, consult [`ato/api.go`](https://github.com/attempt-this-online/attempt-this-online/blob/main/ato/api.go)
-- Message too big (1009): request exceeded the maximum size, which is 65536 bytes
+- Policy violation (1008): request was invalid; the reason may include extra info. Causes include:
+    - invalid msgpack data
+    - msgpack data did not match the schema of Message 1
+    - an argument or an option contained a null byte
+    - the given language did not exist
+    - the timeout value was not in the range 1 to 60
+- Message too big (1009): request exceeded the maximum size, which is currently 65536 bytes
 - Internal server error (1011): something went wrong inside ATO
 
 ### Message 1
@@ -36,6 +40,7 @@ Typing is fairly lax; strings will be accepted in place of binaries (they will b
 A [msgpack]-encoded payload - a map with the following string keys:
 - `stdout`: the standard output from the program and compilation (limited to 128 KiB)
 - `stderr`: the standard error from the program and compilation (limited to 32 KiB)
+<!--
 - `status_type`: the reason the process ended - one of:
     - `exited`: terminated normally by returning from `main` or calling `exit`
     - `killed`: terminated by a signal; only happens on timeout or if the process killed itself for some reason
@@ -46,7 +51,8 @@ A [msgpack]-encoded payload - a map with the following string keys:
     - `killed`: the number of the signal that killed the process (see [`signal(7)`])
     - `core_dumped`: the number of the signal that caused the process to dump its core (see [`signal(7)`], [`core(5)`])
     - `unknown`: always `-1`
-- `timed_out`: whether the process had to be killed because it overran its 60 second timeout. If this is the case,
+-->
+- `timed_out`: whether the process had to be killed because it overran its 60 second timeout. <!-- If this is the case,
   the process will have been killed by `SIGKILL` (ID 9)
 - `real`: real elapsed time in nanoseconds
 - `kernel`: CPU nanoseconds spent in kernel mode
@@ -78,14 +84,15 @@ Currently recognised proprties are:
 - `version` (string): What version constraints ATO places on this language. (Not a guarantee)
 - `url` (string): homepage URL for the language
 - `sbcs` (boolean): true if the language's byte-counter should assume all characters are one byte long
-- `SE_class` (string, optional): language ID used for syntax highlighting when a StackExchange post is generated. If
+- `se_class` (string, optional): language ID used for syntax highlighting when a StackExchange post is generated. If
   empty or not present, then language will have no syntax highlighting
+
+-->
 
 [msgpack]: https://msgpack.org
 [`runners/` directory]: https://github.com/attempt-this-online/attempt-this-online/tree/main/runners
 [`signal(7)`]: https://man.archlinux.org/man/core/man-pages/signal.7.en
 [`core(5)`]: https://man.archlinux.org/man/core/man-pages/core.5.en
-
 
 ## WebSocket API Example
 Simple example of using WebSocket API from JavaScript. It corresponds to this [ATO link](https://ato.pxeger.com/run?1=m700OT49OXlVtJKuS6KtiZFS7IKlpSVpuhbbcxMz8zQ0qwuKMvNK0jSUVFOUdBI1rWshslBFC6A0AA).
