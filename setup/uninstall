@@ -13,8 +13,6 @@ rm -rf \
     /usr/local/bin/ATO \
     /usr/local/bin/ATO_yargs \
     /usr/local/bin/ATO_bash \
-    /usr/local/bin/ATO_rm \
-    /usr/local/bin/ATO_wrapper \
-    /usr/local/bin/ATO_sandbox \
+    /usr/local/bin/ATO_invoke \
     /usr/local/lib/systemd/system/ATO.service \
     /usr/local/lib/systemd/system/ATO.socket
