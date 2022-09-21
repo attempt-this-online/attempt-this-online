@@ -33,6 +33,15 @@ async fn handle_ws(websocket: WebSocket) {
         };
         if message.is_close() {
             break;
+        } else if !message.is_binary() {
+                if let Err(e) = sender
+                    .send(Message::close_with(WEBSOCKET_BASE + UNSUPPORTED_DATA as u16, "expected a binary message"))
+                    .await
+                {
+                    // can't do anything but log it
+                    eprintln!("error sending close code: {}", e);
+                }
+            return;
         }
         let response = match invoke(message.as_bytes()).await {
             Ok(r) => r,
