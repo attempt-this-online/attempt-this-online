@@ -27,7 +27,7 @@ interface MetadataItem {
   name: string;
   image: string;
   version: string;
-  SE_class: string;
+  se_class: string;
   sbcs: string;
   url: string;
 }

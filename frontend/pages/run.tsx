@@ -356,7 +356,7 @@ function _Run(
       title = languages[language].name;
     }
 
-    const markdownCode = codeToMarkdown(code, languages[language].SE_class);
+    const markdownCode = codeToMarkdown(code, languages[language].se_class);
     navigator.clipboard.writeText(`# ${title}, ${byteLength} ${pluralise('byte', byteLength)}
 
 ${markdownCode}

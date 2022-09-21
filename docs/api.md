@@ -84,7 +84,7 @@ Currently recognised proprties are:
 - `version` (string): What version constraints ATO places on this language. (Not a guarantee)
 - `url` (string): homepage URL for the language
 - `sbcs` (boolean): true if the language's byte-counter should assume all characters are one byte long
-- `SE_class` (string, optional): language ID used for syntax highlighting when a StackExchange post is generated. If
+- `se_class` (string, optional): language ID used for syntax highlighting when a StackExchange post is generated. If
   empty or not present, then language will have no syntax highlighting
 
 -->
