@@ -94,7 +94,7 @@ async function runWs({
     ws.onerror = e => { finalReject(e); };
     ws.onclose = e => {
       if (e.code !== CLOSE_NORMAL) {
-        const e2 = new Error(`websocket connection unexpectedly closed with code ${e.code}`);
+        const e2 = new Error(`websocket connection unexpectedly closed with code ${e.code}:\n${e.reason}`);
         finalReject(e2);
         throw e2;
       }
