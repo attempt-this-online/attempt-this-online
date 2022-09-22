@@ -19,10 +19,10 @@ use nix::{
         time::TimeValLike,
         wait::{self, waitid, WaitPidFlag, WaitStatus::*},
     },
-    unistd::{chdir, close, dup2, execve, Gid, mkdir, pipe, pivot_root, setresgid, setresuid, symlinkat, Uid},
+    unistd::{chdir, close, dup2, execve, Gid, mkdir, pipe, pivot_root, read, setresgid, setresuid, symlinkat, Uid},
 };
 use rand::Rng;
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, de::DeserializeOwned, Serialize};
 use serde_bytes::ByteBuf;
 use std::ffi::{CStr, CString};
 use std::fs::File;
@@ -69,6 +69,15 @@ macro_rules! cstr {
     }
 }
 
+/// read and deserialise a msgpack value of type T from stdin, but using only one read syscall.
+/// this ensures that, if the client has sent an "incomplete" websocket message, and therefore the pipe doesn't have enough data in it to satisfy msgpack, we don't block forever on the read waiting for a websocket message that may never arrive
+/// see https://github.com/attempt-this-online/attempt-this-online/issues/88 for why this is needed
+fn msgpack_read1<T: DeserializeOwned>() -> Result<T, String> {
+    let mut buf = [0u8; MAX_REQUEST_SIZE];
+    let size = check!(read(STDIN_FD, &mut buf), "error reading request: {}");
+    rmp_serde::from_read::<_, T>(&buf[..size]).map_err(|s| format!("error decoding request: {s}"))
+}
+
 #[derive(Serialize)]
 struct Response {
     stdout: ByteBuf,
@@ -100,10 +109,10 @@ struct Request {
 }
 
 fn main() -> std::process::ExitCode {
-    let request = match rmp_serde::from_read::<_, Request>(std::io::stdin()) {
+    let request = match msgpack_read1::<Request>() {
         Ok(r) => r,
         Err(e) => {
-            eoprintln!("decode error: {}", e);
+            eoprintln!("{}", e);
             return std::process::ExitCode::from(POLICY_VIOLATION);
         }
     };
@@ -323,7 +332,7 @@ fn invoke(request: &Request, language: &Language) -> Result<Response, String> {
                         Kill = 1,
                     }
                     use ControlMessage::*;
-                    match rmp_serde::from_read::<_, ControlMessage>(std::io::stdin()) {
+                    match msgpack_read1::<ControlMessage>() {
                         Err(e) => {
                             return Err(format!("error reading control message: {}", e));
                         }

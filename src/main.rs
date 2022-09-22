@@ -12,8 +12,6 @@ use tokio::task;
 use warp::ws::*;
 use warp::Filter;
 
-const MAX_REQUEST_SIZE: usize = 1 << 16; // 64KiB
-
 #[tokio::main]
 async fn main() {
     let execute = warp::path!("api" / "v0" / "ws" / "execute")
