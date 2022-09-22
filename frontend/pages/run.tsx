@@ -25,7 +25,6 @@ const NEWLINE = '\n'.charCodeAt(0);
 
 const EMPTY_BUFFER = new Uint8Array([]);
 
-/*
 const SIGNALS: Record<number, string> = {
   1: 'SIGHUP',
   2: 'SIGINT',
@@ -72,7 +71,6 @@ const statusToString = (type: 'exited' | 'killed' | 'core_dumped' | 'unknown', v
       return 'Unknown status';
   }
 };
-*/
 
 const pluralise = (string: string, n: number) => (n === 1 ? string : `${string}s`);
 
@@ -99,8 +97,8 @@ function _Run(
   const [stderr, setStderr] = useState(EMPTY_BUFFER);
   const [stderrEncoding, setStderrEncoding] = useState('utf-8');
 
-  // const [statusType, setStatusType] = useState<'exited' | 'killed' | 'core_dumped' | 'unknown' | null>(null);
-  // const [statusValue, setStatusValue] = useState<number | null>(null);
+  const [statusType, setStatusType] = useState<'exited' | 'killed' | 'core_dumped' | 'unknown' | null>(null);
+  const [statusValue, setStatusValue] = useState<number | null>(null);
   // const [timing, setTiming] = useState('');
   // const [timingOpen, setTimingOpen] = useState(false);
 
@@ -170,10 +168,10 @@ function _Run(
     setStdout(data.stdout);
     setStderr(data.stderr);
 
-    /*
     setStatusType(data.status_type);
     setStatusValue(data.status_value);
 
+    /*
     setTiming(
       `
       Real time: ${data.real / 1e9} s
@@ -588,11 +586,11 @@ ${markdownCode}
                     />
                   )}
                 </button>
-                {/* statusType && (
+                {statusType && (
                 <p className="ml-4">
                   {statusToString(statusType, statusValue!)}
                 </p>
-                ) */}
+                )}
               </div>
             </form>
             <CollapsibleText

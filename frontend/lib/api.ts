@@ -8,8 +8,8 @@ interface RunAPIResponse {
   // stdout_truncated: boolean;
   stderr: Uint8Array;
   // stderr_truncated: boolean;
-  // status_type: 'exited' | 'killed' | 'core_dumped' | 'unknown';
-  // status_value: number;
+  status_type: 'exited' | 'killed' | 'core_dumped' | 'unknown';
+  status_value: number;
   timed_out: boolean;
   // real: number;
   // kernel: number;
