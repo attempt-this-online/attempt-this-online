@@ -9,7 +9,7 @@ import { throttle } from 'lodash';
 import { ExclamationCircleIcon, ClipboardCopyIcon, XIcon } from '@heroicons/react/solid';
 
 import CollapsibleText from 'components/collapsibleText';
-// import ResizeableText from 'components/resizeableText';
+import ResizeableText from 'components/resizeableText';
 import LanguageSelector from 'components/languageSelector';
 import Footer from 'components/footer';
 import Navbar from 'components/navbar';
@@ -99,8 +99,8 @@ function _Run(
 
   const [statusType, setStatusType] = useState<'exited' | 'killed' | 'core_dumped' | 'unknown' | null>(null);
   const [statusValue, setStatusValue] = useState<number | null>(null);
-  // const [timing, setTiming] = useState('');
-  // const [timingOpen, setTimingOpen] = useState(false);
+  const [timing, setTiming] = useState('');
+  const [timingOpen, setTimingOpen] = useState(false);
 
   const [languageSelectorOpen, setLanguageSelectorOpen] = useState(false);
 
@@ -171,7 +171,6 @@ function _Run(
     setStatusType(data.status_type);
     setStatusValue(data.status_value);
 
-    /*
     setTiming(
       `
       Real time: ${data.real / 1e9} s
@@ -186,7 +185,6 @@ function _Run(
       Output operations: ${data.output_ops}
       `.trim().split('\n').map(s => s.trim()).join('\n'),
     );
-    */
 
     if (data.timed_out) {
       notify('The program ran for over 60 seconds and timed out');
@@ -619,7 +617,7 @@ ${markdownCode}
               {' '}
               output
             </CollapsibleText>
-            {/*
+            {
             <details open={timingOpen} className="my-6">
               <summary className="cursor-pointer focus-within:ring rounded pl-2 hover:bg-gray-200 dark:hover:bg-gray-700 transition py-1 -mt-3 -mb-1">
                 <button
@@ -636,7 +634,7 @@ ${markdownCode}
                 dummy={dummy}
               />
             </details>
-            */}
+            }
             <textarea ref={dummy} className="block w-full px-2 rounded font-mono text-base h-0 opacity-0" aria-hidden disabled />
           </main>
         </div>
