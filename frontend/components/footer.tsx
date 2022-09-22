@@ -18,10 +18,10 @@ export default function Footer({ noLegalLink = false }: { noLegalLink?: boolean 
           <Link href="/legal">
             <a className="underline text-blue-500 inline-flex flex-nowrap">
               Legal
-              <div className="inline-block rounded-full w-2 h-2 ml-1 self-center mt-1">
+              {/* <div className="inline-block rounded-full w-2 h-2 ml-1 self-center mt-1">
                 <span className="motion-safe:animate-ping absolute inline-flex h-2 w-2 rounded-full bg-red-500 opacity-75"></span>
                 <span className="absolute inline-flex h-2 w-2 rounded-full bg-red-600"></span>
-              </div>
+              </div> */}
             </a>
           </Link>
         )}
