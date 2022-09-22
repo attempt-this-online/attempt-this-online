@@ -12,7 +12,12 @@ use nix::{
     fcntl::OFlag,
     mount::{mount, MsFlags},
     poll::{PollFd, PollFlags, poll},
-    sys::{stat::Mode, resource::{setrlimit, Resource}},
+    sys::{
+        stat::Mode,
+        resource::{setrlimit, Resource},
+        signal::Signal::{self, *},
+        wait::{self, waitid, WaitPidFlag, WaitStatus::*},
+    },
     unistd::{chdir, close, dup2, execve, Gid, mkdir, pipe, pivot_root, setresgid, setresuid, symlinkat, Uid},
 };
 use rand::Rng;
@@ -68,6 +73,8 @@ struct Response {
     stdout: ByteBuf,
     stderr: ByteBuf,
     timed_out: bool,
+    status_type: &'static str,
+    status_value: i32,
 }
 
 #[allow(dead_code)]
@@ -291,6 +298,21 @@ fn invoke(request: &Request, language: &Language) -> Result<Response, String> {
         // kill process
         drop(cgroup_cleanup);
 
+        let (status_type, status_value) =
+            match waitid(wait::Id::PIDFd(pidfd), WaitPidFlag::WEXITED) {
+                Err(e) => {
+                    eprintln!("error getting waitid result: {}", e);
+                    ("unknown", -1)
+                }
+                Ok(Exited(_, c)) => ("exited", c),
+                Ok(Signaled(_, c, false)) => ("killed", sig2int(c)),
+                Ok(Signaled(_, c, true)) => ("core_dumped", sig2int(c)),
+                Ok(x) => {
+                    eprintln!("warning: unexpected waitid result: {:?}", x);
+                    ("unknown", -1)
+                }
+            };
+
         // these unsafe blocks are safe as long as we don't use stdout_r or stderr_r again
         let mut stdout_f = unsafe { File::from_raw_fd(stdout_r) };
         // dropping this has no runtime effect (as it's just an integer), but it makes it clear that we can't use it again
@@ -307,6 +329,8 @@ fn invoke(request: &Request, language: &Language) -> Result<Response, String> {
             stdout: ByteBuf::from(stdout),
             stderr: ByteBuf::from(stderr),
             timed_out,
+            status_type,
+            status_value,
         })
     }
 }
@@ -587,4 +611,46 @@ fn set_resource_limits() -> Result<(), String> {
     // bytes in POSIX message queues
     check!(setrlimit(Resource::RLIMIT_MSGQUEUE, 100, 100), "error setting MSGQUEUE resource limit: {}");
     Ok(())
+}
+
+// annoyingly, the nix crate has no way to convert its own Signal enum back into an integer, so we have to map the values manually
+// See https://github.com/nix-rust/nix/issues/1822
+fn sig2int(sig: Signal) -> i32 {
+    match sig {
+        SIGHUP => 1,
+        SIGINT => 2,
+        SIGQUIT => 3,
+        SIGILL => 4,
+        SIGTRAP => 5,
+        SIGABRT => 6,
+        SIGBUS => 7,
+        SIGFPE => 8,
+        SIGKILL => 9,
+        SIGUSR1 => 10,
+        SIGSEGV => 11,
+        SIGUSR2 => 12,
+        SIGPIPE => 13,
+        SIGALRM => 14,
+        SIGTERM => 15,
+        SIGSTKFLT => 16,
+        SIGCHLD => 17,
+        SIGCONT => 18,
+        SIGSTOP => 19,
+        SIGTSTP => 20,
+        SIGTTIN => 21,
+        SIGTTOU => 22,
+        SIGURG => 23,
+        SIGXCPU => 24,
+        SIGXFSZ => 25,
+        SIGVTALRM => 26,
+        SIGPROF => 27,
+        SIGWINCH => 28,
+        SIGIO => 29,
+        SIGPWR => 30,
+        SIGSYS => 31,
+        x => {
+            eprintln!("warning: unknown signal: {}", x);
+            -1
+        }
+    }
 }
