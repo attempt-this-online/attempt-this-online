@@ -4,9 +4,11 @@ mod codes;
 use crate::codes::*;
 use futures_util::SinkExt;
 use futures_util::StreamExt;
+use futures_util::stream::SplitStream;
 use std::process::Stdio;
 use tokio::io::AsyncWriteExt;
-use tokio::process::Command;
+use tokio::process::{Child, ChildStdin, Command};
+use tokio::task;
 use warp::ws::*;
 use warp::Filter;
 
@@ -43,7 +45,7 @@ async fn handle_ws(websocket: WebSocket) {
                 }
             return;
         }
-        let response = match invoke(message.as_bytes()).await {
+        let response = match invoke(message.as_bytes(), &mut receiver).await {
             Ok(r) => r,
             Err((code, e)) => {
                 if let Err(e) = sender
@@ -69,7 +71,41 @@ async fn handle_ws(websocket: WebSocket) {
     }
 }
 
-async fn invoke(input: &[u8]) -> Result<Vec<u8>, (u8, String)> {
+async fn invoke(input: &[u8], ws: &mut SplitStream<WebSocket>) -> Result<Vec<u8>, (u8, String)> {
+    let (mut stdin, child) =
+        match invoke1(input).await {
+            Ok(c) => c,
+            Err(e) => {
+                return Err((INTERNAL_ERROR, e))
+            }
+        };
+    let mut wait = task::spawn(async { invoke2(child).await });
+    loop {
+        tokio::select! {
+            res = &mut wait => return res.unwrap(),
+            maybe_msg = ws.next() => match maybe_msg {
+                None => return wait.await.unwrap(),
+                Some(msg) => handle_message(msg, &mut stdin).await?,
+            }
+        }
+    }
+}
+
+async fn handle_message(msg: Result<Message, warp::Error>, stdin: &mut ChildStdin) -> Result<(), (u8, String)> {
+    let msg = match msg {
+        Ok(m) => m,
+        Err(e) => return Err((INTERNAL_ERROR, format!("error getting websocket message: {}", e))),
+    };
+    if !msg.is_binary() {
+        return Err((UNSUPPORTED_DATA, format!("expected a binary message")))
+    }
+    if let Err(e) = stdin.write(msg.as_bytes()).await {
+        return Err((INTERNAL_ERROR, format!("failed passing message on: {}", e)))
+    }
+    Ok(())
+}
+
+async fn invoke1(input: &[u8]) -> Result<(ChildStdin, Child), String> {
     let command = Command::new("ATO_invoke")
         .stderr(Stdio::inherit())
         .stdout(Stdio::piped())
@@ -77,18 +113,21 @@ async fn invoke(input: &[u8]) -> Result<Vec<u8>, (u8, String)> {
         .spawn();
     let mut child = match command {
         Ok(c) => c,
-        Err(e) => return Err((INTERNAL_ERROR, format!("internal error: error spawning ATO_invoke: {}", e))),
+        Err(e) => return Err(format!("internal error: error spawning ATO_invoke: {}", e)),
     };
     let mut stdin = child
         .stdin
         .take()
         .expect("stdin should not have been taken");
     if let Err(e) = stdin.write_all(input).await {
-        return Err((
-            INTERNAL_ERROR,
+        return Err(
             format!("internal error: error writing stdin of ATO_invoke: {}", e),
-        ));
+        );
     }
+    Ok((stdin, child))
+}
+
+async fn invoke2(child: Child) -> Result<Vec<u8>, (u8, String)> {
     let output = match child.wait_with_output().await {
         Ok(o) => o,
         Err(e) => {

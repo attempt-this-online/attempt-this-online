@@ -169,6 +169,7 @@ fn validate(request: &Request) -> Result<&Language, ValidationError> {
     }
 }
 
+const STDIN_FD: std::os::unix::io::RawFd = 0;
 const STDOUT_FD: std::os::unix::io::RawFd = 1;
 const STDERR_FD: std::os::unix::io::RawFd = 2;
 
@@ -301,11 +302,41 @@ fn invoke(request: &Request, language: &Language) -> Result<Response, String> {
 
         // wait for the process to finish, but with the given timeout:
         // if the timeout expires before the process finishes, it will be killed when the cgroup struct is dropped
-        let mut poll_arg = PollFd::new(pidfd, PollFlags::POLLIN);
-        let mut poll_args = std::slice::from_mut(&mut poll_arg);
+        let mut poll_args = [PollFd::new(pidfd, PollFlags::POLLIN), PollFd::new(STDIN_FD, PollFlags::POLLIN)];
         // poll wants milliseconds; request.timeout is seconds
-        let poll_result = check!(poll(&mut poll_args, request.timeout * 1000));
-        let timed_out = poll_result == 0;
+        let timed_out =
+            loop {
+                let poll_result = check!(poll(&mut poll_args, request.timeout * 1000));
+                let poll_child = poll_args[0];
+                let poll_stdin = poll_args[1];
+                if poll_result == 0 {
+                    // timed out
+                    break true
+                } else if poll_child.revents().ok_or("poll returned unexpected event")?.contains(PollFlags::POLLIN) {
+                    // child finished
+                    break false
+                } else if poll_stdin.revents().ok_or("poll returned unexpected event")?.contains(PollFlags::POLLIN) {
+                    // received control message via stdin
+                    #[derive(Deserialize)]
+                    #[repr(u16)]
+                    enum ControlMessage {
+                        Kill = 1,
+                    }
+                    use ControlMessage::*;
+                    match rmp_serde::from_read::<_, ControlMessage>(std::io::stdin()) {
+                        Err(e) => {
+                            return Err(format!("error reading control message: {}", e));
+                        }
+                        Ok(Kill) => {
+                            // continue to drop (i.e. kill), and set timed_out = false
+                            break false
+                        }
+                        // Ok(_) => ...
+                    }
+                } else {
+                    return Err(format!("unexpected poll result: {}, {:?}", poll_result, poll_args));
+                }
+            };
 
         // kill process
         drop(cgroup_cleanup);
