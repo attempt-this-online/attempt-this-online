@@ -13,9 +13,10 @@ use nix::{
     mount::{mount, MsFlags},
     poll::{PollFd, PollFlags, poll},
     sys::{
-        stat::Mode,
-        resource::{setrlimit, Resource},
+        resource::{getrusage, setrlimit, Resource, UsageWho::RUSAGE_CHILDREN},
         signal::Signal::{self, *},
+        stat::Mode,
+        time::TimeValLike,
         wait::{self, waitid, WaitPidFlag, WaitStatus::*},
     },
     unistd::{chdir, close, dup2, execve, Gid, mkdir, pipe, pivot_root, setresgid, setresuid, symlinkat, Uid},
@@ -75,6 +76,16 @@ struct Response {
     timed_out: bool,
     status_type: &'static str,
     status_value: i32,
+    real: i64,
+    kernel: i64,
+    user: i64,
+    max_mem: i64,
+    waits: i64,
+    preemptions: i64,
+    major_page_faults: i64,
+    minor_page_faults: i64,
+    input_ops: i64,
+    output_ops: i64,
 }
 
 #[allow(dead_code)]
@@ -269,6 +280,7 @@ fn invoke(request: &Request, language: &Language) -> Result<Response, String> {
         .flag_pidfd(&mut pidfd)
         .flag_into_cgroup(&cgroup_fd)
         ;
+    let timer = std::time::Instant::now();
     // this is safe because we only ever use one thread in this program
     if check!(unsafe { clone3.call() }, "error clone3ing main child: {}") == 0 { // in child
         // avoid suicide
@@ -298,20 +310,19 @@ fn invoke(request: &Request, language: &Language) -> Result<Response, String> {
         // kill process
         drop(cgroup_cleanup);
 
+        let wait_result = check!(waitid(wait::Id::PIDFd(pidfd), WaitPidFlag::WEXITED), "error getting waitid result: {}");
         let (status_type, status_value) =
-            match waitid(wait::Id::PIDFd(pidfd), WaitPidFlag::WEXITED) {
-                Err(e) => {
-                    eprintln!("error getting waitid result: {}", e);
-                    ("unknown", -1)
-                }
-                Ok(Exited(_, c)) => ("exited", c),
-                Ok(Signaled(_, c, false)) => ("killed", sig2int(c)),
-                Ok(Signaled(_, c, true)) => ("core_dumped", sig2int(c)),
-                Ok(x) => {
+            match wait_result {
+                Exited(_, c) => ("exited", c),
+                Signaled(_, c, false) => ("killed", sig2int(c)),
+                Signaled(_, c, true) => ("core_dumped", sig2int(c)),
+                x => {
                     eprintln!("warning: unexpected waitid result: {:?}", x);
                     ("unknown", -1)
                 }
             };
+
+        let stats = check!(getrusage(RUSAGE_CHILDREN), "error getting resource usage: {}");
 
         // these unsafe blocks are safe as long as we don't use stdout_r or stderr_r again
         let mut stdout_f = unsafe { File::from_raw_fd(stdout_r) };
@@ -331,6 +342,16 @@ fn invoke(request: &Request, language: &Language) -> Result<Response, String> {
             timed_out,
             status_type,
             status_value,
+            real: timer.elapsed().as_nanos() as i64,
+            kernel: stats.system_time().num_nanoseconds(),
+            user: stats.user_time().num_nanoseconds(),
+            max_mem: stats.max_rss(),
+            waits: stats.voluntary_context_switches(),
+            preemptions: stats.involuntary_context_switches(),
+            major_page_faults: stats.major_page_faults(),
+            minor_page_faults: stats.minor_page_faults(),
+            input_ops: stats.block_reads(),
+            output_ops: stats.block_writes(),
         })
     }
 }
