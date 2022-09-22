@@ -40,7 +40,6 @@ Typing is fairly lax; strings will be accepted in place of binaries (they will b
 A [msgpack]-encoded payload - a map with the following string keys:
 - `stdout`: the standard output from the program and compilation (limited to 128 KiB)
 - `stderr`: the standard error from the program and compilation (limited to 32 KiB)
-<!--
 - `status_type`: the reason the process ended - one of:
     - `exited`: terminated normally by returning from `main` or calling `exit`
     - `killed`: terminated by a signal; only happens on timeout or if the process killed itself for some reason
@@ -48,12 +47,13 @@ A [msgpack]-encoded payload - a map with the following string keys:
     - `unknown`: meaning of the value is not known; should never normally happen
 - `status_value`: the status code of the end of the process. Its exact meaning depends on `status_type`:
     - `exited`: the exit code that the program returned
-    - `killed`: the number of the signal that killed the process (see [`signal(7)`])
+    - `killed`: the number of the signal that killed the process (see [`signal(7)`]). Might also be -1 due to technical
+      limitations.
     - `core_dumped`: the number of the signal that caused the process to dump its core (see [`signal(7)`], [`core(5)`])
     - `unknown`: always `-1`
--->
-- `timed_out`: whether the process had to be killed because it overran its 60 second timeout. <!-- If this is the case,
-  the process will have been killed by `SIGKILL` (ID 9)
+- `timed_out`: whether the process had to be killed because it overran its 60 second timeout. If this is the case, the
+  process will have been killed by `SIGKILL` (ID 9)
+<!--
 - `real`: real elapsed time in nanoseconds
 - `kernel`: CPU nanoseconds spent in kernel mode
 - `user`: CPU nanoseconds spent in user mode
