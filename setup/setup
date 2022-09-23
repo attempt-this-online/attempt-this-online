@@ -63,7 +63,7 @@ useradd -rs /usr/bin/nologin -md /var/lib/ATO_home ato
 
 # install backend
 install -m 500 -o ato -g ato server /usr/local/lib/ATO/
-install -m 500 -o ato -g ato invoke /usr/local/bin/ATO_invoke
+install -m 500 -o ato -g ato invoke /usr/local/lib/ATO/invoke
 
 # install runners
 cp -RT runners /usr/local/share/ATO/runners
@@ -106,11 +106,11 @@ echo "7 10 * * * certbot renew && systemctl reload nginx" >> /var/spool/cron/roo
 systemctl enable --now cronie.service
 
 # install yargs
-install -m 555 -o root -g root yargs /usr/local/bin/ATO_yargs
+install -m 555 -o root -g root yargs /usr/local/lib/ATO/yargs
 
 # steal a statically linked bash from Debian
-curl -L "https://github.com/attempt-this-online/static-bash/releases/download/5.2.0(1)-rc2/bash" > /usr/local/bin/ATO_bash
-chmod 555 /usr/local/bin/ATO_bash
+curl -L "https://github.com/attempt-this-online/static-bash/releases/download/5.2.0(1)-rc2/bash" > /usr/local/lib/ATO/bash
+chmod 555 /usr/local/lib/ATO/bash
 
 # configure service
 install -m 555 -o root -g root setup/ATO /usr/local/bin/

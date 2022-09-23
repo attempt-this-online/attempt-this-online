@@ -11,8 +11,5 @@ rm -rf \
     /usr/local/lib/ATO \
     /usr/local/share/ATO \
     /usr/local/bin/ATO \
-    /usr/local/bin/ATO_yargs \
-    /usr/local/bin/ATO_bash \
-    /usr/local/bin/ATO_invoke \
     /usr/local/lib/systemd/system/ATO.service \
     /usr/local/lib/systemd/system/ATO.socket

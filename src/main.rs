@@ -104,14 +104,14 @@ async fn handle_message(msg: Result<Message, warp::Error>, stdin: &mut ChildStdi
 }
 
 async fn invoke1(input: &[u8]) -> Result<(ChildStdin, Child), String> {
-    let command = Command::new("ATO_invoke")
+    let command = Command::new("/usr/local/lib/ATO/invoke")
         .stderr(Stdio::inherit())
         .stdout(Stdio::piped())
         .stdin(Stdio::piped())
         .spawn();
     let mut child = match command {
         Ok(c) => c,
-        Err(e) => return Err(format!("internal error: error spawning ATO_invoke: {}", e)),
+        Err(e) => return Err(format!("internal error: error spawning ATO/invoke: {}", e)),
     };
     let mut stdin = child
         .stdin
@@ -119,7 +119,7 @@ async fn invoke1(input: &[u8]) -> Result<(ChildStdin, Child), String> {
         .expect("stdin should not have been taken");
     if let Err(e) = stdin.write_all(input).await {
         return Err(
-            format!("internal error: error writing stdin of ATO_invoke: {}", e),
+            format!("internal error: error writing stdin of ATO/invoke: {}", e),
         );
     }
     Ok((stdin, child))
@@ -131,7 +131,7 @@ async fn invoke2(child: Child) -> Result<Vec<u8>, (u8, String)> {
         Err(e) => {
             return Err((
                 INTERNAL_ERROR,
-                format!("internal error: error waiting for ATO_invoke: {}", e),
+                format!("internal error: error waiting for ATO/invoke: {}", e),
             ))
         }
     };
@@ -140,7 +140,7 @@ async fn invoke2(child: Child) -> Result<Vec<u8>, (u8, String)> {
         let code = match output.status.code() {
             Some(c) => c as u8,
             None => {
-                eprintln!("internal error: error running ATO_invoke: {}", output.status);
+                eprintln!("internal error: error running ATO/invoke: {}", output.status);
                 INTERNAL_ERROR
             }
         };

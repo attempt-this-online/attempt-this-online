@@ -601,8 +601,8 @@ fn setup_special_files(language_id: &String) -> Result<(), String> {
     check!(symlinkat("pts/ptmx", None, "dev/ptmx"), "error creating /dev/ptmx: {}");
 
     for (src, dest) in [
-        ("/usr/local/bin/ATO_bash", "./ATO/bash"),
-        ("/usr/local/bin/ATO_yargs", "./ATO/yargs"),
+        ("/usr/local/lib/ATO/bash", "./ATO/bash"),
+        ("/usr/local/lib/ATO/yargs", "./ATO/yargs"),
         (&get_runner(&language_id), "./ATO/runner"),
     ] {
         drop(check!(File::create(&dest), "error creating mount point for {}: {}", dest));
