@@ -131,6 +131,8 @@ function _Run(
     setCodeEncoding(languages[language].sbcs ? 'sbcs' : 'utf-8');
   }, [language, languages]);
 
+  const [killCallback, setKillCallback] = useState<(() => void) | null>(null);
+
   const submit = async (event: SyntheticEvent) => {
     event.preventDefault();
     setSubmitting(true);
@@ -147,10 +149,10 @@ function _Run(
     ]);
     const inputBytes = ENCODERS[inputEncoding](input);
 
-    let data;
+    let killCallback1: () => void, pData;
 
     try {
-      data = await API.runWs({
+      [killCallback1, pData] = await API.runWs({
         language: language!,
         input: inputBytes,
         code: combined,
@@ -164,6 +166,19 @@ function _Run(
       setSubmitting(false);
       return;
     }
+
+    setKillCallback(() => killCallback1);
+
+    let data;
+    try {
+      data = await pData;
+    } catch (e) {
+      setKillCallback(null);
+      notify('An error occurred; see the console for details');
+      setSubmitting(false);
+      return;
+    }
+    setKillCallback(null);
 
     setStdout(data.stdout);
     setStderr(data.stderr);
@@ -584,6 +599,16 @@ ${markdownCode}
                     />
                   )}
                 </button>
+                {submitting && (
+                  <button
+                    type="button"
+                    className="rounded ml-4 px-4 py-2 bg-red-500 hover:bg-red-400 text-white focus:outline-none ring-red-300/50 focus:ring disabled:bg-gray-200 disabled:text-black dark:disabled:bg-gray-700 dark:disabled:text-white disabled:cursor-not-allowed transition"
+                    disabled={!killCallback}
+                    onClick={() => killCallback?.()}
+                  >
+                    Kill
+                  </button>
+                )}
                 {statusType && (
                 <p className="ml-4">
                   {statusToString(statusType, statusValue!)}

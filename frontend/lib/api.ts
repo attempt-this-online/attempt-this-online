@@ -78,49 +78,51 @@ async function runWs({
   options: string[],
   programArguments: string[],
   timeout: number,
-}) {
-  // wrap the whole thing in a promise so it can Reject from the right point in the call stack
-  return await new Promise<RunAPIResponse>(async (finalResolve, finalReject) => {
-    const url = new URL(`${BASE_URL}/api/v0/ws/execute`, document.baseURI);
-    if (url.protocol === 'http:') {
-      url.protocol = 'ws:';
-    } else if (url.protocol === 'https:') {
-      url.protocol = 'wss:';
-    } else {
-      throw new Error(`invalid URL protocol: ${url}`);
-    }
-    const ws = new WebSocket(url);
+}): Promise<[() => void, Promise<RunAPIResponse>]> {
+  const url = new URL(`${BASE_URL}/api/v0/ws/execute`, document.baseURI);
+  if (url.protocol === 'http:') {
+    url.protocol = 'ws:';
+  } else if (url.protocol === 'https:') {
+    url.protocol = 'wss:';
+  } else {
+    throw new Error(`invalid URL protocol: ${url}`);
+  }
+  const ws = new WebSocket(url);
+  // wait for connection
+  await new Promise(resolve => {
+    ws.onopen = () => resolve(ws);
+  });
+
+  const p_message = new Promise<RunAPIResponse>((resolve, reject) => {
+    ws.onmessage = async message => {
+      ws.close(CLOSE_NORMAL);
+      resolve(await msgpack.decodeAsync(message.data.stream()) as RunAPIResponse);
+    };
     // setup error handling
-    ws.onerror = e => { finalReject(e); };
+    ws.onerror = e => { console.error('websocket error:', e); };
     ws.onclose = e => {
       if (e.code !== CLOSE_NORMAL) {
-        const e2 = new Error(`websocket connection unexpectedly closed with code ${e.code}:\n${e.reason}`);
-        finalReject(e2);
-        throw e2;
+        const msg = `websocket connection unexpectedly closed with code ${e.code}:\n${e.reason}`;
+        console.error(msg);
+        reject(msg);
       }
     };
-    // wait for connection
-    await new Promise(resolve => {
-      ws.onopen = () => resolve(ws);
-    });
-
-    ws.send(msgpack.encode({
-      language,
-      code,
-      input,
-      options,
-      arguments: programArguments,
-      timeout,
-    }));
-
-    const message = await new Promise<MessageEvent>(resolve => {
-      ws.onmessage = event => {
-        ws.close(CLOSE_NORMAL);
-        resolve(event);
-      };
-    });
-    finalResolve(await msgpack.decodeAsync(message.data.stream()) as RunAPIResponse);
   });
+
+  ws.send(msgpack.encode({
+    language,
+    code,
+    input,
+    options,
+    arguments: programArguments,
+    timeout,
+  }));
+
+  async function kill() {
+    ws.send(msgpack.encode('Kill'));
+  }
+
+  return [kill, p_message];
 }
 
 async function getMetadata() {
