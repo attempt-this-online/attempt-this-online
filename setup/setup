@@ -22,25 +22,17 @@ whoami | grep -xFq root || error you must run this script as root
 # [ -e /sys/kernel/security/apparmor/profiles ] || error you must enable apparmor in the kernel - see 'https://wiki.archlinux.org/index.php/AppArmor'
 
 # install dependencies
-# - bubblewrap: primary sandboxing mechanism
 # - certbot: generate SSL certificates for nginx
 # - cronie: automate renewal of certbot certificates, cache cleaning, etc.
 # - nginx: web server
-# - nginx-mod-modsecurity: web application firewall
 # - sed: configuration editing on installation
 # - skopeo: for docker image extraction
-# - sudo: privilege management for sandboxing
-# - zsh: for running the runner scripts
 [ -z "$ATO_NO_DEPS" ] && pacman -Syu --noconfirm --needed \
-    bubblewrap \
     certbot \
     cronie \
     nginx \
-    nginx-mod-modsecurity \
     sed \
-    skopeo \
-    sudo \
-    zsh
+    skopeo
 
 # don't use /tmp because it has weird permissions
 mkdir -p /var/cache/ATO
@@ -89,7 +81,6 @@ chmod -R a+rX-w /usr/local/share/ATO/public
 # configure nginx
 sed -i "s/ato.pxeger.com/$1/g" setup/nginx.conf
 install -m 644 -o root -g root setup/nginx.conf /etc/nginx/
-install -m 644 -o root -g root setup/modsecurity.conf /etc/nginx/
 # don't waste time generating DH params unless necessary
 [ -f /etc/nginx/dhparam.pem ] || openssl dhparam -out /etc/nginx/dhparam.pem 2048
 systemctl enable nginx.service
@@ -128,8 +119,7 @@ flag() {
 flag /root/flag root:root
 flag /var/lib/ATO_home/flag ato:ato
 
-# Create upper layer filesystem for overlayfs which contains the mount point /ATO pre-made for bwrap - see
-# https://github.com/containers/bubblewrap/issues/413
+# Create upper layer filesystem for overlayfs which contains the mount point /ATO pre-made
 mkdir -p /usr/local/share/ATO/overlayfs_upper/ATO /usr/local/share/ATO/overlayfs_upper/proc /usr/local/share/ATO/overlayfs_upper/dev
 
 echo Finished system setup.

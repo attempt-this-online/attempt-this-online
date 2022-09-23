@@ -10,4 +10,4 @@ echo +memory > "$base_cg/cgroup.subtree_control"
 mkdir -p /run/ATO
 chown ato:ato /run/ATO
 chmod 775 /run/ATO
-sudo -u ato /usr/local/lib/ATO/server
+runuser -u ato /usr/local/lib/ATO/server

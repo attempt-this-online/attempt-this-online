@@ -30,6 +30,5 @@ layers = ":".join("/usr/local/lib/ATO/layers/" + layer.removesuffix(".tar") for 
 # Create mount point
 os.makedirs(f"/usr/local/lib/ATO/rootfs/{image}", exist_ok=True)
 
-# The final layer "/usr/local/share/ATO/overlayfs_upper" is needed to allow bwrap to mount a tmpfs etc. there. See
-# https://github.com/containers/bubblewrap/issues/413 for more info
+# The final layer "/usr/local/share/ATO/overlayfs_upper" is needed to allow invoke to mount a tmpfs etc. there
 print(f"overlay /usr/local/lib/ATO/rootfs/{image} overlay lowerdir=/usr/local/share/ATO/overlayfs_upper:{layers} 0 0")
