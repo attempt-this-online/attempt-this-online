@@ -309,95 +309,105 @@ fn invoke(request: &Request, language: &Language) -> Result<Response, String> {
         check!(close(stdout_w), "error closing stdout write end: {}");
         check!(close(stderr_w), "error closing stderr write end: {}");
 
-        // wait for the process to finish, but with the given timeout:
-        // if the timeout expires before the process finishes, it will be killed when the cgroup struct is dropped
+        run_parent(stdout_r, stderr_r, pidfd, cgroup_cleanup, timer, request.timeout)
+    }
+}
+
+fn run_parent(
+    stdout_r: i32,
+    stderr_r: i32,
+    pidfd: i32,
+    cgroup_cleanup: Cgroup,
+    timer: std::time::Instant,
+    timeout: i32,
+) -> Result<Response, String> {
+    let timed_out = {
+        // use a poll to wait for either:
+        // - timeout to expire
+        // - child to exit
+        // - client to request us to kill the child
         let mut poll_args = [
             // pidfd fires a POLLIN event when the process finishes
             PollFd::new(pidfd, PollFlags::POLLIN),
             // when a websocket message is received
             PollFd::new(STDIN_FD, PollFlags::POLLIN),
         ];
-        // poll wants milliseconds; request.timeout is seconds
-        let timed_out =
-            loop {
-                let poll_result = check!(poll(&mut poll_args, request.timeout * 1000));
-                let [poll_child, poll_stdin] = poll_args;
-                if poll_result == 0 {
-                    // timed out
-                    break true
-                } else if poll_child.revents().ok_or("poll returned unexpected event")?.contains(PollFlags::POLLIN) {
-                    // child finished
-                    break false
-                } else if poll_stdin.revents().ok_or("poll returned unexpected event")?.contains(PollFlags::POLLIN) {
-                    // received control message via stdin
-                    #[derive(Deserialize)]
-                    #[repr(u16)]
-                    enum ControlMessage {
-                        Kill = 1,
-                    }
-                    use ControlMessage::*;
-                    match msgpack_read1::<ControlMessage>() {
-                        Err(e) => {
-                            return Err(format!("error reading control message: {e}"));
-                        }
-                        Ok(Kill) => {
-                            // continue to drop (i.e. kill), and set timed_out = false
-                            break false
-                        }
-                        // Ok(_) => ...
-                    }
-                } else {
-                    return Err(format!("unexpected poll result: {poll_result}, {poll_args:?}"));
+        let poll_result = check!(poll(&mut poll_args, timeout * 1000 /* ms */), "error polling: {}");
+        let [poll_child, poll_stdin] = poll_args;
+        if poll_result == 0 {
+            // timed out
+            true
+        } else if poll_child.revents().ok_or("poll returned unexpected event")?.contains(PollFlags::POLLIN) {
+            // child finished
+            false
+        } else if poll_stdin.revents().ok_or("poll returned unexpected event")?.contains(PollFlags::POLLIN) {
+            // received control message via stdin
+            #[derive(Deserialize)]
+            enum ControlMessage {
+                Kill,
+            }
+            use ControlMessage::*;
+            match msgpack_read1::<ControlMessage>() {
+                Err(e) => {
+                    return Err(format!("error reading control message: {e}"));
                 }
-            };
-
-        // kill process
-        drop(cgroup_cleanup);
-
-        let wait_result = check!(waitid(wait::Id::PIDFd(pidfd), WaitPidFlag::WEXITED), "error getting waitid result: {}");
-        let (status_type, status_value) =
-            match wait_result {
-                Exited(_, c) => ("exited", c),
-                Signaled(_, c, false) => ("killed", sig2int(c)),
-                Signaled(_, c, true) => ("core_dumped", sig2int(c)),
-                x => {
-                    eprintln!("warning: unexpected waitid result: {x:?}");
-                    ("unknown", -1)
+                Ok(Kill) => {
+                    // continue to drop (i.e. kill), and set timed_out = false
+                    false
                 }
-            };
+                // Ok(_) => ...
+            }
+        } else {
+            return Err(format!("unexpected poll result: {poll_result}, {poll_args:?}"));
+        }
+    };
 
-        let stats = check!(getrusage(RUSAGE_CHILDREN), "error getting resource usage: {}");
+    // kill process
+    drop(cgroup_cleanup);
 
-        // these unsafe blocks are safe as long as we don't use stdout_r or stderr_r again
-        let mut stdout_f = unsafe { File::from_raw_fd(stdout_r) };
-        // dropping this has no runtime effect (as it's just an integer), but it makes it clear that we can't use it again
-        drop(stdout_r);
-        let mut stdout = Vec::new();
-        check!(stdout_f.read_to_end(&mut stdout), "error reading stdout: {}");
+    let wait_result = check!(waitid(wait::Id::PIDFd(pidfd), WaitPidFlag::WEXITED), "error getting waitid result: {}");
+    let (status_type, status_value) =
+        match wait_result {
+            Exited(_, c) => ("exited", c),
+            Signaled(_, c, false) => ("killed", sig2int(c)),
+            Signaled(_, c, true) => ("core_dumped", sig2int(c)),
+            x => {
+                eprintln!("warning: unexpected waitid result: {x:?}");
+                ("unknown", -1)
+            }
+        };
 
-        let mut stderr_f = unsafe { File::from_raw_fd(stderr_r) };
-        drop(stderr_r);
-        let mut stderr = Vec::new();
-        check!(stderr_f.read_to_end(&mut stderr), "error reading stderr: {}");
+    let stats = check!(getrusage(RUSAGE_CHILDREN), "error getting resource usage: {}");
 
-        Ok(Response {
-            stdout: ByteBuf::from(stdout),
-            stderr: ByteBuf::from(stderr),
-            timed_out,
-            status_type,
-            status_value,
-            real: timer.elapsed().as_nanos() as i64,
-            kernel: stats.system_time().num_nanoseconds(),
-            user: stats.user_time().num_nanoseconds(),
-            max_mem: stats.max_rss(),
-            waits: stats.voluntary_context_switches(),
-            preemptions: stats.involuntary_context_switches(),
-            major_page_faults: stats.major_page_faults(),
-            minor_page_faults: stats.minor_page_faults(),
-            input_ops: stats.block_reads(),
-            output_ops: stats.block_writes(),
-        })
-    }
+    // these unsafe blocks are safe as long as we don't use stdout_r or stderr_r again
+    let mut stdout_f = unsafe { File::from_raw_fd(stdout_r) };
+    // dropping this has no runtime effect (as it's just an integer), but it makes it clear that we can't use it again
+    drop(stdout_r);
+    let mut stdout = Vec::new();
+    check!(stdout_f.read_to_end(&mut stdout), "error reading stdout: {}");
+
+    let mut stderr_f = unsafe { File::from_raw_fd(stderr_r) };
+    drop(stderr_r);
+    let mut stderr = Vec::new();
+    check!(stderr_f.read_to_end(&mut stderr), "error reading stderr: {}");
+
+    Ok(Response {
+        stdout: ByteBuf::from(stdout),
+        stderr: ByteBuf::from(stderr),
+        timed_out,
+        status_type,
+        status_value,
+        real: timer.elapsed().as_nanos() as i64,
+        kernel: stats.system_time().num_nanoseconds(),
+        user: stats.user_time().num_nanoseconds(),
+        max_mem: stats.max_rss(),
+        waits: stats.voluntary_context_switches(),
+        preemptions: stats.involuntary_context_switches(),
+        major_page_faults: stats.major_page_faults(),
+        minor_page_faults: stats.minor_page_faults(),
+        input_ops: stats.block_reads(),
+        output_ops: stats.block_writes(),
+    })
 }
 
 fn run_child(
