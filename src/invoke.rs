@@ -57,7 +57,7 @@ macro_rules! check_continue {
     };
     ($x:expr $(,)?) => {
         if let Err(e) = $x {
-            eprintln!("{}", e);
+            eprintln!("{e}");
         }
     }
 }
@@ -112,35 +112,35 @@ fn main() -> std::process::ExitCode {
     let request = match msgpack_read1::<Request>() {
         Ok(r) => r,
         Err(e) => {
-            eoprintln!("{}", e);
+            eoprintln!("{e}");
             return std::process::ExitCode::from(POLICY_VIOLATION);
         }
     };
     let language = match validate(&request) {
         Ok(l) => l,
         Err(e) => {
-            eoprintln!("invalid request: {}", e);
+            eoprintln!("invalid request: {e}");
             return std::process::ExitCode::from(POLICY_VIOLATION);
         }
     };
     let result = match invoke(&request, language) {
         Ok(r) => r,
         Err(e) => {
-            eoprintln!("internal error: {}", e);
+            eoprintln!("internal error: {e}");
             return std::process::ExitCode::from(INTERNAL_ERROR);
         }
     };
     let encoded_output = match rmp_serde::to_vec_named(&result) {
         Ok(r) => r,
         Err(e) => {
-            eoprintln!("error encoding output: {}", e);
+            eoprintln!("error encoding output: {e}");
             return std::process::ExitCode::from(INTERNAL_ERROR);
         }
     };
     match std::io::stdout().write_all(&encoded_output[..]) {
         Ok(()) => std::process::ExitCode::from(NORMAL),
         Err(e) => {
-            eoprintln!("error writing output: {}", e);
+            eoprintln!("error writing output: {e}");
             std::process::ExitCode::from(INTERNAL_ERROR)
         }
     }
@@ -190,7 +190,7 @@ impl Drop for Cgroup<'_> {
     fn drop(&mut self) {
         // clean up this cgroup by killing all its processes and then removing it
         if let Err(e) = std::fs::write(self.cgroup.join("cgroup.kill"), "1") {
-            eprintln!("error killing cgroup: {}", e);
+            eprintln!("error killing cgroup: {e}");
             return
         }
 
@@ -209,10 +209,10 @@ impl Drop for Cgroup<'_> {
                     std::thread::yield_now();
                     continue;
                 } else {
-                    eprintln!("giving up removing cgroup after {}ms and {} attempts", elapsed, attempt_counter);
+                    eprintln!("giving up removing cgroup after {elapsed}ms and {attempt_counter} attempts");
                 }
             } else {
-                eprintln!("error removing cgroup: {}", e);
+                eprintln!("error removing cgroup: {e}");
             }
             break;
         }
@@ -311,13 +311,17 @@ fn invoke(request: &Request, language: &Language) -> Result<Response, String> {
 
         // wait for the process to finish, but with the given timeout:
         // if the timeout expires before the process finishes, it will be killed when the cgroup struct is dropped
-        let mut poll_args = [PollFd::new(pidfd, PollFlags::POLLIN), PollFd::new(STDIN_FD, PollFlags::POLLIN)];
+        let mut poll_args = [
+            // pidfd fires a POLLIN event when the process finishes
+            PollFd::new(pidfd, PollFlags::POLLIN),
+            // when a websocket message is received
+            PollFd::new(STDIN_FD, PollFlags::POLLIN),
+        ];
         // poll wants milliseconds; request.timeout is seconds
         let timed_out =
             loop {
                 let poll_result = check!(poll(&mut poll_args, request.timeout * 1000));
-                let poll_child = poll_args[0];
-                let poll_stdin = poll_args[1];
+                let [poll_child, poll_stdin] = poll_args;
                 if poll_result == 0 {
                     // timed out
                     break true
@@ -334,7 +338,7 @@ fn invoke(request: &Request, language: &Language) -> Result<Response, String> {
                     use ControlMessage::*;
                     match msgpack_read1::<ControlMessage>() {
                         Err(e) => {
-                            return Err(format!("error reading control message: {}", e));
+                            return Err(format!("error reading control message: {e}"));
                         }
                         Ok(Kill) => {
                             // continue to drop (i.e. kill), and set timed_out = false
@@ -343,7 +347,7 @@ fn invoke(request: &Request, language: &Language) -> Result<Response, String> {
                         // Ok(_) => ...
                     }
                 } else {
-                    return Err(format!("unexpected poll result: {}, {:?}", poll_result, poll_args));
+                    return Err(format!("unexpected poll result: {poll_result}, {poll_args:?}"));
                 }
             };
 
@@ -357,7 +361,7 @@ fn invoke(request: &Request, language: &Language) -> Result<Response, String> {
                 Signaled(_, c, false) => ("killed", sig2int(c)),
                 Signaled(_, c, true) => ("core_dumped", sig2int(c)),
                 x => {
-                    eprintln!("warning: unexpected waitid result: {:?}", x);
+                    eprintln!("warning: unexpected waitid result: {x:?}");
                     ("unknown", -1)
                 }
             };
@@ -411,7 +415,7 @@ fn run_child(
 
     // replace current stdout with the pipe we created for it
     if let Err(e) = dup2(stdout_w, STDOUT_FD) {
-        eprintln!("ATO internal error: error dup2ing stdout: {}", e);
+        eprintln!("ATO internal error: error dup2ing stdout: {e}");
         return
     }
     // stdout now points to a pipe that the parent handles, so we messages to it will reach the user safely and we don't need to worry about junk.
@@ -420,18 +424,18 @@ fn run_child(
     let env = match load_env(&language) {
         Ok(r) => r,
         Err(e) => {
-            eoprintln!("ATO internal error: {}", e);
+            eoprintln!("ATO internal error: {e}");
             return
         }
     };
 
     if let Err(e) = setup_child(&request, &language, outside_uid, outside_gid) {
-        eoprintln!("ATO internal error: {}", e);
+        eoprintln!("ATO internal error: {e}");
         return
     }
 
     if let Err(e) = dup2(stderr_w, STDERR_FD) {
-        eoprintln!("ATO internal error: error dup2ing stderr: {}", e);
+        eoprintln!("ATO internal error: error dup2ing stderr: {e}");
         return
     }
     // stderr now points to the user; the systemd log is now unreachable
@@ -445,7 +449,7 @@ fn run_child(
     // TODO: wrap runner to gather statistics again?
     if let Err(e) = execve(cstr!("/ATO/runner"), &[cstr!("/ATO/runner")], &env) {
     // if let Err(e) = execve(cstr!("/bin/sh"), &[cstr!("bash"), cstr!("-c"), cstr!("ls -la /ATO")], &[cstr!("TODO=TODO")]) {
-        eprintln!("ATO internal error: error running execve: {}", e)
+        eprintln!("ATO internal error: error running execve: {e}")
     } else {
         eprintln!("ATO internal error: execve should never return if successful")
     }
@@ -458,7 +462,7 @@ fn load_env(language: &Language) -> Result<Vec<CString>, String> {
         .split_inclusive(|b| *b == 0) // split after null bytes, and include them in the results
         .map(|s| CString::from_vec_with_nul(s.to_vec()))
         .collect::<Result<Vec<_>, _>>() // collects errors too
-        .map_err(|e| format!("error building env string: {}", e))
+        .map_err(|e| format!("error building env string: {e}"))
 }
 
 fn setup_child(
@@ -485,11 +489,11 @@ fn set_ids(outside_uid: Uid, outside_gid: Gid) -> Result<(), String> {
     const ROOT_U: Uid = Uid::from_raw(0);
     const ROOT_G: Gid = Gid::from_raw(0);
 
-    let uid_map = format!("{} {} 1\n", ROOT_U, outside_uid);
+    let uid_map = format!("{ROOT_U} {outside_uid} 1\n");
     check!(std::fs::write("/proc/self/uid_map", uid_map), "error writing uid_map: {}");
     // we need to set this in order to be able to use gid_map
     check!(std::fs::write("/proc/self/setgroups", "deny"), "error denying setgroups: {}");
-    let gid_map = format!("{} {} 1\n", ROOT_G, outside_gid);
+    let gid_map = format!("{ROOT_G} {outside_gid} 1\n");
     check!(std::fs::write("/proc/self/gid_map", gid_map), "error writing gid_map: {}");
 
     check!(setresuid(ROOT_U, ROOT_U, ROOT_U), "error setting UIDs: {}");
@@ -710,7 +714,7 @@ fn sig2int(sig: Signal) -> i32 {
         SIGPWR => 30,
         SIGSYS => 31,
         x => {
-            eprintln!("warning: unknown signal: {}", x);
+            eprintln!("warning: unknown signal: {x}");
             -1
         }
     }

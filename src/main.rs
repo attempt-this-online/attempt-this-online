@@ -27,7 +27,7 @@ async fn handle_ws(websocket: WebSocket) {
         let message = match received {
             Ok(r) => r,
             Err(e) => {
-                eprintln!("error reading from websocket: {}", e);
+                eprintln!("error reading from websocket: {e}");
                 continue;
             }
         };
@@ -39,7 +39,7 @@ async fn handle_ws(websocket: WebSocket) {
                     .await
                 {
                     // can't do anything but log it
-                    eprintln!("error sending close code: {}", e);
+                    eprintln!("error sending close code: {e}");
                 }
             return;
         }
@@ -51,7 +51,7 @@ async fn handle_ws(websocket: WebSocket) {
                     .await
                 {
                     // can't do anything but log it
-                    eprintln!("error sending close code: {}", e);
+                    eprintln!("error sending close code: {e}");
                 }
                 return;
             }
@@ -59,13 +59,13 @@ async fn handle_ws(websocket: WebSocket) {
         match sender.send(Message::binary(response)).await {
             Ok(()) => {}
             Err(e) => {
-                eprintln!("error sending to websocket: {}", e);
+                eprintln!("error sending to websocket: {e}");
             }
         }
     }
     if let Err(e) = sender.close().await {
         // can't do anything but log it
-        eprintln!("error closing websocket: {}", e);
+        eprintln!("error closing websocket: {e}");
     }
 }
 
@@ -92,13 +92,13 @@ async fn invoke(input: &[u8], ws: &mut SplitStream<WebSocket>) -> Result<Vec<u8>
 async fn handle_message(msg: Result<Message, warp::Error>, stdin: &mut ChildStdin) -> Result<(), (u8, String)> {
     let msg = match msg {
         Ok(m) => m,
-        Err(e) => return Err((INTERNAL_ERROR, format!("error getting websocket message: {}", e))),
+        Err(e) => return Err((INTERNAL_ERROR, format!("error getting websocket message: {e}"))),
     };
     if !msg.is_binary() {
         return Err((UNSUPPORTED_DATA, format!("expected a binary message")))
     }
     if let Err(e) = stdin.write(msg.as_bytes()).await {
-        return Err((INTERNAL_ERROR, format!("failed passing message on: {}", e)))
+        return Err((INTERNAL_ERROR, format!("failed passing message on: {e}")))
     }
     Ok(())
 }
@@ -111,7 +111,7 @@ async fn invoke1(input: &[u8]) -> Result<(ChildStdin, Child), String> {
         .spawn();
     let mut child = match command {
         Ok(c) => c,
-        Err(e) => return Err(format!("internal error: error spawning ATO/invoke: {}", e)),
+        Err(e) => return Err(format!("internal error: error spawning ATO/invoke: {e}")),
     };
     let mut stdin = child
         .stdin
@@ -119,7 +119,7 @@ async fn invoke1(input: &[u8]) -> Result<(ChildStdin, Child), String> {
         .expect("stdin should not have been taken");
     if let Err(e) = stdin.write_all(input).await {
         return Err(
-            format!("internal error: error writing stdin of ATO/invoke: {}", e),
+            format!("internal error: error writing stdin of ATO/invoke: {e}"),
         );
     }
     Ok((stdin, child))
@@ -131,7 +131,7 @@ async fn invoke2(child: Child) -> Result<Vec<u8>, (u8, String)> {
         Err(e) => {
             return Err((
                 INTERNAL_ERROR,
-                format!("internal error: error waiting for ATO/invoke: {}", e),
+                format!("internal error: error waiting for ATO/invoke: {e}"),
             ))
         }
     };
