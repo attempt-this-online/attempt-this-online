@@ -1,0 +1,17 @@
+#!/bin/sh
+set -e
+[ -n "$URL" ] || {
+    cat <<END
+no \$URL provided
+example usage:
+    URL='ws://localhost:8500/api/v0/ws/execute' $0 $@
+END
+    exit 2
+}
+cd "$(dirname "$(realpath "$0")")"
+[ -d venv ] || {
+    python -m venv venv
+    venv/bin/pip install -r requirements.txt
+}
+. venv/bin/activate
+venv/bin/pytest "$@"
