@@ -107,8 +107,11 @@ struct Request {
     input: ByteBuf,
     arguments: Vec<ByteBuf>,
     options: Vec<ByteBuf>,
+    #[serde(default = "default_timeout")]
     timeout: i32,
 }
+
+fn default_timeout() -> i32 { 60 }
 
 fn main() -> std::process::ExitCode {
     // some care must be taken over error messages - see comments in run_child
