@@ -1,12 +1,12 @@
 extern crate lazy_static;
 
-mod codes;
-use crate::codes::*;
+mod constants;
+use crate::constants::*;
 use futures_util::SinkExt;
 use futures_util::StreamExt;
-use futures_util::stream::SplitStream;
+use futures_util::stream::{SplitSink, SplitStream};
 use std::process::Stdio;
-use tokio::io::AsyncWriteExt;
+use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::process::{Child, ChildStdin, Command};
 use tokio::task;
 use warp::ws::*;
@@ -43,25 +43,16 @@ async fn handle_ws(websocket: WebSocket) {
                 }
             return;
         }
-        let response = match invoke(message.as_bytes(), &mut receiver).await {
-            Ok(r) => r,
-            Err((code, e)) => {
-                if let Err(e) = sender
-                    .send(Message::close_with(WEBSOCKET_BASE + code as u16, e))
-                    .await
-                {
-                    // can't do anything but log it
-                    eprintln!("error sending close code: {e}");
-                }
-                return;
+        if let Err((code, e)) = invoke(message.as_bytes(), &mut receiver, &mut sender).await {
+            if let Err(e) = sender
+                .send(Message::close_with(WEBSOCKET_BASE + code as u16, e))
+                .await
+            {
+                // can't do anything but log it
+                eprintln!("error sending close code: {e}");
             }
+            return;
         };
-        match sender.send(Message::binary(response)).await {
-            Ok(()) => {}
-            Err(e) => {
-                eprintln!("error sending to websocket: {e}");
-            }
-        }
     }
     if let Err(e) = sender.close().await {
         // can't do anything but log it
@@ -69,21 +60,38 @@ async fn handle_ws(websocket: WebSocket) {
     }
 }
 
-async fn invoke(input: &[u8], ws: &mut SplitStream<WebSocket>) -> Result<Vec<u8>, (u8, String)> {
-    let (mut stdin, child) =
+async fn invoke(
+    input: &[u8],
+    receiver: &mut SplitStream<WebSocket>,
+    sender: &mut SplitSink<WebSocket, Message>,
+) -> Result<(), (u8, String)> {
+    let (mut stdin, mut child) =
         match invoke1(input).await {
             Ok(c) => c,
             Err(e) => {
                 return Err((INTERNAL_ERROR, e))
             }
         };
+    let mut stdout = child.stdout.take().expect("stdout should not have been taken");
     let mut wait = task::spawn(async { invoke2(child).await });
+    let mut buf = [0u8; PIPE_BUF];
     loop {
         tokio::select! {
             res = &mut wait => return res.unwrap(),
-            maybe_msg = ws.next() => match maybe_msg {
+            maybe_msg = receiver.next() => match maybe_msg {
                 None => return wait.await.unwrap(),
                 Some(msg) => handle_message(msg, &mut stdin).await?,
+            },
+            maybe_n = stdout.read(&mut buf) => match maybe_n {
+                Err(e) => eprintln!("error reading message: {e}"),
+                Ok(0) => { // EOF
+                    return wait.await.unwrap()
+                }
+                Ok(n) => {
+                    if let Err(e) = sender.send(Message::binary(&buf[..n])).await {
+                        eprintln!("error sending to websocket: {e}")
+                    }
+                }
             }
         }
     }
@@ -105,7 +113,7 @@ async fn handle_message(msg: Result<Message, warp::Error>, stdin: &mut ChildStdi
 
 async fn invoke1(input: &[u8]) -> Result<(ChildStdin, Child), String> {
     let command = Command::new("/usr/local/lib/ATO/invoke")
-        .stderr(Stdio::inherit())
+        .stderr(Stdio::piped())
         .stdout(Stdio::piped())
         .stdin(Stdio::piped())
         .spawn();
@@ -125,7 +133,7 @@ async fn invoke1(input: &[u8]) -> Result<(ChildStdin, Child), String> {
     Ok((stdin, child))
 }
 
-async fn invoke2(child: Child) -> Result<Vec<u8>, (u8, String)> {
+async fn invoke2(child: Child) -> Result<(), (u8, String)> {
     let output = match child.wait_with_output().await {
         Ok(o) => o,
         Err(e) => {
@@ -136,7 +144,8 @@ async fn invoke2(child: Child) -> Result<Vec<u8>, (u8, String)> {
         }
     };
     if !output.status.success() {
-        let msg = std::string::String::from_utf8_lossy(&output.stdout[..]);
+        let msg = std::string::String::from_utf8_lossy(&output.stderr[..]);
+        eprintln!("invoke reported: {msg:#?}");
         let code = match output.status.code() {
             Some(c) => c as u8,
             None => {
@@ -146,6 +155,6 @@ async fn invoke2(child: Child) -> Result<Vec<u8>, (u8, String)> {
         };
         Err((code, msg.trim_end().into()))
     } else {
-        Ok(output.stdout)
+        Ok(())
     }
 }
