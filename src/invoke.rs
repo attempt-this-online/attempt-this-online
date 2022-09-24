@@ -366,6 +366,7 @@ fn run_parent(
 
     // TODO: investigate why this reports ECHILD if the child errors and __WALL is not provided
     // something to do with the fact we use a second thread above which is a different kind of child process?
+    // or the rust threading runtime doing strange things to signal handlers?
     // https://github.com/torvalds/linux/blob/a63f2e7cb1107ab124f80407e5eb8579c04eb7a9/kernel/exit.c#L968
     let wait_result = check!(waitid(wait::Id::PIDFd(pidfd), WaitPidFlag::WEXITED | WaitPidFlag::__WALL), "error getting waitid result: {}");
 
