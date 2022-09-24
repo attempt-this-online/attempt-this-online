@@ -145,7 +145,7 @@ async fn invoke2(child: Child) -> Result<(), (u8, String)> {
     };
     if !output.status.success() {
         let msg = std::string::String::from_utf8_lossy(&output.stderr[..]);
-        eprintln!("invoke reported: {msg:#?}");
+        eprintln!("{msg}");
         let code = match output.status.code() {
             Some(c) => c as u8,
             None => {
