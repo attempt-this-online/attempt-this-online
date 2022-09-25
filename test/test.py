@@ -58,8 +58,8 @@ async def test_basic_execution(c):
     assert 0 <= r.pop("preemptions") < 1000
     assert 0 <= r.pop("major_page_faults") < 1000
     assert 0 <= r.pop("minor_page_faults") < 1000
-    assert 0 <= r.pop("input_ops") < 1000
-    assert 0 <= r.pop("output_ops") < 1000
+    assert 0 <= r.pop("input_ops") < 100000
+    assert 0 <= r.pop("output_ops") < 100
     assert r == {
         "timed_out": False,
         "status_type": "exited",
@@ -180,16 +180,24 @@ class StartsWith(str):
     {"timeout": [60]},
 ))
 async def test_invalid_request_types(kwargs):
-    async with _test_error(StartsWith("error decoding request:")) as c:
+    async with _test_error(StartsWith("invalid request:")) as c:
         await c.send(req("sleep 1", **kwargs))
 
 
 async def test_invalid_request_syntax():
-    async with _test_error(StartsWith("error decoding request:")) as c:
+    async with _test_error(StartsWith("invalid request:")) as c:
         await c.send(b"not a valid msgpack message!")
 
+
+async def test_invalid_request_data_type():
     async with _test_error("expected a binary message", UNSUPPORTED_DATA) as c:
         await c.send("not a binary message!")
+
+
+@mark.xfail(True, reason="#97 is not yet fixed")
+async def test_extra_junk_after_request():
+    async with _test_error("invalid request: found extra data") as c:
+        await c.send(req("") + b"extra junk")
 
 
 @mark.parametrize("kwargs", (
