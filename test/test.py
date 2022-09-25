@@ -76,7 +76,7 @@ async def test_connection_reuse(c):
 async def test_code(c):
     start = monotonic()
     await c.send(req("sleep 1"))
-    assert "Done" in loads(await c.recv())
+    assert loads(await c.recv()).keys() == {"Done"}
     assert 1 < monotonic() - start < 1.1
 
 
@@ -267,3 +267,10 @@ async def test_client_close_yes():
         await c.send(req("yes"))
     await sleep(1)
     assert not await pgrep("yes")
+
+
+async def test_large_output(c):
+    await c.send(req(f"dd if=/dev/zero of=/dev/stdout bs={3840 * 3} count=1 2>&-"))
+    for _ in range(3):
+        assert loads(await c.recv()) == {"Stdout": bytes(3840)}
+    assert "Done" in loads(await c.recv())
