@@ -145,6 +145,7 @@ async fn invoke2(child: Child) -> Result<(), (u8, String)> {
     };
     if !output.status.success() {
         let msg = std::string::String::from_utf8_lossy(&output.stderr[..]);
+        let msg = msg.trim_end();
         eprintln!("{msg}");
         let code = match output.status.code() {
             Some(c) => c as u8,
@@ -153,7 +154,7 @@ async fn invoke2(child: Child) -> Result<(), (u8, String)> {
                 INTERNAL_ERROR
             }
         };
-        Err((code, msg.trim_end().into()))
+        Err((code, msg.into()))
     } else {
         Ok(())
     }
