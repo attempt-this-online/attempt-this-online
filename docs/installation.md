@@ -1,6 +1,6 @@
 # Installation
 ## Fully Automated
-Download and execute the [setup script](./setup/setup) **on a fresh install of Arch Linux**. Using the setup script in
+Download and execute the [setup script](../setup/setup) **on a fresh install of Arch Linux**. Using the setup script in
 any other distribution, or on an Arch Linux machine that has already had changes, is not supported.
 
 Attempt It Online is designed to be run as a wholly packaged appliance and as such requires a dedicated virtual machine.
