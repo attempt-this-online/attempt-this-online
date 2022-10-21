@@ -79,6 +79,13 @@
         "sbcs": false,
         "se_class": "c"
     },
+    "chapel": {
+        "name": "Chapel",
+        "image": "attemptthisonline/chapel",
+        "version": "1.28.0",
+        "url": "https://chapel-lang.org",
+        "sbcs": false
+    },
     "charcoal": {
         "name": "Charcoal",
         "image": "attemptthisonline/charcoal",
