@@ -403,6 +403,13 @@
         "sbcs": false,
         "se_class": "objectivec"
     },
+    "ocaml": {
+        "name": "OCaml",
+        "image": "attemptthisonline/ocaml",
+        "version": "Latest",
+        "url": "https://ocaml.org",
+        "sbcs": false
+    },
     "ooocode": {
         "name": "oOo CODE",
         "image": "attemptthisonline/tio_brainfuck",
