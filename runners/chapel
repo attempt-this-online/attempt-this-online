@@ -2,5 +2,6 @@
 
 cd /ATO/context
 
-/ATO/yargs % /ATO/options chapel % /ATO/code -o /ATO/exe
+ln -s /ATO/code /ATO/code.chpl
+/ATO/yargs % /ATO/options chpl % /ATO/code.chpl -o /ATO/exe
 /ATO/yargs % /ATO/arguments /ATO/exe % < /ATO/input
