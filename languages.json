@@ -506,6 +506,13 @@
         "url": "https://github.com/dloscutoff/Esolangs/tree/master/Regenerate",
         "sbcs": false
     },
+    "riscv": {
+        "name": "RISC-V",
+        "image": "attemptthisonline/riscv",
+        "version": "3.1",
+        "url": "https://github.com/andrescv/Jupiter/",
+        "sbcs": false
+    },
     "ruby": {
         "name": "Ruby",
         "image": "attemptthisonline/ruby",
