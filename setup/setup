@@ -141,9 +141,11 @@ do
     grep -Ex '[0-9a-f]+\.tar' |
         while read -r filename
         do
-            # skip duplicate layers
             layer_id="${filename%.tar}"
+
+            # skip duplicate layers
             [ -d "/usr/local/lib/ATO/layers/$layer_id" ] && continue
+
             mkdir "/usr/local/lib/ATO/layers/$layer_id"
             tar -xf "/var/cache/ATO/images/$layer_id.tar" -C \
                 "/usr/local/lib/ATO/layers/$layer_id"

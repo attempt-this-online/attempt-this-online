@@ -3,6 +3,7 @@ Description=Attempt This Online, a clone of Try It Online
 
 [Service]
 User=ato
+# the + means the start script is run as root, even though the main service runs as the user ato
 ExecStart=+/usr/local/bin/ATO
 Restart=on-failure
 StartLimitBurst=3
