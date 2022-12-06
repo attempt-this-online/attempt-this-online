@@ -15,7 +15,6 @@ use nix::{
     sys::{
         eventfd::{eventfd, EfdFlags},
         resource::{getrusage, setrlimit, Resource, UsageWho::RUSAGE_CHILDREN},
-        signal::Signal::{self, *},
         stat::Mode,
         time::TimeValLike,
         wait::{self, waitid, WaitPidFlag, WaitStatus::*},
@@ -272,7 +271,8 @@ impl Drop for Cgroup<'_> {
 
 fn create_cgroup() -> Result<PathBuf, String> {
     // TODO: dynamically work out the cgroup path
-    const CGROUP_PATH: &str = "/sys/fs/cgroup/system.slice/ATO.service";
+    // const CGROUP_PATH: &str = "/sys/fs/cgroup/system.slice/ATO.service";
+    const CGROUP_PATH: &str = "/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/ATOtest";
     let mut path = PathBuf::from(CGROUP_PATH);
     path.push(random_id());
     check!(std::fs::create_dir(&path), "error creating cgroup dir: {}");
@@ -429,8 +429,8 @@ fn run_parent(
     let (status_type, status_value) =
         match wait_result {
             Exited(_, c) => ("exited", c),
-            Signaled(_, c, false) => ("killed", sig2int(c)),
-            Signaled(_, c, true) => ("core_dumped", sig2int(c)),
+            Signaled(_, c, false) => ("killed", c as i32),
+            Signaled(_, c, true) => ("core_dumped", c as i32),
             x => {
                 eprintln!("warning: unexpected waitid result: {x:?}");
                 ("unknown", -1)
@@ -781,46 +781,4 @@ fn set_resource_limits() -> Result<(), String> {
     // bytes in POSIX message queues
     check!(setrlimit(Resource::RLIMIT_MSGQUEUE, 100, 100), "error setting MSGQUEUE resource limit: {}");
     Ok(())
-}
-
-// annoyingly, the nix crate has no way to convert its own Signal enum back into an integer, so we have to map the values manually
-// See https://github.com/nix-rust/nix/issues/1822
-fn sig2int(sig: Signal) -> i32 {
-    match sig {
-        SIGHUP => 1,
-        SIGINT => 2,
-        SIGQUIT => 3,
-        SIGILL => 4,
-        SIGTRAP => 5,
-        SIGABRT => 6,
-        SIGBUS => 7,
-        SIGFPE => 8,
-        SIGKILL => 9,
-        SIGUSR1 => 10,
-        SIGSEGV => 11,
-        SIGUSR2 => 12,
-        SIGPIPE => 13,
-        SIGALRM => 14,
-        SIGTERM => 15,
-        SIGSTKFLT => 16,
-        SIGCHLD => 17,
-        SIGCONT => 18,
-        SIGSTOP => 19,
-        SIGTSTP => 20,
-        SIGTTIN => 21,
-        SIGTTOU => 22,
-        SIGURG => 23,
-        SIGXCPU => 24,
-        SIGXFSZ => 25,
-        SIGVTALRM => 26,
-        SIGPROF => 27,
-        SIGWINCH => 28,
-        SIGIO => 29,
-        SIGPWR => 30,
-        SIGSYS => 31,
-        x => {
-            eprintln!("warning: unknown signal: {x}");
-            -1
-        }
-    }
 }
