@@ -70,7 +70,7 @@ function CollapsibleText({
             value={encoding}
             onChange={onEncodingChange}
             id={`encodingSelect:${id}`}
-            className="appearance-none ml-1 p-1 rounded bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 transition cursor-pointer ATO_select focus:outline-none focus:ring"
+            className="appearance-none ml-1 px-2 py-1 rounded bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 transition cursor-pointer ATO_select focus:outline-none focus:ring"
           >
             <option value="utf-8">UTF-8</option>
             <option value="base64">Base64</option>
