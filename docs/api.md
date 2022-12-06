@@ -4,12 +4,19 @@ official instance must abide by the [Terms of Use](https://ato.pxeger.com/legal#
 **you must have explicit permission from me to use the API**.
 
 ## Websocket connect `/api/v1/ws/execute`
-Socket flow is pretty simple; the sequence of messages looks like this:
+Socket flow looks like this:
 
 - connect to websocket
-- client sends message 1 (as a binary message)
-- server sends message 2 (as a binary message)
-- server closes connection
+- client sends request message
+- server sends stdout and stderr messages
+- server sends done message
+
+All messages are of binary type.
+
+The same connection can be reused for multiple requests, but only one request at a time. If a second request is sent during the
+execution of the first request, it will be silently ignored.
+
+The server will not close the connection unless the client does, or an error occurs.
 
 Websocket close codes are:
 - Normal closure (1000): everything was ok
@@ -23,7 +30,7 @@ Websocket close codes are:
 - Message too big (1009): request exceeded the maximum size, which is currently 65536 bytes
 - Internal server error (1011): something went wrong inside ATO
 
-### Message 1
+### Request Message
 A [msgpack]-encoded payload - a map with the following string keys:
 - `language`: the identifier of the language interpreter or compiler to use. The identifier is a filename from the
   [`runners/` directory]
@@ -36,10 +43,12 @@ be less than or equal to 60. If not specified, 60 is used.
 
 Typing is fairly lax; strings will be accepted in place of binaries (they will be encoded in UTF-8).
 
-### Message 2
-A [msgpack]-encoded payload - a map with the following string keys:
-- `stdout`: the standard output from the program and compilation (limited to 128 KiB)
-- `stderr`: the standard error from the program and compilation (limited to 32 KiB)
+### Stdout and Stderr Messages
+A [msgpack]-encoded payload - a map containing one key, `Stdout`, or `Stderr`, whose value is a binary containing a
+chunk of the program's output to stdout or stderr.
+
+### Done Message
+A [msgpack]-encoded payload - a map containing one key, `Done`, whose value is another map with the following entries:
 - `status_type`: the reason the process ended - one of:
     - `exited`: terminated normally by returning from `main` or calling `exit`
     - `killed`: terminated by a signal; only happens on timeout or if the process killed itself for some reason
@@ -88,9 +97,18 @@ function ato_run()
 		arguments: [],
 		timeout: 60,
 	}));
-	socket.onmessage = async event => {
-		let response = await msgpack.decodeAsync(event.data.stream());
-		console.log("stdout:", new TextDecoder().decode(response.stdout));
-	}
+    stdout = '';
+    return new Promise(resolve => {
+        socket.onmessage = async event => {
+            let response = await msgpack.decodeAsync(event.data.stream());
+            if ('Done' in response) {
+                console.log(response.Done);
+                resolve(stdout);
+            }
+            if ('Stdout' in response) {
+                stdout += new TextDecoder().decode(response.stdout);
+            }
+        };
+    });
 }
 ```
