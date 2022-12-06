@@ -209,14 +209,12 @@ function _Run(
         if (data.Done.timed_out) {
           notify('The program ran for over 60 seconds and timed out');
         }
-        /*
         if (data.Done.stdout_truncated) {
           notify('stdout exceeded 128KiB and was truncated');
         }
         if (data.Done.stderr_truncated) {
           notify('stderr exceeded 32KiB and was truncated');
         }
-        */
       }
       if ('Stdout' in data) {
         const output = data.Stdout;

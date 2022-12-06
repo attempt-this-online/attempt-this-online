@@ -4,8 +4,8 @@ const BASE_URL = process.env.NEXT_PUBLIC_ATO_BASE_URL || '';
 const CLOSE_NORMAL = 1000;
 
 interface RunAPIResponseDone {
-  // stdout_truncated: boolean;
-  // stderr_truncated: boolean;
+  stdout_truncated: boolean;
+  stderr_truncated: boolean;
   status_type: 'exited' | 'killed' | 'core_dumped' | 'unknown';
   status_value: number;
   timed_out: boolean;
