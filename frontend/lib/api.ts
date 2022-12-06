@@ -3,10 +3,8 @@ import * as msgpack from '@msgpack/msgpack';
 const BASE_URL = process.env.NEXT_PUBLIC_ATO_BASE_URL || '';
 const CLOSE_NORMAL = 1000;
 
-interface RunAPIResponse {
-  stdout: Uint8Array;
+interface RunAPIResponseDone {
   // stdout_truncated: boolean;
-  stderr: Uint8Array;
   // stderr_truncated: boolean;
   status_type: 'exited' | 'killed' | 'core_dumped' | 'unknown';
   status_value: number;
@@ -23,6 +21,11 @@ interface RunAPIResponse {
   output_ops: number;
 }
 
+type RunAPIResponse
+  = { Done: RunAPIResponseDone }
+  | { Stdout: Uint8Array }
+  | { Stderr: Uint8Array };
+
 interface MetadataItem {
   name: string;
   image: string;
@@ -32,36 +35,38 @@ interface MetadataItem {
   url: string;
 }
 
-async function run({
-  language,
-  input,
-  code,
-  options,
-  programArguments,
-  timeout,
-}: {
-  language: string,
-  input: Uint8Array,
-  code: Uint8Array,
-  options: string[],
-  programArguments: string[],
-  timeout: number,
-}) {
-  const response = await fetch(`${BASE_URL}/api/v0/execute`, {
-    method: 'POST',
-    body: msgpack.encode({
-      language,
-      code,
-      input,
-      options,
-      arguments: programArguments,
-      timeout,
-    }),
+type APIMessages = Promise<[RunAPIResponse, APIMessages | null]>;
+
+function handleAPIConnection(ws: WebSocket): APIMessages {
+  let resolve: (value: [RunAPIResponse, APIMessages | null]) => void;
+  let reject: (reason: any) => void;
+  const newP = () => new Promise<[RunAPIResponse, APIMessages | null]>((resolve1, reject1) => {
+    resolve = resolve1;
+    reject = reject1;
   });
-  if (!response.ok || !response.body) {
-    throw new Error(await response.text());
-  }
-  return await msgpack.decodeAsync(response.body) as RunAPIResponse;
+  const p = newP();
+  ws.onmessage = async message => {
+    try {
+      const response = await msgpack.decodeAsync(message.data.stream()) as RunAPIResponse;
+      if ('Done' in response) {
+        ws.close(CLOSE_NORMAL);
+        resolve([response, null]);
+      } else {
+        resolve([response, newP()]);
+      }
+    } catch (e) {
+      reject(e);
+    }
+  };
+  // setup error handling
+  ws.onerror = e => { console.error('websocket error:', e); };
+  ws.onclose = e => {
+    if (e.code !== CLOSE_NORMAL) {
+      const msg = `websocket connection unexpectedly closed with code ${e.code}:\n${e.reason}`;
+      reject(msg);
+    }
+  };
+  return p;
 }
 
 async function runWs({
@@ -78,7 +83,7 @@ async function runWs({
   options: string[],
   programArguments: string[],
   timeout: number,
-}): Promise<[() => void, Promise<RunAPIResponse>]> {
+}): Promise<[() => void, APIMessages]> {
   const url = new URL(`${BASE_URL}/api/v0/ws/execute`, document.baseURI);
   if (url.protocol === 'http:') {
     url.protocol = 'ws:';
@@ -88,25 +93,10 @@ async function runWs({
     throw new Error(`invalid URL protocol: ${url}`);
   }
   const ws = new WebSocket(url);
+  const handler = handleAPIConnection(ws);
   // wait for connection
   await new Promise(resolve => {
     ws.onopen = () => resolve(ws);
-  });
-
-  const p_message = new Promise<RunAPIResponse>((resolve, reject) => {
-    ws.onmessage = async message => {
-      ws.close(CLOSE_NORMAL);
-      resolve(await msgpack.decodeAsync(message.data.stream()) as RunAPIResponse);
-    };
-    // setup error handling
-    ws.onerror = e => { console.error('websocket error:', e); };
-    ws.onclose = e => {
-      if (e.code !== CLOSE_NORMAL) {
-        const msg = `websocket connection unexpectedly closed with code ${e.code}:\n${e.reason}`;
-        console.error(msg);
-        reject(msg);
-      }
-    };
   });
 
   ws.send(msgpack.encode({
@@ -118,15 +108,15 @@ async function runWs({
     timeout,
   }));
 
-  async function kill() {
+  function kill() {
     ws.send(msgpack.encode('Kill'));
   }
 
-  return [kill, p_message];
+  return [kill, handler];
 }
 
 async function getMetadata() {
-  const response = await fetch(`/languages.json`, { method: 'GET' });
+  const response = await fetch('/languages.json', { method: 'GET' });
   if (!response.ok || !response.body) {
     throw new Error(await response.text());
   }
@@ -134,6 +124,6 @@ async function getMetadata() {
 }
 
 export {
-  BASE_URL, run, getMetadata, runWs,
+  BASE_URL, getMetadata, runWs,
 };
 export type { RunAPIResponse, MetadataItem };

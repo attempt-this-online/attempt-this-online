@@ -19,7 +19,8 @@ import * as API from 'lib/api';
 import { save, load } from 'lib/urls';
 import { ENCODERS, DECODERS } from 'lib/encoding';
 import stringLength from 'lib/stringLength';
-import codeToMarkdown from '../lib/codeToMarkdown';
+import codeToMarkdown from 'lib/codeToMarkdown';
+import concatUint8Array from 'lib/concatUint8Array';
 
 const NEWLINE = '\n'.charCodeAt(0);
 
@@ -149,7 +150,8 @@ function _Run(
     ]);
     const inputBytes = ENCODERS[inputEncoding](input);
 
-    let killCallback1: () => void, pData;
+    let killCallback1: () => void;
+    let pData;
 
     try {
       [killCallback1, pData] = await API.runWs({
@@ -169,49 +171,63 @@ function _Run(
 
     setKillCallback(() => killCallback1);
 
-    let data;
-    try {
-      data = await pData;
-    } catch (e) {
-      setKillCallback(null);
-      notify('An error occurred; see the console for details');
-      setSubmitting(false);
-      return;
-    }
-    setKillCallback(null);
+    setStdout(EMPTY_BUFFER);
+    setStderr(EMPTY_BUFFER);
 
-    setStdout(data.stdout);
-    setStderr(data.stderr);
+    do {
+      let data: API.RunAPIResponse;
+      try {
+        [data, pData] = await pData;
+      } catch (e) {
+        setKillCallback(null);
+        console.error(e);
+        notify('An error occurred; see the console for details');
+        setSubmitting(false);
+        return;
+      }
+      if ('Done' in data) {
+        setKillCallback(null);
 
-    setStatusType(data.status_type);
-    setStatusValue(data.status_value);
+        setStatusType(data.Done.status_type);
+        setStatusValue(data.Done.status_value);
 
-    setTiming(
-      `
-      Real time: ${data.real / 1e9} s
-      Kernel time: ${data.kernel / 1e9} s
-      User time: ${data.kernel / 1e9} s
-      Maximum lifetime memory usage: ${data.max_mem} KiB
-      Waits (voluntary context switches): ${data.waits}
-      Preemptions (involuntary context switches): ${data.preemptions}
-      Minor page faults: ${data.minor_page_faults}
-      Major page faults: ${data.major_page_faults}
-      Input operations: ${data.input_ops}
-      Output operations: ${data.output_ops}
-      `.trim().split('\n').map(s => s.trim()).join('\n'),
-    );
+        setTiming(
+          `
+          Real time: ${data.Done.real / 1e9} s
+          Kernel time: ${data.Done.kernel / 1e9} s
+          User time: ${data.Done.kernel / 1e9} s
+          Maximum lifetime memory usage: ${data.Done.max_mem} KiB
+          Waits (voluntary context switches): ${data.Done.waits}
+          Preemptions (involuntary context switches): ${data.Done.preemptions}
+          Minor page faults: ${data.Done.minor_page_faults}
+          Major page faults: ${data.Done.major_page_faults}
+          Input operations: ${data.Done.input_ops}
+          Output operations: ${data.Done.output_ops}
+          `.trim().split('\n').map(s => s.trim()).join('\n'),
+        );
 
-    if (data.timed_out) {
-      notify('The program ran for over 60 seconds and timed out');
-    }
-    /*
-    if (data.stdout_truncated) {
-      notify('stdout exceeded 128KiB and was truncated');
-    }
-    if (data.stderr_truncated) {
-      notify('stderr exceeded 32KiB and was truncated');
-    }
-    */
+        if (data.Done.timed_out) {
+          notify('The program ran for over 60 seconds and timed out');
+        }
+        /*
+        if (data.Done.stdout_truncated) {
+          notify('stdout exceeded 128KiB and was truncated');
+        }
+        if (data.Done.stderr_truncated) {
+          notify('stderr exceeded 32KiB and was truncated');
+        }
+        */
+      }
+      if ('Stdout' in data) {
+        const output = data.Stdout;
+        setStdout(current => concatUint8Array(current, output));
+      }
+      if ('Stderr' in data) {
+        const output = data.Stderr;
+        setStderr(current => concatUint8Array(current, output));
+      }
+
+    } while (pData);
 
     setSubmitting(false);
   };
@@ -642,7 +658,6 @@ ${markdownCode}
               {' '}
               output
             </CollapsibleText>
-            {
             <details open={timingOpen} className="my-6">
               <summary className="cursor-pointer focus-within:ring rounded pl-2 hover:bg-gray-200 dark:hover:bg-gray-700 transition py-1 -mt-3 -mb-1">
                 <button
@@ -659,7 +674,6 @@ ${markdownCode}
                 dummy={dummy}
               />
             </details>
-            }
             <textarea ref={dummy} className="block w-full px-2 rounded font-mono text-base h-0 opacity-0" aria-hidden disabled />
           </main>
         </div>
