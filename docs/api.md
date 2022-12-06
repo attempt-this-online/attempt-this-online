@@ -3,7 +3,7 @@ The official instance uses the base url `https://ato.pxeger.com`. Note that use 
 official instance must abide by the [Terms of Use](https://ato.pxeger.com/legal#terms-of-use):
 **you must have explicit permission from me to use the API**.
 
-## Websocket connect `/api/v0/ws/execute`
+## Websocket connect `/api/v1/ws/execute`
 Socket flow is pretty simple; the sequence of messages looks like this:
 
 - connect to websocket
@@ -79,7 +79,7 @@ It prints `stdout: 42` to the JavaScript console.
 
 function ato_run()
 {
-	let socket = new WebSocket("wss://ato.pxeger.com/api/v0/ws/execute");
+	let socket = new WebSocket("wss://ato.pxeger.com/api/v1/ws/execute");
 	socket.onopen = () => socket.send(msgpack.encode({
 		language: "c_gcc", // get this from https://github.com/attempt-this-online/attempt-this-online/tree/main/runners
 		code: 'main(){printf("%d",a);}',

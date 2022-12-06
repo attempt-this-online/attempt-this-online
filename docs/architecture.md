@@ -4,7 +4,7 @@ display. This assumes ATO is being run with the default full setup.
 
 - User clicks run on the webpage
 - Frontend concatenates header, body, and footer of program, and encodes code and input
-- Browser opens websocket to `https://ato.pxeger.com/api/v0/ws/execute`
+- Browser opens websocket to `https://ato.pxeger.com/api/v1/ws/execute`
     - Sends a request containing [msgpack](https://msgpack.org)-encoded data, which is a map containing:
         - `language` (string): the name/identifier of the language
         - `code` (bytes): the program code to run

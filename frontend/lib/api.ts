@@ -75,7 +75,7 @@ async function runWs({
   programArguments: string[],
   timeout: number,
 }): Promise<[() => void, APIMessages]> {
-  const url = new URL(`${BASE_URL}/api/v0/ws/execute`, document.baseURI);
+  const url = new URL(`${BASE_URL}/api/v1/ws/execute`, document.baseURI);
   if (url.protocol === 'http:') {
     url.protocol = 'ws:';
   } else if (url.protocol === 'https:') {

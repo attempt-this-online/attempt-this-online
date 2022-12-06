@@ -4,7 +4,7 @@ set -e
     cat <<END
 no \$URL provided
 example usage:
-    URL='ws://localhost:8500/api/v0/ws/execute' $0 $@
+    URL='ws://localhost:8500/api/v1/ws/execute' $0 $@
 END
     exit 2
 }

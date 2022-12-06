@@ -14,7 +14,7 @@ use warp::Filter;
 
 #[tokio::main]
 async fn main() {
-    let execute = warp::path!("api" / "v0" / "ws" / "execute")
+    let execute = warp::path!("api" / "v1" / "ws" / "execute")
         .and(warp::ws())
         .map(|ws: Ws| ws.max_message_size(MAX_REQUEST_SIZE).on_upgrade(handle_ws))
         .with(warp::cors().allow_any_origin());
