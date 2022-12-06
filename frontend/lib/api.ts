@@ -26,15 +26,6 @@ type RunAPIResponse
   | { Stdout: Uint8Array }
   | { Stderr: Uint8Array };
 
-interface MetadataItem {
-  name: string;
-  image: string;
-  version: string;
-  se_class: string;
-  sbcs: string;
-  url: string;
-}
-
 type APIMessages = Promise<[RunAPIResponse, APIMessages | null]>;
 
 function handleAPIConnection(ws: WebSocket): APIMessages {
@@ -113,6 +104,15 @@ async function runWs({
   }
 
   return [kill, handler];
+}
+
+interface MetadataItem {
+  name: string;
+  image: string;
+  version: string;
+  se_class: string;
+  sbcs: string;
+  url: string;
 }
 
 async function getMetadata() {
