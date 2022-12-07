@@ -2,9 +2,7 @@ extern crate lazy_static;
 
 mod constants;
 use crate::constants::*;
-use futures_util::SinkExt;
-use futures_util::StreamExt;
-use futures_util::stream::{SplitSink, SplitStream};
+use futures_util::{SinkExt, StreamExt};
 use std::process::Stdio;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::process::{Child, ChildStdin, Command};
@@ -21,9 +19,8 @@ async fn main() {
     warp::serve(execute).run(([127, 0, 0, 1], 8500)).await;
 }
 
-async fn handle_ws(websocket: WebSocket) {
-    let (mut sender, mut receiver) = websocket.split();
-    while let Some(received) = receiver.next().await {
+async fn handle_ws(mut websocket: WebSocket) {
+    while let Some(received) = websocket.next().await {
         let message = match received {
             Ok(r) => r,
             Err(e) => {
@@ -34,7 +31,7 @@ async fn handle_ws(websocket: WebSocket) {
         if message.is_close() {
             break;
         } else if !message.is_binary() {
-                if let Err(e) = sender
+                if let Err(e) = websocket
                     .send(Message::close_with(WEBSOCKET_BASE + UNSUPPORTED_DATA as u16, "expected a binary message"))
                     .await
                 {
@@ -43,8 +40,8 @@ async fn handle_ws(websocket: WebSocket) {
                 }
             return;
         }
-        if let Err((code, e)) = invoke(message.as_bytes(), &mut receiver, &mut sender).await {
-            if let Err(e) = sender
+        if let Err((code, e)) = invoke(message.as_bytes(), &mut websocket).await {
+            if let Err(e) = websocket
                 .send(Message::close_with(WEBSOCKET_BASE + code as u16, e))
                 .await
             {
@@ -54,7 +51,7 @@ async fn handle_ws(websocket: WebSocket) {
             return;
         };
     }
-    if let Err(e) = sender.close().await {
+    if let Err(e) = websocket.close().await {
         // can't do anything but log it
         eprintln!("error closing websocket: {e}");
     }
@@ -62,8 +59,7 @@ async fn handle_ws(websocket: WebSocket) {
 
 async fn invoke(
     input: &[u8],
-    receiver: &mut SplitStream<WebSocket>,
-    sender: &mut SplitSink<WebSocket, Message>,
+    websocket: &mut WebSocket,
 ) -> Result<(), (u8, String)> {
     let (mut stdin, mut child) =
         match invoke1(input).await {
@@ -78,7 +74,7 @@ async fn invoke(
     loop {
         tokio::select! {
             res = &mut wait => return res.unwrap(),
-            maybe_msg = receiver.next() => match maybe_msg {
+            maybe_msg = websocket.next() => match maybe_msg {
                 None => return wait.await.unwrap(),
                 Some(msg) => handle_message(msg, &mut stdin).await?,
             },
@@ -88,7 +84,7 @@ async fn invoke(
                     return wait.await.unwrap()
                 }
                 Ok(n) => {
-                    if let Err(e) = sender.send(Message::binary(&buf[..n])).await {
+                    if let Err(e) = websocket.send(Message::binary(&buf[..n])).await {
                         eprintln!("error sending to websocket: {e}")
                     }
                 }
