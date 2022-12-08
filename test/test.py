@@ -8,10 +8,12 @@ from msgpack import loads, dumps
 from pytest import mark, raises
 from pytest_asyncio import fixture
 
+KiB = 1024
 sec = 1e9  # ns
 SIGKILL = 9
-POLICY_VIOLATION = 1008
 UNSUPPORTED_DATA = 1003
+TOO_LARGE = 1009
+POLICY_VIOLATION = 1008
 
 url = environ["URL"]
 slow = mark.skipif(bool(environ.get("FAST")), reason="takes too long and FAST option set")
@@ -198,6 +200,16 @@ async def test_invalid_request_data_type():
 async def test_extra_junk_after_request():
     async with _test_error("invalid request: found extra data") as c:
         await c.send(req("") + b"extra junk")
+
+
+async def test_too_large_request():
+    s = 64 * KiB
+
+    async with _test_error(StartsWith("invalid request:")) as c:
+        await c.send(bytes(s))
+
+    async with _test_error(f"received message of size {s + 1}, greater than size limit {s}", TOO_LARGE) as c:
+        await c.send(bytes(s + 1))
 
 
 @mark.parametrize("kwargs", (

@@ -4,6 +4,7 @@ pub const WEBSOCKET_BASE: u16 = 1000;
 pub const NORMAL: u8 = 0;
 pub const UNSUPPORTED_DATA: u8 = 3;
 pub const POLICY_VIOLATION: u8 = 8;
+pub const TOO_LARGE: u8 = 9;
 pub const INTERNAL_ERROR: u8 = 11;
 #[allow(non_upper_case_globals)]
 pub const KiB: u64 = 1024;

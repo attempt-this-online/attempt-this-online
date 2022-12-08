@@ -3,10 +3,12 @@ extern crate lazy_static;
 mod constants;
 use crate::constants::*;
 use futures_util::{SinkExt, StreamExt};
+use std::error::Error;
 use std::process::Stdio;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::process::{Child, ChildStdin, Command};
 use tokio::task;
+use tokio_tungstenite::tungstenite::error as ws_error;
 use warp::ws::*;
 use warp::Filter;
 
@@ -20,35 +22,35 @@ async fn main() {
 }
 
 async fn handle_ws(mut websocket: WebSocket) {
+    macro_rules! close {
+        ($code:expr, $msg:expr) => {
+            if let Err(e) = websocket.send(Message::close_with(WEBSOCKET_BASE + $code as u16, $msg)).await {
+                // can't do anything but log it
+                eprintln!("error closing websocket: {e}");
+            }
+            return;
+        }
+    }
     while let Some(received) = websocket.next().await {
         let message = match received {
             Ok(r) => r,
             Err(e) => {
-                eprintln!("error reading from websocket: {e}");
+                if let Some(e) = check_message_too_large(&e) {
+                    eprintln!("{e}");
+                    close!(TOO_LARGE, e);
+                } else {
+                    eprintln!("error reading from websocket: {e}");
+                }
                 continue;
             }
         };
         if message.is_close() {
             break;
         } else if !message.is_binary() {
-                if let Err(e) = websocket
-                    .send(Message::close_with(WEBSOCKET_BASE + UNSUPPORTED_DATA as u16, "expected a binary message"))
-                    .await
-                {
-                    // can't do anything but log it
-                    eprintln!("error sending close code: {e}");
-                }
-            return;
+            close!(UNSUPPORTED_DATA, "expected a binary message");
         }
         if let Err((code, e)) = invoke(message.as_bytes(), &mut websocket).await {
-            if let Err(e) = websocket
-                .send(Message::close_with(WEBSOCKET_BASE + code as u16, e))
-                .await
-            {
-                // can't do anything but log it
-                eprintln!("error sending close code: {e}");
-            }
-            return;
+            close!(code, e);
         };
     }
     if let Err(e) = websocket.close().await {
@@ -153,5 +155,15 @@ async fn invoke2(child: Child) -> Result<(), (u8, String)> {
         Err((code, msg.into()))
     } else {
         Ok(())
+    }
+}
+
+fn check_message_too_large(e: &warp::Error) -> Option<String> {
+    let e = e.source()?;
+    let e = e.downcast_ref::<ws_error::Error>()?;
+    if let ws_error::Error::Capacity(ws_error::CapacityError::MessageTooLong{size, ..}) = e {
+        Some(format!("received message of size {size}, greater than size limit {MAX_REQUEST_SIZE}"))
+    } else {
+        None
     }
 }
