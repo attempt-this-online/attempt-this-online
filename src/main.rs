@@ -5,7 +5,9 @@ mod constants;
 use crate::constants::*;
 use futures_util::{SinkExt, StreamExt};
 use std::error::Error;
+use std::net::SocketAddr;
 use std::process::Stdio;
+use std::str::FromStr;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::process::{Child, ChildStdin, Command};
 use tokio::task;
@@ -19,7 +21,21 @@ async fn main() {
         .and(warp::ws())
         .map(|ws: Ws| ws.max_message_size(MAX_REQUEST_SIZE).on_upgrade(handle_ws))
         .with(warp::cors().allow_any_origin());
-    warp::serve(execute).run(([127, 0, 0, 1], 8500)).await;
+    let addr = get_bind_address();
+    eprintln!("starting ATO server on {addr}");
+    warp::serve(execute).run(addr).await;
+}
+
+fn get_bind_address() -> SocketAddr {
+    SocketAddr::from_str(
+        &std::env::var("ATO_BIND").unwrap_or_else(|e| {
+            if let std::env::VarError::NotUnicode(_) = e {
+                panic!("$ATO_BIND is invalid Unicode")
+            }
+            "127.0.0.1:8500".to_string()
+        })
+    )
+    .expect("$ATO_BIND is not a valid address")
 }
 
 async fn handle_ws(mut websocket: WebSocket) {
