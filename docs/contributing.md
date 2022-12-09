@@ -91,3 +91,72 @@ cd /ATO/context
 - Build package `./build`
 - Upload `setup/setup` and `dist/attempt_this_online.tar.gz` to GitHub release
 - Set description etc. on GitHub release
+
+## Backend developer instructions
+The backend is written in Rust. You'll need the nightly Rust compiler and cargo.
+
+- `src/main.rs` contains the websocket server, which is the main entrypoint to the service
+- `src/invoke.rs` contains the core sandbox
+
+See [Architecture](./architecture.md) for more details on how the overall system works.
+
+This sandbox uses features specific to the Linux kernel, so you'll need to be developing on Linux.
+You'll need to make sure unprivileged namespaces are enabled; instructions will vary by distribution.
+
+To set up a minimal developer environment:
+
+```bash
+sudo mkdir -p /usr/local/{lib,share}/ATO
+sudo chown $USER:$USER /usr/local/{lib,share}/ATO
+mkdir /usr/local/lib/ATO/{rootfs,env} /usr/local/share/ATO/runners
+sudo docker run --rm -it attemptthisonline/zsh tar -c / | tar -xC /usr/local/{lib,share}/ATO
+ln -s "$(pwd)/runners/zsh" /usr/local/share/ATO/runners/zsh
+ln -s "$(pwd)/target/debug/invoke" /usr/local/lib/ATO/invoke
+ln -s "$(which bash)" /usr/local/lib/ATO/bash
+ln -s "$(pwd)/dist/attempt_this_online/yargs" /usr/local/lib/ATO/yargs
+gcc -Wall -Werror -static yargs.c -o dist/attempt_this_online/yargs
+cargo build --all-targets
+```
+
+I'm working on Dockerising this (#105), because it's pretty stupid.
+
+Now run the server:
+
+```bash
+target/debug/attempt-this-online
+```
+
+There are some basic sandbox functionality tests written in Python (make sure you have version 3.10 or higher installed).
+The `test/run` helper script will set up the testing environment for you if needed (as well as running the tests).
+Pass it the URL to the API, like this:
+
+```bash
+URL='ws://localhost:8500/api/v1/ws/execute' test/run
+```
+
+Some of the tests take a few seconds to run (because they test timing things). To skip these, set the `FAST` environment
+variable:
+
+```bash
+FAST=1 URL='ws://localhost:8500/api/v1/ws/execute' test/run
+```
+
+### Automatic rebuilds
+You may find it useful to have your code automatically rebuilt. Install [`entr`](https://eradman.com/entrproject/),
+then run, in different shell instances, and in this order:
+
+```bash
+ls src | entr -c cargo build --all-targets
+```
+
+```bash
+ls target/debug/attempt-this-online | entr -cs 'killall attempt-this-online; target/debug/attempt-this-online & touch target/.ready'
+```
+
+```bash
+ls target/.ready test/test.py | URL='ws://localhost:8500/api/v1/ws/execute' entr -c test/run
+# you can also add FAST=1 here ^
+```
+
+## Frontend developer instructions
+See [`frontend/README.md`](../frontend/README.md).
