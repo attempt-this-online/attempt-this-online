@@ -83,8 +83,8 @@ cd /ATO/context
   - Make a [Pull Request](https://github.com/attempt-this-online/attempt-this-online/pulls) to add the runner for
 
 ## Making Releases
-- Update version numbers in `frontend/package.json` and `setup/setup`
-- Upgrade dependencies (`cd frontend; npm update; cd ..`)
+- Update version numbers in `frontend/package.json`, `Cargo.toml`, and `setup/setup`
+- Upgrade dependencies (`cd frontend; npm update; cd ..; cargo update`)
 - Stage and commit changes
 - Tag version in git, e.g. `v0.1.2`
 - Push `main` **and the new tag** to GitHub
