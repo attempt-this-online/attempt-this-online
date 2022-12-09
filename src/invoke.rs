@@ -286,9 +286,13 @@ impl Drop for Cgroup<'_> {
 }
 
 fn create_cgroup() -> Result<PathBuf, Option<String>> {
-    // TODO: dynamically work out the cgroup path
-    const CGROUP_PATH: &str = "/sys/fs/cgroup/system.slice/ATO.service";
-    let mut path = PathBuf::from(CGROUP_PATH);
+    use std::env::VarError::*;
+    let cgroup_path = std::env::var("ATO_CGROUP_PATH").map_err(|e| Some(match e {
+            NotPresent => "error creating cgroup: $ATO_CGROUP_PATH not provided",
+            NotUnicode(_) => "error creating cgroup: $ATO_CGROUP_PATH is invalid Unicode",
+        }.to_string())
+    )?;
+    let mut path = PathBuf::from(cgroup_path);
     path.push(random_id());
     check!(std::fs::create_dir(&path), "error creating cgroup dir: {}");
     Ok(path)
