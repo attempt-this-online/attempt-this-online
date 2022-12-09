@@ -33,10 +33,10 @@ use std::path::PathBuf;
 /// like the ? postfix operator, but formats errors to strings
 macro_rules! check {
     ($x:expr, $f:literal $(, $($a:expr),+)? $(,)?) => {
-        $x.map_err(|e| format!($f, $($($a,)*)? e))?
+        $x.map_err(|e| Some(format!($f, $($($a,)*)? e)))?
     };
     ($x:expr $(,)?) => {
-        $x.map_err(|e| e.to_string())?
+        $x.map_err(|e| Some(e.to_string()))?
     }
 }
 
@@ -82,7 +82,7 @@ enum StreamResponse {
     }
 }
 
-fn output_message(message: StreamResponse) -> Result<(), String> {
+fn output_message(message: StreamResponse) -> Result<(), Option<String>> {
     let encoded_message = check!(rmp_serde::to_vec_named(&message));
     // to ensure packeted writes do not get split up, they must be <= PIPE_BUF
     // see pipe(2) § O_DIRECT and pipe(7) § PIPE_BUF
@@ -90,11 +90,11 @@ fn output_message(message: StreamResponse) -> Result<(), String> {
     match nix::unistd::write(STDOUT_FD, &encoded_message) {
         Ok(_) => Ok(()),
         Err(Errno::EPIPE) => {
-            // TODO: Err(None)?
-            Err("error writing message: client went away".to_string())
+            // client went away
+            Err(None)
         }
         Err(e) => {
-            Err(format!("error writing message: {e}"))
+            Err(Some(format!("error writing message: {e}")))
         }
     }
 }
@@ -154,6 +154,13 @@ impl std::io::Read for PacketRead {
 fn main() -> std::process::ExitCode {
     // some care must be taken over error messages - see comments in run_child
 
+    // note also that throughout the code, the Error variant of our Result types is Option<String>
+    // when this is Some("..."), it's a normal error message
+    // but when this is None, it means there was an "expected" error:
+    // we need to exit the program because of it
+    // but nothing's actually gone wrong, so it's not logged
+    // so far this only happens when the client goes away during execution
+
     // use stdout in "packet" mode - see pipe(2) § O_DIRECT
     // this ensures that calls to write(2) correspond one-to-one with websocket messages.
     // and also use stdin in packet mode:
@@ -197,7 +204,7 @@ fn main() -> std::process::ExitCode {
             return std::process::ExitCode::from(POLICY_VIOLATION);
         }
     };
-    if let Err(e) = invoke(packet_stdin, &request, language) {
+    if let Err(Some(e)) = invoke(packet_stdin, &request, language) {
         eprintln!("{e}");
         return std::process::ExitCode::from(INTERNAL_ERROR);
     } else {
@@ -278,7 +285,7 @@ impl Drop for Cgroup<'_> {
     }
 }
 
-fn create_cgroup() -> Result<PathBuf, String> {
+fn create_cgroup() -> Result<PathBuf, Option<String>> {
     // TODO: dynamically work out the cgroup path
     // const CGROUP_PATH: &str = "/sys/fs/cgroup/system.slice/ATO.service";
     const CGROUP_PATH: &str = "/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/ATOtest";
@@ -288,7 +295,7 @@ fn create_cgroup() -> Result<PathBuf, String> {
     Ok(path)
 }
 
-fn setup_cgroup(path: &PathBuf) -> Result<(), String> {
+fn setup_cgroup(path: &PathBuf) -> Result<(), Option<String>> {
     // this sets some resource limits, but the others are set with ordinary POSIX rlimits:
     // see the set_resource_limits function
     const MEMORY_HIGH: u64 = 200 * MiB;
@@ -306,7 +313,7 @@ fn random_id() -> String {
     rand::thread_rng().gen::<[u8; RANDOM_ID_SIZE]>().encode_hex::<String>()
 }
 
-fn invoke(packet_stdin: PacketRead, request: &Request, language: &Language) -> Result<(), String> {
+fn invoke(packet_stdin: PacketRead, request: &Request, language: &Language) -> Result<(), Option<String>> {
     let cgroup = create_cgroup()?;
     let cgroup_cleanup = Cgroup{ cgroup: &cgroup };
     setup_cgroup(&cgroup)?;
@@ -366,7 +373,7 @@ fn run_parent(
     cgroup_cleanup: Cgroup,
     timer: std::time::Instant,
     timeout: i32,
-) -> Result<(), String> {
+) -> Result<(), Option<String>> {
     // eventfd is basically a condition variable, but which we can poll on
     let quit = check!(eventfd(0, EfdFlags::empty()), "error creating eventfd: {}");
 
@@ -388,11 +395,11 @@ fn run_parent(
         if poll_result == 0 {
             // timed out
             true
-        } else if poll_child.revents().ok_or("poll returned unexpected event")?.contains(PollFlags::POLLIN) {
+        } else if poll_child.revents().ok_or(Some("poll returned unexpected event".into()))?.contains(PollFlags::POLLIN) {
             // child finished
             false
         } else {
-            let stdin_events = poll_stdin.revents().ok_or("poll returned unexpected event")?;
+            let stdin_events = poll_stdin.revents().ok_or(Some("poll returned unexpected event".into()))?;
             if stdin_events.contains(PollFlags::POLLIN) {
                 // received control message via stdin
                 #[derive(Deserialize)]
@@ -402,7 +409,7 @@ fn run_parent(
                 use ControlMessage::*;
                 match rmp_serde::from_read::<_, ControlMessage>(&mut packet_stdin) {
                     Err(e) => {
-                        return Err(format!("error reading control message: {e}"));
+                        return Err(Some(format!("error reading control message: {e}")));
                     }
                     Ok(Kill) => {
                         // continue to drop (i.e. kill), and set timed_out = false
@@ -414,7 +421,7 @@ fn run_parent(
                 // client disappeared: continue to kill
                 false
             } else {
-                return Err(format!("unexpected poll result: {poll_result}, {poll_args:?}"));
+                return Err(Some(format!("unexpected poll result: {poll_result}, {poll_args:?}")));
             }
         }
     };
@@ -466,7 +473,7 @@ fn run_parent(
     Ok(())
 }
 
-fn handle_output(stdout_r: i32, stderr_r: i32, quit: i32) -> Result<(), String> {
+fn handle_output(stdout_r: i32, stderr_r: i32, quit: i32) -> Result<(), Option<String>> {
     for (name, pipe) in [("stdout", stdout_r), ("stderr", stderr_r)] {
         check!(fcntl(pipe, FcntlArg::F_SETFL(OFlag::O_NONBLOCK)), "error setting O_NONBLOCK on {} read end: {}", name);
     }
@@ -487,7 +494,7 @@ fn handle_output(stdout_r: i32, stderr_r: i32, quit: i32) -> Result<(), String> 
             (0, "stdout", poll_stdout, stdout_r, StreamResponse::Stdout as StreamId),
             (1, "stderr", poll_stderr, stderr_r, StreamResponse::Stderr as StreamId),
         ] {
-            if poll.revents().ok_or("poll returned unexpected event")?.contains(PollFlags::POLLIN) {
+            if poll.revents().ok_or(Some("poll returned unexpected event".into()))?.contains(PollFlags::POLLIN) {
                 let mut buf = [0u8; OUTPUT_BUF_SIZE];
                 let len = check!(read(pipe, &mut buf), "error reading from {}: {}", name);
                 totals[i] += len;
@@ -498,7 +505,7 @@ fn handle_output(stdout_r: i32, stderr_r: i32, quit: i32) -> Result<(), String> 
                 output_message(message)?;
             }
         }
-        if poll_quit.revents().ok_or("poll returned unexpected event")?.contains(PollFlags::POLLIN) {
+        if poll_quit.revents().ok_or(Some("poll returned unexpected event".into()))?.contains(PollFlags::POLLIN) {
             return Ok(())
         }
     }
@@ -540,13 +547,17 @@ fn run_child(
     let env = match load_env(&language) {
         Ok(r) => r,
         Err(e) => {
-            eoprintln!("{e}");
+            if let Some(e) = e {
+                eoprintln!("{e}");
+            }
             return
         }
     };
 
     if let Err(e) = setup_child(&request, &language, outside_uid, outside_gid) {
-        eoprintln!("{e}");
+        if let Some(e) = e {
+            eoprintln!("{e}");
+        }
         return
     }
 
@@ -569,14 +580,14 @@ fn run_child(
     }
 }
 
-fn load_env(language: &Language) -> Result<Vec<CString>, String> {
+fn load_env(language: &Language) -> Result<Vec<CString>, Option<String>> {
     const ENV_BASE_PATH: &str = "/usr/local/lib/ATO/env/";
     let path = String::from(ENV_BASE_PATH) + &language.image.replace("/", "+");
     check!(std::fs::read(path), "error reading image env file: {}")
         .split_inclusive(|b| *b == 0) // split after null bytes, and include them in the results
         .map(|s| CString::from_vec_with_nul(s.to_vec()))
         .collect::<Result<Vec<_>, _>>() // collects errors too
-        .map_err(|e| format!("error building env string: {e}"))
+        .map_err(|e| Some(format!("error building env string: {e}")))
 }
 
 fn setup_child(
@@ -584,7 +595,7 @@ fn setup_child(
     language: &Language,
     outside_uid: Uid,
     outside_gid: Gid,
-) -> Result<(), String> {
+) -> Result<(), Option<String>> {
     const SIGKILL: i32 = 9;
     // set up to die if our parent dies
     check!(prctl::set_pdeathsig(Some(SIGKILL)), "error setting parent death signal: {}");
@@ -596,7 +607,7 @@ fn setup_child(
     Ok(())
 }
 
-fn set_ids(outside_uid: Uid, outside_gid: Gid) -> Result<(), String> {
+fn set_ids(outside_uid: Uid, outside_gid: Gid) -> Result<(), Option<String>> {
     // we're currently nobody (65534) inside the container which means we can't do anything.
     // so we declare ourselves root inside the container, but this requires a mapping for who we become from the perspective of processes outside the container
 
@@ -644,7 +655,7 @@ fn get_runner(language_id: &String) -> String {
     String::from(LANGUAGE_BASE_PATH) + language_id
 }
 
-fn setup_filesystem(request: &Request, language: &Language) -> Result<(), String> {
+fn setup_filesystem(request: &Request, language: &Language) -> Result<(), Option<String>> {
     let rootfs = get_rootfs(&language);
 
     // set the propogation type of all mounts to private - this is because:
@@ -688,7 +699,7 @@ fn setup_filesystem(request: &Request, language: &Language) -> Result<(), String
     Ok(())
 }
 
-fn setup_special_files(language_id: &String) -> Result<(), String> {
+fn setup_special_files(language_id: &String) -> Result<(), Option<String>> {
     mount!("./ATO", "tmpfs", MS_NOSUID | MS_NODEV, "mode=755,size=65535k");
     check!(mkdir("./ATO/context", Mode::S_IRWXU | Mode::S_IRGRP | Mode::S_IXGRP | Mode::S_IROTH | Mode::S_IXOTH), "error creating /ATO/context: {}");
     mount!("./proc", "proc",);
@@ -730,7 +741,7 @@ fn setup_special_files(language_id: &String) -> Result<(), String> {
     Ok(())
 }
 
-fn setup_request_files(request: &Request) -> Result<(), String> {
+fn setup_request_files(request: &Request) -> Result<(), Option<String>> {
     check!(std::fs::write("/ATO/code", &request.code), "error writing /ATO/code: {}");
     // TODO: stream input in instead of writing it to a file?
     check!(std::fs::write("/ATO/input", &request.input), "error writing /ATO/input: {}");
@@ -748,7 +759,7 @@ fn join_args(args: &Vec<ByteBuf>) -> ByteBuf {
     b
 }
 
-fn drop_caps() -> Result<(), String> {
+fn drop_caps() -> Result<(), Option<String>> {
     // drop as many privileges as possible
     // for more info on caps, see man capabilities(7)
 
@@ -765,7 +776,7 @@ fn drop_caps() -> Result<(), String> {
     Ok(())
 }
 
-fn set_resource_limits() -> Result<(), String> {
+fn set_resource_limits() -> Result<(), Option<String>> {
     // resource limits work as follows: each one has a "soft" and "hard" limit.
     // for most limits, the process will get an error if it goes beyond the soft limit;
     // the soft limit can be raised by the process but never to higher than the hard limit.
