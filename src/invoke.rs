@@ -9,6 +9,7 @@ use close_fds::close_open_fds;
 use hex::ToHex;
 use nix::{
     dir::Dir,
+    errno::Errno,
     fcntl::{fcntl, FcntlArg, OFlag},
     mount::{mount, MsFlags},
     poll::{PollFd, PollFlags, poll},
@@ -86,8 +87,16 @@ fn output_message(message: StreamResponse) -> Result<(), String> {
     // to ensure packeted writes do not get split up, they must be <= PIPE_BUF
     // see pipe(2) § O_DIRECT and pipe(7) § PIPE_BUF
     assert!(encoded_message.len() <= PIPE_BUF);
-    check!(nix::unistd::write(STDOUT_FD, &encoded_message), "error writing message: {}");
-    Ok(())
+    match nix::unistd::write(STDOUT_FD, &encoded_message) {
+        Ok(_) => Ok(()),
+        Err(Errno::EPIPE) => {
+            // TODO: Err(None)?
+            Err("error writing message: client went away".to_string())
+        }
+        Err(e) => {
+            Err(format!("error writing message: {e}"))
+        }
+    }
 }
 
 #[allow(dead_code)]

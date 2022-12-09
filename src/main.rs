@@ -1,3 +1,4 @@
+#![feature(let_chains)]
 extern crate lazy_static;
 
 mod constants;
@@ -26,7 +27,11 @@ async fn handle_ws(mut websocket: WebSocket) {
         ($code:expr, $msg:expr) => {
             if let Err(e) = websocket.send(Message::close_with(WEBSOCKET_BASE + $code as u16, $msg)).await {
                 // can't do anything but log it
-                eprintln!("error closing websocket: {e}");
+                if let Some(e) = e.source() && let Some(ws_error::Error::ConnectionClosed) = e.downcast_ref() {
+                    // client went away: do nothing
+                } else {
+                    eprintln!("error closing websocket: {e}");
+                }
             }
             return;
         }
