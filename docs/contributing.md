@@ -104,20 +104,12 @@ This sandbox uses features specific to the Linux kernel, so you'll need to be de
 You'll need to make sure unprivileged namespaces are enabled; instructions will vary by distribution.
 
 ### Environment
-To set up a minimal development environment:
+A minimal development environment for running the server can be set up using the provided Dockerfile.
+You'll still do all your development outside the container, but the server itself will run in one.
+
+First, do an initial build of the code:
 
 ```bash
-sudo mkdir -p /usr/local/{lib,share}/ATO
-sudo chown $USER:$USER /usr/local/{lib,share}/ATO
-mkdir /usr/local/lib/ATO/{rootfs/attemptthisonline+zsh/{proc,sys,dev,ATO},env} /usr/local/share/ATO/runners
-sudo docker run --rm -it attemptthisonline/zsh \
-    tar --exclude /sys --exclude /proc --exclude /dev -c / \
-    | tar -xC /usr/local/lib/ATO/rootfs/attemptthisonline+zsh
-printf 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\0LANG=C.UTF-8\0' > /usr/local/lib/ATO/env/attemptthisonline+zsh
-ln -s "$(pwd)/runners/zsh" /usr/local/share/ATO/runners/zsh
-ln -s "$(pwd)/target/debug/invoke" /usr/local/lib/ATO/invoke
-ln -s "$(which bash)" /usr/local/lib/ATO/bash
-ln -s "$(pwd)/dist/attempt_this_online/yargs" /usr/local/lib/ATO/yargs
 mkdir -p dist/attempt_this_online
 gcc -Wall -Werror -static yargs.c -o dist/attempt_this_online/yargs
 cargo build --all-targets
@@ -134,15 +126,12 @@ echo +memory > $ATO_CGROUP_PATH/cgroup.subtree_control
 If your distribution doesn't use systemd with cgroup v2 (the "unified cgroup hierarchy"), then you'll have to set it up
 manually.
 
-I'm working on Dockerising this (#105), because it's admittedly rather involved.
-
-Now run the server:
+Build and run the Docker container:
 
 ```bash
-target/debug/attempt-this-online
+sudo docker build -t ato_dev /dev/shm -f Dockerfile
+sudo docker run -it --rm -v "$(pwd)":/src -v /sys/fs/cgroup/user.slice/user-$(id -u).slice/user@$(id -u).service/ATO:/run/cgroup2 -p 8500:8500 --privileged ato_dev
 ```
-
-This will bind to localhost on port 8500 by default. You can override this with the `ATO_BIND` environment variable.
 
 ### Tests
 There are some basic sandbox functionality tests written in Python (make sure you have version 3.10 or higher installed).
@@ -168,10 +157,7 @@ then run, in different shell instances:
 ls src | entr -c cargo build --all-targets
 ```
 
-```bash
-export ATO_CGROUP_PATH=/sys/fs/cgroup/user.slice/user-$(id -u).slice/user@$(id -u).service/ATO
-ls target/debug/attempt-this-online | entr -rc target/debug/attempt-this-online
-```
+If you're using Docker container, the server will restart automatically when it is rebuilt.
 
 To rerun tests automatically as well:
 
