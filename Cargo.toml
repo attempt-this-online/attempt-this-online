@@ -2,9 +2,6 @@
 name = "attempt-this-online"
 version = "0.1.16"
 edition = "2021"
-default-run = "attempt-this-online"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 warp = "0.3.3"
@@ -25,5 +22,9 @@ capctl = "0.2.2"
 tokio-tungstenite = "0.17.2"
 
 [[bin]]
-name = "invoke"
-path = "src/invoke.rs"
+name = "server"
+path = "src/server.rs"
+
+[[bin]]
+name = "sandbox"
+path = "src/sandbox.rs"

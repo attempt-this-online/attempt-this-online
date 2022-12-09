@@ -54,8 +54,7 @@ mkdir -p \
 useradd -rs /usr/bin/nologin -md /var/lib/ATO_home ato
 
 # install backend
-install -m 500 -o ato -g ato server /usr/local/lib/ATO/
-install -m 500 -o ato -g ato invoke /usr/local/lib/ATO/invoke
+install -m 500 -o ato -g ato server sandbox /usr/local/lib/ATO/
 
 # install runners
 cp -RT runners /usr/local/share/ATO/runners

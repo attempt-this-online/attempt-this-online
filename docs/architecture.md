@@ -14,10 +14,10 @@ display. This assumes ATO is being run with the default full setup.
         - `timeout` (int): the maximum number of seconds to run the program for
 - [`nginx`](https://en.wikipedia.org/wiki/Nginx) server receives the request
 - `nginx` forwards the request to the Rust API server over the local port `8500`
-- Rust backend ([`main.rs`]) spawns the Rust sandbox program ([`invoke.rs`]), feeding the websocket request into its
+- Rust backend ([`server.rs`]) spawns the Rust sandbox program ([`sandbox.rs`]), feeding the websocket request into its
   STDIN
-- `msgpack` request is decoded and validated in `invoke.rs`
-- `invoke` creates an isolated Linux container in a new [cgroup](https://docs.kernel.org/admin-guide/cgroup-v2.html)
+- `msgpack` request is decoded and validated in `sandbox.rs`
+- `sandbox` creates an isolated Linux container in a new [cgroup](https://docs.kernel.org/admin-guide/cgroup-v2.html)
     - The container has temporary files `/ATO/code`, `/ATO/input`, `/ATO/arguments`, `/ATO/options` created, containing
       the input values from the API request
     - It has `rlimit`s and some cgroup values set to limit resource usage
@@ -30,12 +30,12 @@ display. This assumes ATO is being run with the default full setup.
          - `/ATO/bash`: A statically linked `/bin/bash` ([stolen from Debian](https://packages.debian.org/unstable/amd64/bash-static/download)),
          in case the language's Docker image doesn't have a bash
          - `/ATO/yargs`: a wrapper to execute a command with null-terminated arguments from a file
-- `invoke` kills all processes remaining inside the container's cgroup, and removes the cgroup
+- `sandbox` kills all processes remaining inside the container's cgroup, and removes the cgroup
 - API takes in the output to create a whole response which is packed again using `msgpack` and sent back to the client
-  via the server in `main.rs`, and `nginx`
+  via the server in `server.rs`, and `nginx`
 - The frontend decodes and lays out the result
 
-More details of the container created by `invoke` can be found by consulting its well-commented source code.
+More details of the container created by `sandbox` can be found by consulting its well-commented source code.
 
-[`main.rs`]: ../src/main.rs
-[`invoke.rs`]: ../src/invoke.rs
+[`server.rs`]: ../src/server.rs
+[`sandbox.rs`]: ../src/sandbox.rs
