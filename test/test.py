@@ -191,6 +191,19 @@ async def test_invalid_request_syntax():
         await c.send(b"not a valid msgpack message!")
 
 
+async def test_incomplete_request():
+    payload = req("echo hello")
+    async with _test_error(StartsWith("invalid request:")) as c:
+        await c.send(payload[:20])
+
+
+async def test_split_request():
+    payload = req("echo hello")
+    async with _test_error(StartsWith("invalid request:")) as c:
+        await c.send(payload[:20])
+        await c.send(payload[20:])
+
+
 async def test_invalid_request_data_type():
     async with _test_error("expected a binary message", UNSUPPORTED_DATA) as c:
         await c.send("not a binary message!")
