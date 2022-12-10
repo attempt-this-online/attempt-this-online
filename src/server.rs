@@ -39,40 +39,23 @@ fn get_bind_address() -> SocketAddr {
 }
 
 async fn handle_ws(mut websocket: WebSocket) {
-    macro_rules! close {
-        ($code:expr, $msg:expr) => {
-            if let Err(e) = websocket.send(Message::close_with(WEBSOCKET_BASE + $code as u16, $msg)).await {
-                // can't do anything but log it
-                if let Some(e) = e.source() && let Some(ws_error::Error::ConnectionClosed) = e.downcast_ref() {
-                    // client went away: do nothing
-                } else {
-                    eprintln!("error closing websocket: {e}");
+    loop {
+        match invoke(&mut websocket).await {
+            Ok(()) => continue,
+            Err(None) => break,
+            Err(Some((code, msg))) => {
+                eprintln!("{msg}");
+                if let Err(e) = websocket.send(Message::close_with(WEBSOCKET_BASE + code as u16, msg)).await {
+                    if let Some(e) = e.source() && let Some(ws_error::Error::ConnectionClosed) = e.downcast_ref() {
+                        // client went away: do nothing
+                    } else {
+                        // can't do anything but log it
+                        eprintln!("error closing websocket: {e}");
+                    }
                 }
+                return;
             }
-            return;
         }
-    }
-    while let Some(received) = websocket.next().await {
-        let message = match received {
-            Ok(r) => r,
-            Err(e) => {
-                if let Some(e) = check_message_too_large(&e) {
-                    eprintln!("{e}");
-                    close!(TOO_LARGE, e);
-                } else {
-                    eprintln!("error reading from websocket: {e}");
-                }
-                continue;
-            }
-        };
-        if message.is_close() {
-            break;
-        } else if !message.is_binary() {
-            close!(UNSUPPORTED_DATA, "expected a binary message");
-        }
-        if let Err((code, e)) = invoke(message.as_bytes(), &mut websocket).await {
-            close!(code, e);
-        };
     }
     if let Err(e) = websocket.close().await {
         // can't do anything but log it
@@ -81,14 +64,13 @@ async fn handle_ws(mut websocket: WebSocket) {
 }
 
 async fn invoke(
-    input: &[u8],
     websocket: &mut WebSocket,
-) -> Result<(), (u8, String)> {
+) -> Result<(), Option<(u8, String)>> {
     let (mut stdin, mut child) =
-        match invoke1(input).await {
+        match invoke1().await {
             Ok(c) => c,
             Err(e) => {
-                return Err((INTERNAL_ERROR, e))
+                return Err(Some((INTERNAL_ERROR, e)))
             }
         };
     let mut stdout = child.stdout.take().expect("stdout should not have been taken");
@@ -96,15 +78,15 @@ async fn invoke(
     let mut buf = [0u8; PIPE_BUF];
     loop {
         tokio::select! {
-            res = &mut wait => return res.unwrap(),
+            res = &mut wait => return res.unwrap().map_err(Some),
             maybe_msg = websocket.next() => match maybe_msg {
-                None => return wait.await.unwrap(),
+                None => return wait.await.unwrap().map_err(Some),
                 Some(msg) => handle_message(msg, &mut stdin).await?,
             },
             maybe_n = stdout.read(&mut buf) => match maybe_n {
                 Err(e) => eprintln!("error reading message: {e}"),
                 Ok(0) => { // EOF
-                    return wait.await.unwrap()
+                    return wait.await.unwrap().map_err(Some)
                 }
                 Ok(n) => {
                     if let Err(e) = websocket.send(Message::binary(&buf[..n])).await {
@@ -116,21 +98,33 @@ async fn invoke(
     }
 }
 
-async fn handle_message(msg: Result<Message, warp::Error>, stdin: &mut ChildStdin) -> Result<(), (u8, String)> {
+async fn handle_message(msg: Result<Message, warp::Error>, stdin: &mut ChildStdin) -> Result<(), Option<(u8, String)>> {
     let msg = match msg {
         Ok(m) => m,
-        Err(e) => return Err((INTERNAL_ERROR, format!("error getting websocket message: {e}"))),
+        Err(e) => return Err(Some(
+            if let Some(e) = e.source()
+                && let Some(e) = e.downcast_ref::<ws_error::Error>()
+                && let ws_error::Error::Capacity(ws_error::CapacityError::MessageTooLong{size, ..}) = e
+            {
+                (TOO_LARGE, format!("received message of size {size}, greater than size limit {MAX_REQUEST_SIZE}"))
+            } else {
+                (INTERNAL_ERROR, format!("error reading from websocket: {e}"))
+            }
+        )),
     };
+    if msg.is_close() {
+        return Err(None)
+    }
     if !msg.is_binary() {
-        return Err((UNSUPPORTED_DATA, format!("expected a binary message")))
+        return Err(Some((UNSUPPORTED_DATA, format!("expected a binary message"))))
     }
     if let Err(e) = stdin.write(msg.as_bytes()).await {
-        return Err((INTERNAL_ERROR, format!("failed passing message on: {e}")))
+        return Err(Some((INTERNAL_ERROR, format!("failed passing message on: {e}"))))
     }
     Ok(())
 }
 
-async fn invoke1(input: &[u8]) -> Result<(ChildStdin, Child), String> {
+async fn invoke1() -> Result<(ChildStdin, Child), String> {
     let command = Command::new("/usr/local/lib/ATO/sandbox")
         .stderr(Stdio::piped())
         .stdout(Stdio::piped())
@@ -140,15 +134,10 @@ async fn invoke1(input: &[u8]) -> Result<(ChildStdin, Child), String> {
         Ok(c) => c,
         Err(e) => return Err(format!("internal error: error spawning ATO/sandbox: {e}")),
     };
-    let mut stdin = child
+    let stdin = child
         .stdin
         .take()
         .expect("stdin should not have been taken");
-    if let Err(e) = stdin.write_all(input).await {
-        return Err(
-            format!("internal error: error writing stdin of ATO/sandbox: {e}"),
-        );
-    }
     Ok((stdin, child))
 }
 
@@ -176,15 +165,5 @@ async fn invoke2(child: Child) -> Result<(), (u8, String)> {
         Err((code, msg.into()))
     } else {
         Ok(())
-    }
-}
-
-fn check_message_too_large(e: &warp::Error) -> Option<String> {
-    let e = e.source()?;
-    let e = e.downcast_ref::<ws_error::Error>()?;
-    if let ws_error::Error::Capacity(ws_error::CapacityError::MessageTooLong{size, ..}) = e {
-        Some(format!("received message of size {size}, greater than size limit {MAX_REQUEST_SIZE}"))
-    } else {
-        None
     }
 }

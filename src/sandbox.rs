@@ -26,9 +26,9 @@ use rand::Rng;
 use serde::{Deserialize, Serialize};
 use serde_bytes::ByteBuf;
 use std::ffi::{CStr, CString};
-use std::cmp::min;
 use std::fs::File;
 use std::path::PathBuf;
+use std::process::ExitCode;
 
 /// like the ? postfix operator, but formats errors to strings
 macro_rules! check {
@@ -99,6 +99,25 @@ fn output_message(message: StreamResponse) -> Result<(), Option<String>> {
     }
 }
 
+enum ReadMessageError {
+    ReadError(String),
+    DecodeError(String),
+}
+
+use ReadMessageError::*;
+
+fn read_message<T: serde::de::DeserializeOwned>() -> Result<T, ReadMessageError> {
+    let mut buf = [0u8; MAX_REQUEST_SIZE];
+    let size = read(STDIN_FD, &mut buf).map_err(|e| ReadError(e.to_string()))?;
+    use rmp_serde::decode::Error::*;
+    rmp_serde::from_read::<_, T>(&buf[..size]).map_err(|e| match e {
+        InvalidMarkerRead(ref ei) | InvalidDataRead(ref ei)
+            if ei.kind() != std::io::ErrorKind::UnexpectedEof
+            => ReadError(e.to_string()),
+        e => DecodeError(e.to_string())
+    })
+}
+
 #[allow(dead_code)]
 #[derive(Deserialize)]
 struct Request {
@@ -113,45 +132,7 @@ struct Request {
 
 fn default_timeout() -> i32 { 60 }
 
-struct PacketRead {
-    fd: i32,
-    buf: [u8; PIPE_BUF],
-    buf_len: usize,
-    buf_pos: usize,
-}
-
-impl PacketRead {
-    const fn new(fd: i32) -> Self {
-        PacketRead {
-            fd,
-            buf: [0; PIPE_BUF],
-            buf_len: 0,
-            buf_pos: 0,
-        }
-    }
-}
-
-impl std::io::Read for PacketRead {
-    fn read(&mut self, out: &mut [u8]) -> Result<usize, std::io::Error> {
-        let mut total = 0;
-        // TODO: chunking here makes an effort to fill all of `out`. Is that what we want?
-        for chunk in out.chunks_mut(PIPE_BUF) {
-            assert!(self.buf_pos <= self.buf_len);
-            if self.buf_pos == self.buf_len {
-                // refill buffer
-                self.buf_len = read(self.fd, &mut self.buf).map_err(Into::<std::io::Error>::into)?;
-                self.buf_pos = 0;
-            }
-            let amount_read = min(chunk.len(), self.buf_len - self.buf_pos);
-            total += amount_read;
-            chunk[..amount_read].copy_from_slice(&self.buf[self.buf_pos..][..amount_read]);
-            self.buf_pos += amount_read;
-        }
-        Ok(total)
-    }
-}
-
-fn main() -> std::process::ExitCode {
+fn main() -> ExitCode {
     // some care must be taken over error messages - see comments in run_child
 
     // note also that throughout the code, the Error variant of our Result types is Option<String>
@@ -163,52 +144,36 @@ fn main() -> std::process::ExitCode {
 
     // use stdout in "packet" mode - see pipe(2) § O_DIRECT
     // this ensures that calls to write(2) correspond one-to-one with websocket messages.
-    // and also use stdin in packet mode:
-    // this ensures that calls to read(2) never return the contents of more than one websocket message
-    // (although incoming websocket messages may be spread across multiple pipe packets and thus require multiple reads)
-    // This prevents both:
-    // - data loss from multiple messages being put into one read, with messages after the first being ignored
-    // - "slow loris" attacks - see https://github.com/attempt-this-online/attempt-this-online/issues/88
-    // Note that this means read(2)s from stdin must always ask for at least PIPE_BUF bytes;
-    // otherwise, the remained of a packet may be silently discarded.
-    // PacketRead contains an implementation of Read which provides this guarantee
-    for (name, fd) in [("stdout", STDOUT_FD), ("stdin", STDIN_FD)] {
+    for (name, fd) in [("stdout", STDOUT_FD)] {
         if let Err(e) = fcntl(fd, FcntlArg::F_SETFL(OFlag::O_DIRECT)) {
             eprintln!("error setting {name} pipe to O_DIRECT: {e}");
-            return std::process::ExitCode::from(INTERNAL_ERROR)
+            return ExitCode::from(INTERNAL_ERROR)
         }
     }
 
-    let mut packet_stdin: PacketRead = PacketRead::new(STDIN_FD);
-
-    let request = match rmp_serde::from_read::<_, Request>(&mut packet_stdin) {
+    let request = match read_message::<Request>() {
         Ok(r) => r,
-        Err(e) => {
-            use rmp_serde::decode::Error::*;
-            let why =
-                if let InvalidMarkerRead(ref ei) | InvalidDataRead(ref ei) = e
-                    && ei.kind() != std::io::ErrorKind::UnexpectedEof {
-                    eprintln!("error reading request: {e}");
-                    INTERNAL_ERROR
-                } else {
-                    eprintln!("invalid request: {e}");
-                    POLICY_VIOLATION
-                };
-            return std::process::ExitCode::from(why);
+        Err(ReadError(e)) => {
+            eprintln!("error reading request: {e}");
+            return ExitCode::from(INTERNAL_ERROR)
+        }
+        Err(DecodeError(e)) => {
+            eprintln!("invalid request: {e}");
+            return ExitCode::from(POLICY_VIOLATION)
         }
     };
     let language = match validate(&request) {
         Ok(l) => l,
         Err(e) => {
             eprintln!("invalid request: {e}");
-            return std::process::ExitCode::from(POLICY_VIOLATION);
+            return ExitCode::from(POLICY_VIOLATION);
         }
     };
-    if let Err(Some(e)) = invoke(packet_stdin, &request, language) {
+    if let Err(Some(e)) = invoke(&request, language) {
         eprintln!("{e}");
-        return std::process::ExitCode::from(INTERNAL_ERROR);
+        return ExitCode::from(INTERNAL_ERROR);
     } else {
-        return std::process::ExitCode::from(NORMAL);
+        return ExitCode::from(NORMAL);
     }
 }
 
@@ -316,7 +281,7 @@ fn random_id() -> String {
     rand::thread_rng().gen::<[u8; RANDOM_ID_SIZE]>().encode_hex::<String>()
 }
 
-fn invoke(packet_stdin: PacketRead, request: &Request, language: &Language) -> Result<(), Option<String>> {
+fn invoke(request: &Request, language: &Language) -> Result<(), Option<String>> {
     let cgroup = create_cgroup()?;
     let cgroup_cleanup = Cgroup{ cgroup: &cgroup };
     setup_cgroup(&cgroup)?;
@@ -364,12 +329,11 @@ fn invoke(packet_stdin: PacketRead, request: &Request, language: &Language) -> R
         check!(close(stdout_w), "error closing stdout write end: {}");
         check!(close(stderr_w), "error closing stderr write end: {}");
 
-        run_parent(packet_stdin, stdout_r, stderr_r, pidfd, cgroup_cleanup, timer, request.timeout)
+        run_parent(stdout_r, stderr_r, pidfd, cgroup_cleanup, timer, request.timeout)
     }
 }
 
 fn run_parent(
-    mut packet_stdin: PacketRead,
     stdout_r: i32,
     stderr_r: i32,
     pidfd: i32,
@@ -410,9 +374,12 @@ fn run_parent(
                     Kill,
                 }
                 use ControlMessage::*;
-                match rmp_serde::from_read::<_, ControlMessage>(&mut packet_stdin) {
-                    Err(e) => {
+                match read_message::<ControlMessage>() {
+                    Err(ReadError(e)) => {
                         return Err(Some(format!("error reading control message: {e}")));
+                    }
+                    Err(DecodeError(e)) => {
+                        return Err(Some(format!("invalid control message: {e}")));
                     }
                     Ok(Kill) => {
                         // continue to drop (i.e. kill), and set timed_out = false
