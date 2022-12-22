@@ -197,14 +197,16 @@ async def test_incomplete_request():
         await c.send(payload[:20])
 
 
-async def test_split_request():
+async def test_split_request_delay():
     payload = req("echo hello")
-
     async with _test_error(StartsWith("invalid request:"), max_time=1.1) as c:
         await c.send(payload[:20])
         await sleep(1)
         await c.send(payload[20:])
 
+
+async def test_split_request():
+    payload = req("echo hello")
     async with _test_error(StartsWith("invalid request:")) as c:
         await c.send(payload[:20])
         await c.send(payload[20:])
