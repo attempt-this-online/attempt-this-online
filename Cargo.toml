@@ -1,6 +1,6 @@
 [package]
 name = "attempt-this-online"
-version = "0.1.16"
+version = "0.2.0"
 edition = "2021"
 
 [dependencies]
