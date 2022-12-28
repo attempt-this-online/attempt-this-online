@@ -205,6 +205,7 @@ async def test_split_request_delay():
         await c.send(payload[20:])
 
 
+@mark.xfail(True, reason="#88 is not yet fixed")
 async def test_split_request():
     payload = req("echo hello")
     async with _test_error(StartsWith("invalid request:")) as c:
