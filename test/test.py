@@ -361,3 +361,15 @@ async def test_yes_kill():
                 break
     assert monotonic() - start < 1
     assert not await pgrep("yes")
+
+
+async def test_loopback(c):
+    await c.send(req("ip addr"))
+    assert loads(await c.recv())["Stdout"] == b"""\
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host 
+       valid_lft forever preferred_lft forever
+"""
