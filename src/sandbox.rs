@@ -572,6 +572,7 @@ fn setup_filesystem(request: &Request, language: &Language) -> Result<(), Error>
 }
 
 fn setup_special_files(language_id: &String) -> Result<(), Error> {
+    mount!("./tmp", "tmpfs", MS_NOSUID | MS_NODEV, "mode=755,size=65535k");
     mount!("./ATO", "tmpfs", MS_NOSUID | MS_NODEV, "mode=755,size=65535k");
     check!(mkdir("./ATO/context", Mode::S_IRWXU | Mode::S_IRGRP | Mode::S_IXGRP | Mode::S_IROTH | Mode::S_IXOTH), "error creating /ATO/context: {}");
     mount!("./proc", "proc",);
