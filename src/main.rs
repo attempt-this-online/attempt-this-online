@@ -242,10 +242,7 @@ impl Connection {
     }
 
     pub fn output_message<T: Serialize>(&mut self, message: T) -> Result<(), Error> {
-        let encoded_message = match rmp_serde::to_vec_named(&message) {
-            Ok(r) => r,
-            Err(e) => return Err(Error::InternalError(format!("error encoding output message: {e}"))),
-        };
+        let encoded_message = check!(rmp_serde::to_vec_named(&message), "error encoding output message: {}");
         match self.0.write_message(ws::Message::Binary(encoded_message)) {
             Ok(()) => Ok(()),
             Err(ws::Error::ConnectionClosed) => Err(Error::ClientWentAway),
