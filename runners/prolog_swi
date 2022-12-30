@@ -1,0 +1,5 @@
+#!/bin/sh
+
+cd /ATO/context
+ln -s /ATO/code /ATO/code.pl
+/ATO/yargs %1 /ATO/options /ATO/yargs %2 /ATO/arguments swipl -q -f %1 %2 /ATO/code < /ATO/input

@@ -454,6 +454,13 @@
         "url": "https://github.com/dloscutoff/pip",
         "sbcs": false
     },
+    "prolog_swi": {
+        "name": "Prolog (SWI)",
+        "image": "attemptthisonline/swi_prolog",
+        "version": "Latest",
+        "url": "https://www.swi-prolog.org/",
+        "sbcs": false
+    },
     "pyth": {
         "name": "Pyth",
         "image": "attemptthisonline/pyth",
