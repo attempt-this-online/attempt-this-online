@@ -1,4 +1,10 @@
-#![feature(io_error_more, let_chains, exitcode_exit_method, anonymous_lifetime_in_impl_trait)]
+#![feature(
+    io_error_more,
+    let_chains,
+    exitcode_exit_method,
+    anonymous_lifetime_in_impl_trait,
+    cursor_remaining,
+)]
 
 mod constants;
 mod languages;
@@ -233,8 +239,16 @@ impl Connection {
                 return Err(Error::InternalError(e));
             }
         };
-        match rmp_serde::from_slice::<T>(&message) {
-            Ok(r) => Ok(r),
+        let cursor = std::io::Cursor::new(&message);
+        let mut de = rmp_serde::Deserializer::new(cursor);
+        match <T as Deserialize>::deserialize(&mut de) {
+            Ok(r) => {
+                if !de.get_ref().is_empty() {
+                    Err(Error::PolicyViolation("found extra data".to_string()))
+                } else {
+                    Ok(r)
+                }
+            },
             Err(e) => {
                 Err(Error::PolicyViolation(e.to_string()))
             }

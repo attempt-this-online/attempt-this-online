@@ -221,7 +221,6 @@ async def test_invalid_request_data_type():
         await c.send("not a binary message!")
 
 
-@mark.xfail(True, reason="#97 is not yet fixed")
 async def test_extra_junk_after_request():
     async with _test_error("invalid request: found extra data") as c:
         await c.send(req("") + b"extra junk")
