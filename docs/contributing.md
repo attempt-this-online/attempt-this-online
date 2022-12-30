@@ -95,8 +95,8 @@ cd /ATO/context
 ## Backend developer instructions
 The backend is written in Rust. You'll need the nightly Rust compiler and cargo.
 
-- `src/server.rs` contains the websocket server, which is the main entrypoint to the service
-- `src/sandbox.rs` contains the core sandbox
+- `src/main.rs` is the main entrypoint to the service and contains the websocket server handling code
+- `src/sandbox.rs` contains the core sandbox and execution wrapper
 
 See [Architecture](./architecture.md) for more details on how the overall system works.
 
@@ -115,7 +115,6 @@ sudo docker run --rm -it attemptthisonline/zsh \
     | tar -xC /usr/local/lib/ATO/rootfs/attemptthisonline+zsh
 printf 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\0LANG=C.UTF-8\0' > /usr/local/lib/ATO/env/attemptthisonline+zsh
 ln -s "$(pwd)/runners/zsh" /usr/local/share/ATO/runners/zsh
-ln -s "$(pwd)/target/debug/sandbox" /usr/local/lib/ATO/sandbox
 ln -s "$(which bash)" /usr/local/lib/ATO/bash
 ln -s "$(pwd)/dist/attempt_this_online/yargs" /usr/local/lib/ATO/yargs
 mkdir -p dist/attempt_this_online
@@ -139,7 +138,7 @@ I'm working on Dockerising this (#105), because it's admittedly rather involved.
 Now run the server:
 
 ```bash
-target/debug/server
+target/debug/attempt-this-online
 ```
 
 This will bind to localhost on port 8500 by default. You can override this with the `ATO_BIND` environment variable.
@@ -170,7 +169,7 @@ ls src | entr -c cargo build --all-targets
 
 ```bash
 export ATO_CGROUP_PATH=/sys/fs/cgroup/user.slice/user-$(id -u).slice/user@$(id -u).service/ATO
-ls target/debug/server | entr -rc target/debug/server
+ls target/debug/attempt-this-online | entr -rc target/debug/attempt-this-online
 ```
 
 To rerun tests automatically as well:
@@ -178,7 +177,7 @@ To rerun tests automatically as well:
 ```bash
 export URL='ws://localhost:8500/api/v1/ws/execute'
 # export FAST=1
-ls target/debug/server target/debug/sandbox test/test.py | entr -c test/run
+ls target/debug/attempt-this-online test/test.py | entr -c test/run
 ```
 
 ## Frontend developer instructions

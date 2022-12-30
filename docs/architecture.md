@@ -14,13 +14,9 @@ display. This assumes ATO is being run with the default full setup.
         - `timeout` (int): the maximum number of seconds to run the program for
 - [`nginx`](https://en.wikipedia.org/wiki/Nginx) server receives the request
 - `nginx` forwards the request to the Rust API server over the local port `8500`
-- Rust backend ([`server.rs`]) spawns the Rust sandbox program ([`sandbox.rs`]), feeding the websocket request into its
-  STDIN
-- `msgpack` request is decoded and validated in `sandbox.rs`
-- `sandbox` creates an isolated Linux container in a new [cgroup](https://docs.kernel.org/admin-guide/cgroup-v2.html)
-    - The container has temporary files `/ATO/code`, `/ATO/input`, `/ATO/arguments`, `/ATO/options` created, containing
-      the input values from the API request
-    - It has `rlimit`s and some cgroup values set to limit resource usage
+- Rust backend ([`main.rs`]) forks a new process to handle the request
+- The new process reads and decodes the WebSocket request, passing it to the `invoke` function in [`sandbox.rs`]
+- `sandbox.rs` creates an isolated Linux container in a new [cgroup](https://docs.kernel.org/admin-guide/cgroup-v2.html)
     - The container has mounted:
          - `/` (the root file system): from `/usr/local/lib/ATO/rootfs`, an extracted Docker image containing the root
          file system for the relevant language. The extraction is done as part of the `setup/setup` script, and the
@@ -30,12 +26,18 @@ display. This assumes ATO is being run with the default full setup.
          - `/ATO/bash`: A statically linked `/bin/bash` ([stolen from Debian](https://packages.debian.org/unstable/amd64/bash-static/download)),
          in case the language's Docker image doesn't have a bash
          - `/ATO/yargs`: a wrapper to execute a command with null-terminated arguments from a file
-- `sandbox` kills all processes remaining inside the container's cgroup, and removes the cgroup
-- API takes in the output to create a whole response which is packed again using `msgpack` and sent back to the client
-  via the server in `server.rs`, and `nginx`
+    - The container has temporary files `/ATO/code`, `/ATO/input`, `/ATO/arguments`, `/ATO/options` created, containing
+      the input values from the API request
+    - It has `rlimit`s and some cgroup values set to limit resource usage
+- Meanwhile, `sandbox.rs` spawns a second thread which monitors the program's output, and feeds it into WebSocket
+  response messages (encoded with `msgpack` again)
+- `sandbox.rs` waits for the process to finish, and then stops the second thread
+- `sandbox.rs` kills all processes remaining inside the container's cgroup, and removes the cgroup
+- API takes in the output to create a "done" response with some more details about the program, which is sent back to
+  the client over the WebSocket again
 - The frontend decodes and lays out the result
 
-More details of the container created by `sandbox` can be found by consulting its well-commented source code.
+More details of the sandbox container can be found by consulting its (not-well-commented) source code.
 
-[`server.rs`]: ../src/server.rs
+[`main.rs`]: ../src/main.rs
 [`sandbox.rs`]: ../src/sandbox.rs
