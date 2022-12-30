@@ -373,3 +373,8 @@ async def test_loopback(c):
     inet6 ::1/128 scope host 
        valid_lft forever preferred_lft forever
 """
+
+
+async def test_tmp(c):
+    await c.send(req("touch /tmp/foo; ls /tmp"))
+    assert loads(await c.recv())["Stdout"] == b"foo\n"
