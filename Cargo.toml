@@ -4,9 +4,7 @@ version = "0.2.0"
 edition = "2021"
 
 [dependencies]
-warp = "0.3.3"
-tokio = { version = "1.*", features = ["full"] }
-futures-util = "0.3.25"
+tungstenite = "0.18.0"
 rmp = "0.8.11"
 serde = { version = "1.0.149", features = ["derive"] }
 serde_bytes = "0.11.7"
@@ -19,12 +17,3 @@ hex = "0.4.3"
 clone3 = "0.2.3"
 close_fds = "0.3.2"
 capctl = "0.2.2"
-tokio-tungstenite = "0.17.2"
-
-[[bin]]
-name = "server"
-path = "src/server.rs"
-
-[[bin]]
-name = "sandbox"
-path = "src/sandbox.rs"

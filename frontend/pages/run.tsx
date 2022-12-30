@@ -213,7 +213,7 @@ function _Run(
           notify('stdout exceeded 128KiB and was truncated');
         }
         if (data.Done.stderr_truncated) {
-          notify('stderr exceeded 32KiB and was truncated');
+          notify('stderr exceeded 128KiB and was truncated');
         }
       }
       if ('Stdout' in data) {
