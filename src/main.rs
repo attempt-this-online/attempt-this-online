@@ -3,6 +3,7 @@
 mod constants;
 mod languages;
 mod sandbox;
+mod network;
 
 use crate::{constants::*, languages::*, sandbox::invoke};
 use std::process::Termination;

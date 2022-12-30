@@ -1,5 +1,6 @@
 use crate::constants::*;
 use crate::languages::*;
+use crate::network::setup_network;
 use crate::{check, Error, Request, StreamResponse, Connection, ControlMessage};
 
 use capctl::{caps, prctl};
@@ -471,6 +472,7 @@ fn setup_child(
     check!(prctl::set_pdeathsig(Some(SIGKILL)), "error setting parent death signal: {}");
 
     set_ids(outside_uid, outside_gid)?;
+    setup_network()?;
     setup_filesystem(&request, &language)?;
     drop_caps()?;
     set_resource_limits()?;
