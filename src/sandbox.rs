@@ -1,4 +1,6 @@
-use crate::{constants::*, languages::*, Error, Request, StreamResponse, Connection, ControlMessage};
+use crate::constants::*;
+use crate::languages::*;
+use crate::{check, Error, Request, StreamResponse, Connection, ControlMessage};
 
 use capctl::{caps, prctl};
 use clone3::Clone3;
@@ -24,16 +26,6 @@ use std::ffi::{CStr, CString};
 use std::fs::File;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
-
-/// like the ? postfix operator, but formats errors to strings
-macro_rules! check {
-    ($x:expr, $f:literal $(, $($a:expr),+)? $(,)?) => {
-        $x.map_err(|e| Error::InternalError(format!($f, $($($a,)*)? e)))?
-    };
-    ($x:expr $(,)?) => {
-        $x.map_err(|e| Error::InternalError(e.to_string()))?
-    }
-}
 
 /// log `Err`s to stderr but don't stop execution
 macro_rules! check_continue {

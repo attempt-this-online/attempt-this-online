@@ -176,6 +176,18 @@ pub enum Error {
     InternalError(String),
 }
 
+/// like the ? postfix operator, but formats errors to strings
+macro_rules! check {
+    ($x:expr, $f:literal $(, $($a:expr),+)? $(,)?) => {
+        $x.map_err(|e| Error::InternalError(format!($f, $($($a,)*)? e)))?
+    };
+    ($x:expr $(,)?) => {
+        $x.map_err(|e| Error::InternalError(e.to_string()))?
+    }
+}
+
+pub(crate) use check;
+
 fn handle_request(connection: &mut Connection, connection_fd: i32) -> Result<(), Error> {
     let request = connection.read_message()?;
     let language = validate(&request)?;
