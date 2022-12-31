@@ -589,6 +589,13 @@
         "sbcs": false,
         "se_class": "tex"
     },
+    "thunno": {
+        "name": "Thunno",
+        "image": "attemptthisonline/thunno",
+        "version": "Latest",
+        "url": "https://github.com/Thunno/Thunno",
+        "sbcs": false
+    },
     "tictac": {
         "name": "Tictac",
         "image": "attemptthisonline/tictac",
