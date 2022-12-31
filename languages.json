@@ -124,6 +124,13 @@
         "url": "https://crystal-lang.org/",
         "sbcs": false
     },
+    "curry_kics2": {
+        "name": "Curry (KiCS2)",
+        "image": "attemptthisonline/curry_kics2",
+        "version": "Latest",
+        "url": "https://www-ps.informatik.uni-kiel.de/kics2/index.html",
+        "sbcs": false
+    },
     "curry_pakcs": {
         "name": "Curry (PAKCS)",
         "image": "attemptthisonline/curry_pakcs",
