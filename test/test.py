@@ -382,3 +382,9 @@ async def test_tmp(c):
 async def test_writeable_rootfs(c):
     await c.send(req("echo hi > foo; cat foo"))
     assert loads(await c.recv())["Stdout"] == b"hi\n"
+
+
+@mark.xfail(True, reason="#92 is not fixed yet")
+async def test_writeable_rootfs_everywhere(c):
+    await c.send(req("echo hi > /etc/shadow; cat /etc/shadow"))
+    assert loads(await c.recv())["Stdout"] == b"hi\n"
