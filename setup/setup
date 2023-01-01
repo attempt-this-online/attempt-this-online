@@ -148,6 +148,7 @@ do
             mkdir "/usr/local/lib/ATO/layers/$layer_id"
             tar -xf "/var/cache/ATO/images/$layer_id.tar" -C \
                 "/usr/local/lib/ATO/layers/$layer_id"
+            chown -R ato:ato "/usr/local/lib/ATO/layers/$layer_id"
         done
 
     # replace slash with plus so that it can be used as an individual filename
