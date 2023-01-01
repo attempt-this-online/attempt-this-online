@@ -57,6 +57,13 @@
         "url": "https://github.com/TryItOnline/brainfuck",
         "sbcs": false
     },
+    "brainflak": {
+        "name": "Brain-Flak",
+        "image": "attemptthisonline/brain-flak",
+        "version": "Latest",
+        "url": "https://github.com/DJMcMayhem/Brain-Flak",
+        "sbcs": false
+    },
     "brainfuck": {
         "name": "Brainfuck",
         "image": "attemptthisonline/tio_brainfuck",
