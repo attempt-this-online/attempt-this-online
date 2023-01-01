@@ -12,6 +12,7 @@ mod sandbox;
 mod network;
 
 use crate::{constants::*, languages::*, sandbox::invoke};
+use nix::sys::signal::{signal, Signal, SigHandler};
 use std::process::Termination;
 use std::net::{SocketAddr, TcpListener, TcpStream};
 use tungstenite::protocol::WebSocketConfig;
@@ -52,6 +53,11 @@ where F: FnOnce() -> T,
 }
 
 fn main() {
+    // tell the kernel not to keep zombie processes around
+    // see waitpid(2) § NOTES and https://elixir.bootlin.com/linux/v6.1.2/source/kernel/signal.c#L2089
+    // this is safe because there was no previous signal handler function
+    unsafe { signal(Signal::SIGCHLD, SigHandler::SigIgn) }.unwrap();
+
     let addr = get_bind_address();
     eprintln!("starting ATO server on {addr}");
     let server = TcpListener::bind(addr).unwrap();
@@ -61,6 +67,11 @@ fn main() {
 }
 
 fn handle_ws(connection: TcpStream) {
+    // tell the kernel that we now *do* care about our child processes
+    // see waitpid(2) § NOTES
+    // this is safe because there was no previous signal handler function
+    unsafe { signal(Signal::SIGCHLD, SigHandler::SigDfl) }.unwrap();
+
     // get raw fd so we can poll on it later
     use std::os::fd::AsRawFd;
     let connection_fd = connection.as_raw_fd();
