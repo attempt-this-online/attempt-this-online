@@ -533,7 +533,7 @@ fn setup_filesystem(request: &Request, language: &Language) -> Result<(), Error>
     // set the propogation type of all mounts to private - this is because:
     // 1. when we bind-mount stuff we don't want that to propogate to the parent namespace
     // 2. we don't want any potential mounts in the parent namespace to appear here and mess things up either
-    // 2. pivot_root below requires . and its parent to be mounted private anyway
+    // 3. pivot_root below requires . and its parent to be mounted private anyway
     check!(mount::<str, str, str, str>(
         None,
         "/",
@@ -542,16 +542,22 @@ fn setup_filesystem(request: &Request, language: &Language) -> Result<(), Error>
         None,
     ), "error setting / to MS_PRIVATE: {}");
 
-    // bind-mount rootfs onto itself for two reasons:
-    // 1. the kernel now considers it a mount point, which is required for pivot_root to work
-    // 2. we can make it read-only
+    // mount a tmpfs to contain the data written to the container's root filesystem
+    // (which will be discarded when the container exits)
+    mount!("/run/ATO", "tmpfs", MS_NOSUID, "mode=755,size=65535k");
+    // overlayfs requires separate "upper" and "work" directories, so create those
+    check!(mkdir("/run/ATO/upper", Mode::S_IRWXU), "error creating overlayfs upper directory: {}");
+    check!(mkdir("/run/ATO/work", Mode::S_IRWXU), "error creating overlayfs work directory: {}");
+
+    // mount writeable upper layer on top of rootfs using overlayfs
+    // also, the kernel now considers it a mount point, which is required for pivot_root to work
     check!(mount::<str, str, str, str>(
-        Some(&rootfs),
+        None,
         &rootfs,
-        None,
-        MsFlags::MS_BIND | MsFlags::MS_RDONLY | MsFlags::MS_REC,
-        None,
-    ), "error bind-mounting new rootfs onto itself: {}");
+        Some("overlay"),
+        MsFlags::empty(),
+        Some(&format!("upperdir=/run/ATO/upper,lowerdir={rootfs},workdir=/run/ATO/work")),
+    ), "error mounting new rootfs: {}");
 
     check!(chdir::<str>(&rootfs), "error changing directory to new rootfs: {}");
     // now . points to the new rootfs

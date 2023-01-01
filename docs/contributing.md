@@ -133,6 +133,16 @@ echo +memory > $ATO_CGROUP_PATH/cgroup.subtree_control
 If your distribution doesn't use systemd with cgroup v2 (the "unified cgroup hierarchy"), then you'll have to set it up
 manually.
 
+Finally create a temporary directory owned by your user:
+
+```
+sudo mkdir /run/ATO
+sudo chown $USER:$USER /run/ATO
+chmod 755 /run/ATO
+```
+
+These last two steps (setting up the cgroup and `/run/ATO` directories) will need to be redone if you reboot.
+
 I'm working on Dockerising this (#105), because it's admittedly rather involved.
 
 Now run the server:
