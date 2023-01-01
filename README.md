@@ -12,7 +12,7 @@ It was originally a clone of [Try It Online!](https://github.com/TryItOnline/try
 name.
 
 ## Licence
-© Patrick Reader 2021 - 2022. Attempt This Online is licensed under the GNU Affero General Public License 3.0 except where
+© Patrick Reader 2021 - 2023. Attempt This Online is licensed under the GNU Affero General Public License 3.0 except where
 otherwise noted - see the [`LICENCE.txt`](./LICENCE.txt) file for more information.
 
 Note that if you use the official instance at [ato.pxeger.com](https://ato.pxeger.com), you must also abide by the
