@@ -377,3 +377,8 @@ async def test_loopback(c):
 async def test_tmp(c):
     await c.send(req("touch /tmp/foo; ls /tmp"))
     assert loads(await c.recv())["Stdout"] == b"foo\n"
+
+
+async def test_writeable_rootfs(c):
+    await c.send(req("echo hi > foo; cat foo"))
+    assert loads(await c.recv())["Stdout"] == b"hi\n"
