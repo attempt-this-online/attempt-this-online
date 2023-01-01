@@ -1,4 +1,6 @@
 # Installation
+You will need approximately 20GB or more free disk space.
+
 ## Fully Automated
 Download and execute the [setup script](../setup/setup) **on a fresh install of Arch Linux**. Using the setup script in
 any other distribution, or on an Arch Linux machine that has already had changes, is not supported.
