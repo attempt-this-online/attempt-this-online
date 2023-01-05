@@ -105,8 +105,8 @@ fn create_cgroup() -> Result<PathBuf, Error> {
 fn setup_cgroup(path: &PathBuf) -> Result<(), Error> {
     // this sets some resource limits, but the others are set with ordinary POSIX rlimits:
     // see the set_resource_limits function
-    const MEMORY_HIGH: u64 = 512 * MiB;
-    check!(std::fs::write(path.join("memory.high"), MEMORY_HIGH.to_string()), "error writing cgroup memory.high: {}");
+    // const MEMORY_HIGH: u64 = 512 * MiB;
+    // check!(std::fs::write(path.join("memory.high"), MEMORY_HIGH.to_string()), "error writing cgroup memory.high: {}");
     // disable swap
     check!(std::fs::write(path.join("memory.swap.max"), "0"), "error writing cgroup memory.swap.max: {}");
     Ok(())
