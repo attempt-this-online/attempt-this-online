@@ -50,6 +50,13 @@
         "url": "https://mlochbaum.github.io/BQN/",
         "sbcs": false
     },
+    "bracmat": {
+        "name": "Bracmat",
+        "image": "attemptthisonline/bracmat",
+        "version": "Latest",
+        "url": "http://jongejan.dk/bracmat.html",
+        "sbcs": false
+    },
     "brainbool": {
         "name": "Brainbool",
         "image": "attemptthisonline/tio_brainfuck",
