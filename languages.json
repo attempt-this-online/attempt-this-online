@@ -14,6 +14,13 @@
         "url": "https://github.com/TryItOnline/brainfuck",
         "sbcs": false
     },
+    "aheui_rpaheui": {
+        "name": "Aheui (rpaheui)",
+        "image": "attemptthisonline/rpaheui",
+        "version": "Latest",
+        "url": "https://github.com/aheui/rpaheui",
+        "sbcs": false
+    },
     "apl_dzaima": {
         "name": "APL (dzaima/APL)",
         "image": "attemptthisonline/dzaima_apl",
