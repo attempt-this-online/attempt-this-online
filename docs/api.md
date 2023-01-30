@@ -60,6 +60,9 @@ A [msgpack]-encoded payload - a map containing one key, `Done`, whose value is a
       limitations.
     - `core_dumped`: the number of the signal that caused the process to dump its core (see [`signal(7)`], [`core(5)`])
     - `unknown`: always `-1`
+- `stdout_truncated` and `stderr_truncated`: booleans which indicate if the program's output exceeded 128KiB and was
+  therefore truncated. Note that slightly more than 128KiB may sometimes still be accepted from the program and sent to
+  the client in stdout/stderr messages (see above)
 - `timed_out`: whether the process had to be killed because it overran its 60 second timeout. If this is the case, the
   process will have been killed by `SIGKILL` (ID 9)
 - `real`: real elapsed time in nanoseconds
