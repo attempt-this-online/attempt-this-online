@@ -195,7 +195,7 @@ function _Run(
           `
           Real time: ${data.Done.real / 1e9} s
           Kernel time: ${data.Done.kernel / 1e9} s
-          User time: ${data.Done.kernel / 1e9} s
+          User time: ${data.Done.user / 1e9} s
           Maximum lifetime memory usage: ${data.Done.max_mem} KiB
           Waits (voluntary context switches): ${data.Done.waits}
           Preemptions (involuntary context switches): ${data.Done.preemptions}
