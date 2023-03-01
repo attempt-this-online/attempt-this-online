@@ -195,6 +195,13 @@
         "url": "https://elixir-lang.org",
         "sbcs": false
     },
+    "elm": {
+        "name": "Elm",
+        "image": "attemptthisonline/elm",
+        "version": "Latest",
+        "url": "https://elm-lang.org/",
+        "sbcs": false
+    },
     "erlang": {
         "name": "Erlang",
         "image": "attemptthisonline/erlang",
