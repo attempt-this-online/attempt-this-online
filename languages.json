@@ -121,7 +121,6 @@
         "url": "https://clang.llvm.org",
         "sbcs": false,
         "se_class": "c"
-
     },
     "cognate": {
         "name": "Cognate",
@@ -413,6 +412,13 @@
         "version": "Latest",
         "url": "https://nekovm.org/",
         "sbcs": false
+    },
+    "nekomata": {
+        "name": "Neko",
+        "image": "attemptthisonline/nekomata",
+        "version": "Latest",
+        "url": "https://github.com/AlephAlpha/Nekomata",
+        "sbcs": true
     },
     "nibbles": {
         "name": "Nibbles",
