@@ -355,6 +355,13 @@
         "url": "https://julialang.org",
         "sbcs": false
     },
+    "kamilalisp": {
+        "name": "Kamilalisp",
+        "image": "attemptthisonline/kamilalisp",
+        "version": "Latest",
+        "url": "https://github.com/kspalaiologos/kamilalisp",
+        "sbcs": false
+    },
     "k_ktye": {
         "name": "K (ktye/i)",
         "image": "attemptthisonline/ktye_k",
