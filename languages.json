@@ -561,6 +561,13 @@
         "url": "https://github.com/dloscutoff/Esolangs/tree/master/Regenerate",
         "sbcs": false
     },
+    "retina": {
+        "name": "Retina",
+        "image": "attemptthisonline/retina",
+        "version": "Latest",
+        "url": "https://github.com/m-ender/retina",
+        "sbcs": true
+    },
     "ruby": {
         "name": "Ruby",
         "image": "attemptthisonline/ruby",
