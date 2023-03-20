@@ -414,7 +414,7 @@
         "sbcs": false
     },
     "nekomata": {
-        "name": "Neko",
+        "name": "Nekomata",
         "image": "attemptthisonline/nekomata",
         "version": "Latest",
         "url": "https://github.com/AlephAlpha/Nekomata",
