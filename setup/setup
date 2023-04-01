@@ -92,7 +92,7 @@ install -dm 750 -o root -g http /var/www/_letsencrypt
 certbot certonly -n --standalone -d "$1" -d "www.$1" --agree-tos --register-unsafely-without-email
 # configure cronie to automatically renew certificates
 # (every day at 10:07)
-echo "7 10 * * * certbot renew && systemctl reload nginx" >> /var/spool/cron/root
+echo "7 10 * * * systemctl stop nginx && certbot renew && systemctl start nginx" >> /var/spool/cron/root
 systemctl enable --now cronie.service
 
 # install yargs
