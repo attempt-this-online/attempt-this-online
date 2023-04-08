@@ -1,4 +1,4 @@
 #!/bin/sh
 
 cd /ATO/context
-/ATO/yargs % /ATO/options /ATO/arguments python3 minigolf.py % /ATO/code < /ATO/input
+/ATO/yargs % /ATO/options python3 minigolf.py % /ATO/code < /ATO/input
