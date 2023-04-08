@@ -413,6 +413,13 @@
         "sbcs": false,
         "se_class": "lua"
     },
+    "minigolf": {
+        "name": "minigolf",
+        "image": "attemptthisonline/minigolf",
+        "version": "Latest",
+        "url": "https://github.com/jfioasd/minigolf/",
+        "sbcs": false
+    },
     "neko": {
         "name": "Neko",
         "image": "attemptthisonline/neko",
