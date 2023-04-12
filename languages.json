@@ -666,6 +666,13 @@
         "url": "https://github.com/Thunno/Thunno",
         "sbcs": false
     },
+    "thunno2": {
+        "name": "Thunno 2",
+        "image": "attemptthisonline/thunno2",
+        "version": "Latest",
+        "url": "https://github.com/Thunno/Thunno2",
+        "sbcs": true
+    },
     "tictac": {
         "name": "Tictac",
         "image": "attemptthisonline/tictac",
