@@ -2,7 +2,7 @@
 
 systemctl disable --now ATO.service nginx.service
 sed -i '/^overlay/d' /etc/fstab
-sed -i '/systemctl stop nginx && certbot renew && systemctl start nginx/' /var/spool/cron/root
+sed -i '/systemctl stop nginx && certbot renew && systemctl start nginx/d' /var/spool/cron/root
 umount /usr/local/lib/ATO/rootfs/*
 userdel ato
 rm -rf \
