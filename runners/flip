@@ -1,0 +1,4 @@
+#!/bin/sh
+
+cd /ATO/context
+python3 /opt/flip/flip.py /ATO/code < /ATO/input

@@ -237,6 +237,13 @@
         "url": "https://github.com/PyGamer0/flax",
         "sbcs": true
     },
+    "Flip": {
+        "name": "Flip",
+        "image": "attemptthisonline/flip",
+        "version": "Latest",
+        "url": "https://github.com/jfioasd/Flip",
+        "sbcs": false
+    },
     "funky2": {
         "name": "Funky2",
         "image": "attemptthisonline/funky2",
