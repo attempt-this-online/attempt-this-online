@@ -237,7 +237,7 @@
         "url": "https://github.com/PyGamer0/flax",
         "sbcs": true
     },
-    "Flip": {
+    "flip": {
         "name": "Flip",
         "image": "attemptthisonline/flip",
         "version": "Latest",
