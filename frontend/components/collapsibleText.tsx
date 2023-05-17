@@ -42,7 +42,10 @@ function CollapsibleText({
   return (
     <div className="relative">
       <details open={open} className="my-6">
-        <summary className="cursor-pointer focus-within:ring rounded pl-2 hover:bg-gray-200 dark:hover:bg-gray-700 transition py-1 -mt-3 -mb-1">
+        <summary
+          className="cursor-pointer focus-within:ring rounded pl-2 hover:bg-gray-200 dark:hover:bg-gray-700 transition py-1 -mt-3 -mb-1"
+          tabIndex="-1"
+        >
           <label htmlFor={`textarea:${id}`}>
             <button
               type="button"
