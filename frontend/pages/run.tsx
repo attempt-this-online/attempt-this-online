@@ -416,6 +416,8 @@ ${markdownCode}
   const keyDownHandler = (e: any) => {
     if (readyToSubmit && e.ctrlKey && !e.shiftKey && !e.metaKey && !e.altKey && e.key === 'Enter') {
       submit(e);
+    } else if (e.ctrlKey && !e.shiftKey && !e.metaKey && !e.altKey && e.key === 'y') {
+      setLanguageSelectorOpen(true);
     }
   };
 
