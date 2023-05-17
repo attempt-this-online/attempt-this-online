@@ -43,7 +43,7 @@ const ThemeWrapper = connect(
     dispatch({ type: 'setBigTextBoxes', bigTextBoxes: storedBigTextBoxes });
     let storedTabBehaviour = await localForage.getItem('ATO_tab_behaviour');
     if (storedTabBehaviour !== 'focus' && storedTabBehaviour !== 'insert') {
-      storedTabBehaviour = 'insert';
+      storedTabBehaviour = 'focus';
     }
     dispatch({ type: 'setTabBehaviour', tabBehaviour: storedTabBehaviour });
 
