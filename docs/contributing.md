@@ -34,7 +34,8 @@ guide](https://guides.github.com/introduction/flow/) on the matter.
      byte counter in the frontend to assume all characters comprise one byte (rather than using UTF-8))
    - se_class (provide this only if StackExchange has built-in syntax highlighting for the language; this will be added
      when a CGCC post template is generated. See [here](https://meta.stackexchange.com/q/184108) for details)
-3. Create a runner script in `runners/`. Here is an example showing the general idea:
+3. Create a runner script in `runners/`, named the same as the key in `languages.json`. Here is an example showing the
+   general idea:
 
 ```sh
 #!/bin/sh
