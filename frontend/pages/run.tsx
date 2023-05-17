@@ -83,6 +83,8 @@ function _Run(
 ) {
   const router = useRouter();
 
+  const codeBox = useRef<any>(null);
+
   let [language, setLanguage] = useState<string | null>(null);
   const [header, setHeader] = useState('');
   const [headerEncoding, setHeaderEncoding] = useState('utf-8');
@@ -244,6 +246,7 @@ function _Run(
       const loadedLanguage = router.query.L || router.query.l;
       if (loadedLanguage) {
         setLanguage(loadedLanguage as string);
+        codeBox?.current?.focus();
       } else {
         setLanguageSelectorOpen(true);
       }
@@ -265,8 +268,9 @@ function _Run(
       setInputEncoding(loadedData.inputEncoding);
       // further updates the router.query should not trigger updates
       setShouldLoad(false);
+      codeBox?.current?.focus();
     }
-  }, [router, shouldLoad]);
+  }, [router, shouldLoad, codeBox]);
 
   if (languages && language && !languages[language]) {
     alert(`Unknown language:\n${language}`);
@@ -429,7 +433,13 @@ ${markdownCode}
         <Navbar />
         <div className="grow relative">
           {languageSelectorOpen ? (
-            <LanguageSelector {...{ language, languages, setLanguage, setLanguageSelectorOpen }} />
+            <LanguageSelector {...{ language, languages }} callback={(id: string) => {
+              if (id !== null) {
+                setLanguage(id);
+              };
+              setLanguageSelectorOpen(false);
+              codeBox?.current?.focus();
+            }} />
           ) : null}
           <div className="sticky h-0 top-4 z-20 pointer-events-none">
             {notifications.map(
@@ -557,6 +567,7 @@ ${markdownCode}
                 id="code"
                 onKeyDown={keyDownHandler}
                 dummy={dummy}
+                ref={codeBox}
               >
                 Code
               </CollapsibleText>

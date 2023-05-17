@@ -1,5 +1,5 @@
 import {
-  useState, useEffect, ReactNode,
+  forwardRef, useState, useEffect, ReactNode,
 } from 'react';
 
 import ResizeableText from 'components/resizeableText';
@@ -24,7 +24,7 @@ function CollapsibleText({
   children: ReactNode,
   onKeyDown: (event: any) => void,
   dummy: any,
-}) {
+}, ref) {
   const [open, setOpen] = useState(true);
   const [modified, setModified] = useState(false);
 
@@ -60,6 +60,7 @@ function CollapsibleText({
           onKeyDown={onKeyDown}
           readOnly={readOnly}
           dummy={dummy}
+          ref={ref}
         />
         <div className="absolute top-0 right-0">
           <label htmlFor={`encodingSelect:${id}`}>
@@ -81,6 +82,8 @@ function CollapsibleText({
     </div>
   );
 }
+
+CollapsibleText = forwardRef(CollapsibleText);
 
 CollapsibleText.defaultProps = {
   readOnly: false,

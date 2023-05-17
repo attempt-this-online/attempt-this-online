@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { forwardRef, useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 
-export default function ResizeableText(
+function ResizeableText(
   {
     value,
     readOnly,
@@ -17,6 +17,7 @@ export default function ResizeableText(
     dummy: any,
     setValue?: (e: string) => void,
   },
+  ref,
 ) {
   const [height, setHeight] = useState(24);
   const bigTextBoxes = useSelector((state: any) => state.bigTextBoxes);
@@ -62,7 +63,12 @@ export default function ResizeableText(
         autoCorrect="off"
         autoCapitalize="none"
         spellCheck={false}
+        ref={ref}
       />
     </>
   );
 }
+
+ResizeableText = forwardRef(ResizeableText);
+
+export default ResizeableText;

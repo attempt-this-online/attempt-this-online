@@ -3,12 +3,11 @@ import { useRef, useState, useEffect } from 'react';
 import { MetadataItem } from 'lib/api';
 
 export default function LanguageSelector({
-  languages, setLanguage, language, setLanguageSelectorOpen,
+  languages, language, callback
 }: {
   languages: Record<string, MetadataItem>,
-  setLanguage: (language: string) => void,
   language: string | null,
-  setLanguageSelectorOpen: (state: boolean) => void,
+  callback: (id: string | null) => void,
 }) {
   const searchBox = useRef<HTMLInputElement | null>(null);
   useEffect(() => {
@@ -33,20 +32,19 @@ export default function LanguageSelector({
         onClick={
           (event: any) => {
             if (language !== null) {
-                setLanguageSelectorOpen(false);
+                callback(null);
             }
           }
         }
       ></div>
       <div
         className="fixed flex items-center justify-center overflow-auto z-50 left-0 right-0 top-0 bottom-0 pointer-events-none"
-        onKeyDown={(event: any) => {
+        onKeyUp={(event: any) => {
           if (event.key === 'Escape' && language !== null) {
-            setLanguageSelectorOpen(false);
+            callback(null);
           } else if (event.key === 'Enter' && results?.length && search) {
             const [id, _metadata] = results[0];
-            setLanguage(id);
-            setLanguageSelectorOpen(false);
+            callback(id);
           }
         }}
       >
@@ -59,7 +57,7 @@ export default function LanguageSelector({
             {language !== null && (
               <button
                 type="button"
-                onClick={() => { setLanguageSelectorOpen(false); }}
+                onClick={() => callback(null)}
                 className="absolute right-0 top-0 bottom-0 rounded-full bg-transparent hover:bg-gray-200 dark:hover:bg-gray-800 transition flex"
               >
                 <XIcon className="h-5 w-5 inline-block mx-1 my-auto" />
@@ -86,7 +84,7 @@ export default function LanguageSelector({
                   type="button"
                   key={id}
                   className="p-2 rounded flex w-full text-left cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700 transition"
-                  onClick={() => { setLanguage(id); setLanguageSelectorOpen(false); }}
+                  onClick={() => callback(id)}
                   role="option"
                   aria-selected={id === language}
                 >
