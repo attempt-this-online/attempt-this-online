@@ -16,7 +16,7 @@ const initialState = {
   theme: 'system',
   fontLigaturesEnabled: true,
   bigTextBoxes: true,
-  tabBehaviour: 'insert',
+  tabBehaviour: 'focus',
 };
 
 const reducer = (state = initialState, action: any) => {
