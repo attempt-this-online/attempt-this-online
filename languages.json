@@ -524,7 +524,7 @@
         "sbcs": false
     },
     "pwsh": {
-        "name": "PowerShell Core",
+        "name": "PowerShell",
         "image": "attemptthisonline/pwsh",
         "version": "Latest",
         "url": "https://github.com/PowerShell/PowerShell",
