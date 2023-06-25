@@ -523,9 +523,9 @@
         "url": "https://github.com/dloscutoff/pip",
         "sbcs": false
     },
-    "pwsh": {
+    "powershell": {
         "name": "PowerShell",
-        "image": "attemptthisonline/pwsh",
+        "image": "attemptthisonline/powershell",
         "version": "Latest",
         "url": "https://github.com/PowerShell/PowerShell",
         "sbcs": false,
