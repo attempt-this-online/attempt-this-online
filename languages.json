@@ -523,6 +523,14 @@
         "url": "https://github.com/dloscutoff/pip",
         "sbcs": false
     },
+    "powershell": {
+        "name": "PowerShell",
+        "image": "attemptthisonline/powershell",
+        "version": "Latest",
+        "url": "https://github.com/PowerShell/PowerShell",
+        "sbcs": false,
+        "se_class":"lang-powershell"
+    },
     "prolog_swi": {
         "name": "Prolog (SWI)",
         "image": "attemptthisonline/swi_prolog",
