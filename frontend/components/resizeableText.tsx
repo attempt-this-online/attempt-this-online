@@ -1,7 +1,7 @@
 import { forwardRef, useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 
-function ResizeableText(
+function resizeableText(
   {
     value,
     readOnly,
@@ -17,7 +17,7 @@ function ResizeableText(
     dummy: any,
     setValue?: (e: string) => void,
   },
-  ref,
+  ref: any,
 ) {
   const [height, setHeight] = useState(24);
   const bigTextBoxes = useSelector((state: any) => state.bigTextBoxes);
@@ -44,11 +44,10 @@ function ResizeableText(
       event.target.selectionStart = start + 1;
       event.target.selectionEnd = start + 1;
       handleChange(event);
-    }
-    else {
+    } else {
       onKeyDown(event);
     }
-  }
+  };
   return (
     <>
       <textarea
@@ -69,6 +68,6 @@ function ResizeableText(
   );
 }
 
-ResizeableText = forwardRef(ResizeableText);
+const ResizeableText = forwardRef(resizeableText);
 
 export default ResizeableText;

@@ -4,9 +4,9 @@ import {
 
 import ResizeableText from 'components/resizeableText';
 
-function CollapsibleText({
+function collapsibleText({
   value,
-  setValue,
+  setValue = undefined,
   encoding,
   onEncodingChange,
   id,
@@ -24,7 +24,7 @@ function CollapsibleText({
   children: ReactNode,
   onKeyDown: (event: any) => void,
   dummy: any,
-}, ref) {
+}, ref: any) {
   const [open, setOpen] = useState(true);
   const [modified, setModified] = useState(false);
 
@@ -44,7 +44,7 @@ function CollapsibleText({
       <details open={open} className="my-6">
         <summary
           className="cursor-pointer focus-within:ring rounded pl-2 hover:bg-gray-200 dark:hover:bg-gray-700 transition py-1 -mt-3 -mb-1"
-          tabIndex="-1"
+          tabIndex={-1}
         >
           <label htmlFor={`textarea:${id}`}>
             <button
@@ -59,7 +59,7 @@ function CollapsibleText({
         <ResizeableText
           id={id}
           value={value}
-          setValue={event => { setModified(true); setValue?.(event); }}
+          setValue={(event: any) => { setModified(true); setValue?.(event); }}
           onKeyDown={onKeyDown}
           readOnly={readOnly}
           dummy={dummy}
@@ -86,10 +86,11 @@ function CollapsibleText({
   );
 }
 
-CollapsibleText = forwardRef(CollapsibleText);
+const CollapsibleText = forwardRef(collapsibleText);
 
 CollapsibleText.defaultProps = {
   readOnly: false,
+  setValue: undefined,
 };
 
 export default CollapsibleText;
