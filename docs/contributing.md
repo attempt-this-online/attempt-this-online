@@ -28,6 +28,7 @@ guide](https://guides.github.com/introduction/flow/) on the matter.
    language (avoid special characters); in the value, set these fields:
    - name (should be human-readable - this is what will be presented to the user in the UI)
    - image (name of the Docker image used to run the code)
+       - this must be normalised, to include both the Docker Registry URL, and the tag
    - version (set this to whatever boundary we guarantee to the user, not just the version it currently uses)
    - URL (homepage of the language)
    - SBCS (set to `true` if the language's code uses a single-byte character set; this will change the behaviour of the

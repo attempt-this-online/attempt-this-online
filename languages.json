@@ -1,7 +1,7 @@
 {
     "05ab1e": {
         "name": "05AB1E",
-        "image": "attemptthisonline/05ab1e",
+        "image": "docker.io/attemptthisonline/05ab1e:latest",
         "version": "Latest",
         "url": "https://github.com/Adriandmen/05AB1E",
         "sbcs": true,
@@ -9,35 +9,35 @@
     },
     "alphuck": {
         "name": "Alphuck",
-        "image": "attemptthisonline/tio_brainfuck",
+        "image": "docker.io/attemptthisonline/tio_brainfuck:latest",
         "version": "Unknown",
         "url": "https://github.com/TryItOnline/brainfuck",
         "sbcs": false
     },
     "aheui_rpaheui": {
         "name": "Aheui (rpaheui)",
-        "image": "attemptthisonline/rpaheui",
+        "image": "docker.io/attemptthisonline/rpaheui:latest",
         "version": "Latest",
         "url": "https://github.com/aheui/rpaheui",
         "sbcs": false
     },
     "apl_dzaima": {
         "name": "APL (dzaima/APL)",
-        "image": "attemptthisonline/dzaima_apl",
+        "image": "docker.io/attemptthisonline/dzaima_apl:latest",
         "version": "Latest",
         "url": "https://github.com/dzaima/APL",
         "sbcs": true
     },
     "awk": {
         "name": "AWK",
-        "image": "attemptthisonline/base",
+        "image": "docker.io/attemptthisonline/base:latest",
         "version": "Latest",
         "url": "https://www.gnu.org/software/gawk/",
         "sbcs": false
     },
     "bash": {
         "name": "Bash",
-        "image": "attemptthisonline/bash",
+        "image": "docker.io/attemptthisonline/bash:latest",
         "version": "Latest",
         "url": "https://www.gnu.org/software/bash/",
         "sbcs": false,
@@ -45,56 +45,56 @@
     },
     "bc": {
         "name": "bc",
-        "image": "attemptthisonline/bc",
+        "image": "docker.io/attemptthisonline/bc:latest",
         "version": "Latest",
         "url": "https://www.gnu.org/software/bc/",
         "sbcs": false
     },
     "bqn": {
         "name": "BQN (CBQN)",
-        "image": "attemptthisonline/cbqn",
+        "image": "docker.io/attemptthisonline/cbqn:latest",
         "version": "Latest",
         "url": "https://mlochbaum.github.io/BQN/",
         "sbcs": false
     },
     "bracmat": {
         "name": "Bracmat",
-        "image": "attemptthisonline/bracmat",
+        "image": "docker.io/attemptthisonline/bracmat:latest",
         "version": "Latest",
         "url": "http://jongejan.dk/bracmat.html",
         "sbcs": false
     },
     "brainbool": {
         "name": "Brainbool",
-        "image": "attemptthisonline/tio_brainfuck",
+        "image": "docker.io/attemptthisonline/tio_brainfuck:latest",
         "version": "Unknown",
         "url": "https://github.com/TryItOnline/brainfuck",
         "sbcs": false
     },
     "brainflak": {
         "name": "Brain-Flak",
-        "image": "attemptthisonline/brain-flak",
+        "image": "docker.io/attemptthisonline/brain-flak:latest",
         "version": "Latest",
         "url": "https://github.com/DJMcMayhem/Brain-Flak",
         "sbcs": false
     },
     "brainfuck": {
         "name": "Brainfuck",
-        "image": "attemptthisonline/tio_brainfuck",
+        "image": "docker.io/attemptthisonline/tio_brainfuck:latest",
         "version": "the only version",
         "url": "https://github.com/TryItOnline/brainfuck",
         "sbcs": false
     },
     "brainlove": {
         "name": "Brainlove",
-        "image": "attemptthisonline/tio_brainfuck",
+        "image": "docker.io/attemptthisonline/tio_brainfuck:latest",
         "version": "Unknown",
         "url": "https://github.com/TryItOnline/brainfuck",
         "sbcs": false
     },
     "c_gcc": {
         "name": "C (GCC)",
-        "image": "attemptthisonline/base",
+        "image": "docker.io/attemptthisonline/base:latest",
         "version": "11",
         "url": "https://gcc.gnu.org",
         "sbcs": false,
@@ -102,21 +102,21 @@
     },
     "chapel": {
         "name": "Chapel",
-        "image": "attemptthisonline/chapel",
+        "image": "docker.io/attemptthisonline/chapel:latest",
         "version": "1.28.0",
         "url": "https://chapel-lang.org",
         "sbcs": false
     },
     "charcoal": {
         "name": "Charcoal",
-        "image": "attemptthisonline/charcoal",
+        "image": "docker.io/attemptthisonline/charcoal:latest",
         "version": "Latest",
         "url": "https://github.com/somebody1234/Charcoal",
         "sbcs": true
     },
     "clang": {
         "name": "C (clang)",
-        "image": "attemptthisonline/clang",
+        "image": "docker.io/attemptthisonline/clang:latest",
         "version": "Latest",
         "url": "https://clang.llvm.org",
         "sbcs": false,
@@ -124,14 +124,14 @@
     },
     "cognate": {
         "name": "Cognate",
-        "image": "attemptthisonline/cognate",
+        "image": "docker.io/attemptthisonline/cognate:latest",
         "version": "Latest",
         "url": "https://cognate-lang.github.io",
         "sbcs": false
     },
     "cplusplus_gcc": {
         "name": "C++ (GCC)",
-        "image": "attemptthisonline/gcc",
+        "image": "docker.io/attemptthisonline/gcc:latest",
         "version": "11",
         "url": "https://gcc.gnu.org",
         "sbcs": false,
@@ -139,35 +139,35 @@
     },
     "crystal": {
         "name": "Crystal",
-        "image": "attemptthisonline/crystal",
+        "image": "docker.io/attemptthisonline/crystal:latest",
         "version": "Latest",
         "url": "https://crystal-lang.org/",
         "sbcs": false
     },
     "curry_kics2": {
         "name": "Curry (KiCS2)",
-        "image": "attemptthisonline/curry_kics2",
+        "image": "docker.io/attemptthisonline/curry_kics2:latest",
         "version": "Latest",
         "url": "https://www-ps.informatik.uni-kiel.de/kics2/index.html",
         "sbcs": false
     },
     "curry_pakcs": {
         "name": "Curry (PAKCS)",
-        "image": "attemptthisonline/curry_pakcs",
+        "image": "docker.io/attemptthisonline/curry_pakcs:latest",
         "version": "Latest",
         "url": "https://www.informatik.uni-kiel.de/~pakcs/index.html",
         "sbcs": false
     },
     "dc": {
         "name": "dc",
-        "image": "attemptthisonline/bc",
+        "image": "docker.io/attemptthisonline/bc:latest",
         "version": "Latest",
         "url": "https://www.gnu.org/software/bc/",
         "sbcs": false
     },
     "deno": {
         "name": "TypeScript (Deno)",
-        "image": "attemptthisonline/deno",
+        "image": "docker.io/attemptthisonline/deno:latest",
         "version": "Latest",
         "url": "https://deno.land",
         "sbcs": false,
@@ -175,35 +175,35 @@
     },
     "dirac": {
         "name": "dirac",
-        "image": "attemptthisonline/dirac",
+        "image": "docker.io/attemptthisonline/dirac:latest",
         "version": "Latest",
         "url": "https://esolangs.org/wiki/Dirac",
         "sbcs": false
     },
     "dyalog_apl": {
         "name": "APL (Dyalog APL)",
-        "image": "dyalog/dyalog",
+        "image": "docker.io/dyalog/dyalog:latest",
         "version": "Latest",
         "url": "https://www.dyalog.com/products.htm",
         "sbcs": false
     },
     "elixir": {
         "name": "Elixir",
-        "image": "attemptthisonline/elixir",
+        "image": "docker.io/attemptthisonline/elixir:latest",
         "version": "Latest",
         "url": "https://elixir-lang.org",
         "sbcs": false
     },
     "elm": {
         "name": "Elm",
-        "image": "attemptthisonline/elm",
+        "image": "docker.io/attemptthisonline/elm:latest",
         "version": "Latest",
         "url": "https://elm-lang.org/",
         "sbcs": false
     },
     "erlang": {
         "name": "Erlang",
-        "image": "attemptthisonline/erlang",
+        "image": "docker.io/attemptthisonline/erlang:latest",
         "version": "Latest",
         "url": "https://www.erlang.org",
         "sbcs": false,
@@ -211,70 +211,70 @@
     },
     "exceptionally": {
         "name": "Exceptionally",
-        "image": "attemptthisonline/exceptionally",
+        "image": "docker.io/attemptthisonline/exceptionally:latest",
         "version": "Latest",
         "url": "https://github.com/dloscutoff/Esolangs/tree/master/Exceptionally",
         "sbcs": false
     },
     "extended_brainfuck_type_I": {
         "name": "Extended Brainfuck Type I",
-        "image": "attemptthisonline/tio_brainfuck",
+        "image": "docker.io/attemptthisonline/tio_brainfuck:latest",
         "version": "Unknown",
         "url": "https://github.com/TryItOnline/brainfuck",
         "sbcs": false
     },
     "factor": {
         "name": "Factor",
-        "image": "attemptthisonline/factor",
+        "image": "docker.io/attemptthisonline/factor:latest",
         "version": "Latest",
         "url": "https://factorcode.org",
         "sbcs": false
     },
     "flax": {
         "name": "flax",
-        "image": "attemptthisonline/flax",
+        "image": "docker.io/attemptthisonline/flax:latest",
         "version": "Latest",
         "url": "https://github.com/PyGamer0/flax",
         "sbcs": true
     },
     "flip": {
         "name": "Flip",
-        "image": "attemptthisonline/flip",
+        "image": "docker.io/attemptthisonline/flip:latest",
         "version": "Latest",
         "url": "https://github.com/jfioasd/Flip",
         "sbcs": false
     },
     "funky2": {
         "name": "Funky2",
-        "image": "attemptthisonline/funky2",
+        "image": "docker.io/attemptthisonline/funky2:latest",
         "version": "Latest",
         "url": "https://funky2.a-ta.co/",
         "sbcs": false
     },
     "gdc": {
         "name": "D (GDC)",
-        "image": "attemptthisonline/gcc",
+        "image": "docker.io/attemptthisonline/gcc:latest",
         "version": "11",
         "url": "https://gdcproject.org",
         "sbcs": false
     },
     "gfortran": {
         "name": "Fortran (GFortran)",
-        "image": "attemptthisonline/gcc",
+        "image": "docker.io/attemptthisonline/gcc:latest",
         "version": "11",
         "url": "https://gcc.gnu.org/fortran",
         "sbcs": false
     },
     "gnat": {
         "name": "Ada (GNAT)",
-        "image": "attemptthisonline/gcc",
+        "image": "docker.io/attemptthisonline/gcc:latest",
         "version": "11",
         "url": "https://en.wikipedia.org/wiki/GNAT",
         "sbcs": false
     },
     "go": {
         "name": "Go",
-        "image": "attemptthisonline/go",
+        "image": "docker.io/attemptthisonline/go:latest",
         "version": "Latest",
         "url": "https://go.dev",
         "sbcs": false,
@@ -282,7 +282,7 @@
     },
     "go_gcc": {
         "name": "Go (GCC)",
-        "image": "attemptthisonline/gcc",
+        "image": "docker.io/attemptthisonline/gcc:latest",
         "version": "11",
         "url": "https://gcc.gnu.org",
         "sbcs": false,
@@ -290,7 +290,7 @@
     },
     "guile": {
         "name": "Guile",
-        "image": "attemptthisonline/base",
+        "image": "docker.io/attemptthisonline/base:latest",
         "version": "Latest",
         "url": "https://www.gnu.org/software/guile/",
         "sbcs": false,
@@ -298,7 +298,7 @@
     },
     "haskell": {
         "name": "Haskell",
-        "image": "attemptthisonline/haskell",
+        "image": "docker.io/attemptthisonline/haskell:latest",
         "version": "Latest",
         "url": "https://www.haskell.org",
         "sbcs": false,
@@ -306,28 +306,28 @@
     },
     "hops": {
         "name": "HOPS",
-        "image": "attemptthisonline/hops",
+        "image": "docker.io/attemptthisonline/hops:latest",
         "version": "Latest",
         "url": "https://akc.is/hops/",
         "sbcs": false
     },
     "husk": {
         "name": "Husk",
-        "image": "attemptthisonline/husk",
+        "image": "docker.io/attemptthisonline/husk:latest",
         "version": "Latest",
         "url": "https://github.com/barbuz/Husk",
         "sbcs": true
     },
     "j": {
         "name": "J",
-        "image": "attemptthisonline/j_but_longer",
+        "image": "docker.io/attemptthisonline/j_but_longer:latest",
         "version": "Latest",
         "url": "https://www.jsoftware.com",
         "sbcs": false
     },
     "j_uby": {
         "name": "J-uby",
-        "image": "attemptthisonline/j_uby",
+        "image": "docker.io/attemptthisonline/j_uby:latest",
         "version": "Latest",
         "url": "https://github.com/cyoce/J-uby",
         "sbcs": false,
@@ -335,7 +335,7 @@
     },
     "java": {
         "name": "Java",
-        "image": "attemptthisonline/java",
+        "image": "docker.io/attemptthisonline/java:latest",
         "version": "Latest",
         "url": "https://en.wikipedia.org/wiki/Java_(programming_language)",
         "sbcs": false,
@@ -343,63 +343,63 @@
     },
     "jelly": {
         "name": "Jelly",
-        "image": "attemptthisonline/jelly",
+        "image": "docker.io/attemptthisonline/jelly:latest",
         "version": "70c9fd93",
         "url": "https://github.com/DennisMitchell/jellylanguage",
         "sbcs": true
     },
     "jq": {
         "name": "jq",
-        "image": "attemptthisonline/jq",
+        "image": "docker.io/attemptthisonline/jq:latest",
         "version": "Latest",
         "url": "https://stedolan.github.io/jq/",
         "sbcs": false
     },
     "julia": {
         "name": "Julia",
-        "image": "attemptthisonline/julia",
+        "image": "docker.io/attemptthisonline/julia:latest",
         "version": "Latest",
         "url": "https://julialang.org",
         "sbcs": false
     },
     "kamilalisp": {
         "name": "Kamilalisp",
-        "image": "attemptthisonline/kamilalisp",
+        "image": "docker.io/attemptthisonline/kamilalisp:latest",
         "version": "Latest",
         "url": "https://github.com/kspalaiologos/kamilalisp",
         "sbcs": false
     },
     "k_ktye": {
         "name": "K (ktye/i)",
-        "image": "attemptthisonline/ktye_k",
+        "image": "docker.io/attemptthisonline/ktye_k:latest",
         "version": "Latest",
         "url": "https://github.com/ktye/i",
         "sbcs": false
     },
     "k_ngn": {
         "name": "K (ngn/k)",
-        "image": "attemptthisonline/ngn_k",
+        "image": "docker.io/attemptthisonline/ngn_k:latest",
         "version": "Latest",
         "url": "https://codeberg.org/ngn/k",
         "sbcs": false
     },
     "k_ok": {
         "name": "K (oK)",
-        "image": "attemptthisonline/ok",
+        "image": "docker.io/attemptthisonline/ok:latest",
         "version": "Latest",
         "url": "https://github.com/JohnEarnest/ok",
         "sbcs": false
     },
     "knight": {
         "name": "Knight",
-        "image": "attemptthisonline/knight",
+        "image": "docker.io/attemptthisonline/knight:latest",
         "version": "Latest",
         "url": "https://github.com/knight-lang/knight-lang",
         "sbcs": false
     },
     "kotlin": {
         "name": "Kotlin",
-        "image": "attemptthisonline/kotlin",
+        "image": "docker.io/attemptthisonline/kotlin:latest",
         "version": "Latest",
         "url": "https://kotlinlang.org",
         "sbcs": false,
@@ -407,14 +407,14 @@
     },
     "lolcode": {
         "name": "LOLCODE",
-        "image": "attemptthisonline/lolcode",
+        "image": "docker.io/attemptthisonline/lolcode:latest",
         "version": "Latest",
         "url": "https://github.com/justinmeza/lci",
         "sbcs": false
     },
     "lua": {
         "name": "Lua",
-        "image": "attemptthisonline/lua",
+        "image": "docker.io/attemptthisonline/lua:latest",
         "version": "Latest",
         "url": "https://www.lua.org",
         "sbcs": false,
@@ -422,42 +422,42 @@
     },
     "minigolf": {
         "name": "minigolf",
-        "image": "attemptthisonline/minigolf",
+        "image": "docker.io/attemptthisonline/minigolf:latest",
         "version": "Latest",
         "url": "https://github.com/jfioasd/minigolf/",
         "sbcs": false
     },
     "neko": {
         "name": "Neko",
-        "image": "attemptthisonline/neko",
+        "image": "docker.io/attemptthisonline/neko:latest",
         "version": "Latest",
         "url": "https://nekovm.org/",
         "sbcs": false
     },
     "nekomata": {
         "name": "Nekomata",
-        "image": "attemptthisonline/nekomata",
+        "image": "docker.io/attemptthisonline/nekomata:latest",
         "version": "Latest",
         "url": "https://github.com/AlephAlpha/Nekomata",
         "sbcs": true
     },
     "nibbles": {
         "name": "Nibbles",
-        "image": "attemptthisonline/nibbles",
+        "image": "docker.io/attemptthisonline/nibbles:latest",
         "version": "Latest",
         "url": "http://golfscript.com/nibbles/index.html",
         "sbcs": false
     },
     "nim": {
         "name": "Nim",
-        "image": "attemptthisonline/nim",
+        "image": "docker.io/attemptthisonline/nim:latest",
         "version": "Latest",
         "url": "https://nim-lang.org/",
         "sbcs": false
     },
     "node": {
         "name": "JavaScript (Node.js)",
-        "image": "attemptthisonline/node",
+        "image": "docker.io/attemptthisonline/node:latest",
         "version": "Latest",
         "url": "https://nodejs.org",
         "sbcs": false,
@@ -465,7 +465,7 @@
     },
     "objective_c_gcc": {
         "name": "Objective-C (GCC)",
-        "image": "attemptthisonline/gcc",
+        "image": "docker.io/attemptthisonline/gcc:latest",
         "version": "11",
         "url": "https://gcc.gnu.org",
         "sbcs": false,
@@ -473,7 +473,7 @@
     },
     "objective_cplusplus_gcc": {
         "name": "Objective-C++ (GCC)",
-        "image": "attemptthisonline/gcc",
+        "image": "docker.io/attemptthisonline/gcc:latest",
         "version": "11",
         "url": "https://gcc.gnu.org",
         "sbcs": false,
@@ -481,28 +481,28 @@
     },
     "ocaml": {
         "name": "OCaml",
-        "image": "attemptthisonline/ocaml",
+        "image": "docker.io/attemptthisonline/ocaml:latest",
         "version": "Latest",
         "url": "https://ocaml.org",
         "sbcs": false
     },
     "ooocode": {
         "name": "oOo CODE",
-        "image": "attemptthisonline/tio_brainfuck",
+        "image": "docker.io/attemptthisonline/tio_brainfuck:latest",
         "version": "Unknown",
         "url": "https://github.com/TryItOnline/brainfuck",
         "sbcs": false
     },
     "pari_gp": {
         "name": "PARI/GP",
-        "image": "attemptthisonline/pari_gp",
+        "image": "docker.io/attemptthisonline/pari_gp:latest",
         "version": "Latest",
         "url": "https://pari.math.u-bordeaux.fr",
         "sbcs": false
     },
     "perl": {
         "name": "Perl",
-        "image": "attemptthisonline/perl",
+        "image": "docker.io/attemptthisonline/perl:latest",
         "version": "Latest",
         "url": "https://www.perl.org",
         "sbcs": false,
@@ -510,7 +510,7 @@
     },
     "php": {
         "name": "PHP",
-        "image": "attemptthisonline/php",
+        "image": "docker.io/attemptthisonline/php:latest",
         "version": "Latest",
         "url": "https://www.php.net",
         "sbcs": false,
@@ -518,14 +518,14 @@
     },
     "pip": {
         "name": "Pip",
-        "image": "attemptthisonline/pip",
+        "image": "docker.io/attemptthisonline/pip:latest",
         "version": "Latest",
         "url": "https://github.com/dloscutoff/pip",
         "sbcs": false
     },
     "powershell": {
         "name": "PowerShell",
-        "image": "attemptthisonline/powershell",
+        "image": "docker.io/attemptthisonline/powershell:latest",
         "version": "Latest",
         "url": "https://github.com/PowerShell/PowerShell",
         "sbcs": false,
@@ -533,21 +533,21 @@
     },
     "prolog_swi": {
         "name": "Prolog (SWI)",
-        "image": "attemptthisonline/swi_prolog",
+        "image": "docker.io/attemptthisonline/swi_prolog:latest",
         "version": "Latest",
         "url": "https://www.swi-prolog.org/",
         "sbcs": false
     },
     "pyth": {
         "name": "Pyth",
-        "image": "attemptthisonline/pyth",
+        "image": "docker.io/attemptthisonline/pyth:latest",
         "version": "Latest",
         "url": "https://github.com/isaacg1/pyth",
         "sbcs": false
     },
     "python": {
         "name": "Python",
-        "image": "attemptthisonline/python_with_common_libraries",
+        "image": "docker.io/attemptthisonline/python_with_common_libraries:latest",
         "version": "Latest",
         "url": "https://www.python.org",
         "sbcs": false,
@@ -555,7 +555,7 @@
     },
     "python2": {
         "name": "Python 2",
-        "image": "attemptthisonline/python2",
+        "image": "docker.io/attemptthisonline/python2:latest",
         "version": "2",
         "url": "https://docs.python.org/2/",
         "sbcs": false,
@@ -563,14 +563,14 @@
     },
     "quipu": {
         "name": "Quipu",
-        "image": "attemptthisonline/quipu",
+        "image": "docker.io/attemptthisonline/quipu:latest",
         "version": "Latest",
         "url": "https://github.com/cgccuser/quipu",
         "sbcs": false
     },
     "r": {
         "name": "R",
-        "image": "attemptthisonline/r_but_longer",
+        "image": "docker.io/attemptthisonline/r_but_longer:latest",
         "version": "Latest",
         "url": "https://www.r-project.org",
         "sbcs": false,
@@ -578,7 +578,7 @@
     },
     "raku": {
         "name": "Raku (Perl 6) (rakudo)",
-        "image": "attemptthisonline/raku",
+        "image": "docker.io/attemptthisonline/raku:latest",
         "version": "Latest",
         "url": "https://raku.org",
         "sbcs": false,
@@ -586,28 +586,28 @@
     },
     "random_brainfuck": {
         "name": "Random Brainfuck",
-        "image": "attemptthisonline/tio_brainfuck",
+        "image": "docker.io/attemptthisonline/tio_brainfuck:latest",
         "version": "Unknown",
         "url": "https://github.com/TryItOnline/brainfuck",
         "sbcs": false
     },
     "regenerate": {
         "name": "Regenerate",
-        "image": "attemptthisonline/regenerate",
+        "image": "docker.io/attemptthisonline/regenerate:latest",
         "version": "Latest",
         "url": "https://github.com/dloscutoff/Esolangs/tree/master/Regenerate",
         "sbcs": false
     },
     "retina": {
         "name": "Retina",
-        "image": "attemptthisonline/retina",
+        "image": "docker.io/attemptthisonline/retina:latest",
         "version": "Latest",
         "url": "https://github.com/m-ender/retina",
         "sbcs": true
     },
     "ruby": {
         "name": "Ruby",
-        "image": "attemptthisonline/ruby",
+        "image": "docker.io/attemptthisonline/ruby:latest",
         "version": "Latest",
         "url": "https://www.ruby-lang.org/",
         "sbcs": false,
@@ -615,7 +615,7 @@
     },
     "rust": {
         "name": "Rust",
-        "image": "attemptthisonline/rust",
+        "image": "docker.io/attemptthisonline/rust:latest",
         "version": "Latest",
         "url": "https://www.rust-lang.org",
         "sbcs": false,
@@ -623,7 +623,7 @@
     },
     "sbcl": {
         "name": "Common Lisp (SBCL)",
-        "image": "attemptthisonline/sbcl",
+        "image": "docker.io/attemptthisonline/sbcl:latest",
         "version": "Latest",
         "url": "http://www.sbcl.org",
         "sbcs": false,
@@ -631,7 +631,7 @@
     },
     "scala2": {
         "name": "Scala 2",
-        "image": "attemptthisonline/scala2",
+        "image": "docker.io/attemptthisonline/scala2:latest",
         "version": "2",
         "url": "https://www.scala-lang.org/",
         "sbcs": false,
@@ -639,7 +639,7 @@
     },
     "scala3": {
         "name": "Scala 3",
-        "image": "attemptthisonline/scala3",
+        "image": "docker.io/attemptthisonline/scala3:latest",
         "version": "3",
         "url": "https://www.scala-lang.org/",
         "sbcs": false,
@@ -647,28 +647,28 @@
     },
     "sed": {
         "name": "sed",
-        "image": "attemptthisonline/base",
+        "image": "docker.io/attemptthisonline/base:latest",
         "version": "Latest",
         "url": "https://www.gnu.org/software/sed/",
         "sbcs": false
     },
     "slashes": {
         "name": "///",
-        "image": "attemptthisonline/slashes",
+        "image": "docker.io/attemptthisonline/slashes:latest",
         "version": "Latest",
         "url": "https://esolangs.org/wiki////",
         "sbcs": false
     },
     "tcl": {
         "name": "Tcl",
-        "image": "attemptthisonline/tcl",
+        "image": "docker.io/attemptthisonline/tcl:latest",
         "version": "Latest",
         "url": "http://tcl.sourceforge.net",
         "sbcs": false
     },
     "tex": {
         "name": "TeX",
-        "image": "attemptthisonline/texlive",
+        "image": "docker.io/attemptthisonline/texlive:latest",
         "version": "Latest",
         "url": "https://tug.org/texlive/doc.html",
         "sbcs": false,
@@ -676,49 +676,49 @@
     },
     "thunno": {
         "name": "Thunno",
-        "image": "attemptthisonline/thunno",
+        "image": "docker.io/attemptthisonline/thunno:latest",
         "version": "Latest",
         "url": "https://github.com/Thunno/Thunno",
         "sbcs": false
     },
     "thunno2": {
         "name": "Thunno 2",
-        "image": "attemptthisonline/thunno2",
+        "image": "docker.io/attemptthisonline/thunno2:latest",
         "version": "Latest",
         "url": "https://github.com/Thunno/Thunno2",
         "sbcs": true
     },
     "tictac": {
         "name": "Tictac",
-        "image": "attemptthisonline/tictac",
+        "image": "docker.io/attemptthisonline/tictac:latest",
         "version": "Latest",
         "url": "https://github.com/pxeger/tictac",
         "sbcs": true
     },
     "tinybf": {
         "name": "TinyBF",
-        "image": "attemptthisonline/tio_brainfuck",
+        "image": "docker.io/attemptthisonline/tio_brainfuck:latest",
         "version": "Unknown",
         "url": "https://github.com/TryItOnline/brainfuck",
         "sbcs": false
     },
     "vyxal": {
         "name": "Vyxal",
-        "image": "attemptthisonline/vyxal",
+        "image": "docker.io/attemptthisonline/vyxal:latest",
         "version": "2",
         "url": "https://github.com/Vyxal/Vyxal",
         "sbcs": true
     },
     "whitespace": {
         "name": "Whitespace",
-        "image": "attemptthisonline/whitespace",
+        "image": "docker.io/attemptthisonline/whitespace:latest",
         "version": "Latest",
         "url": "https://web.archive.org/web/20150618184706/http://compsoc.dur.ac.uk/whitespace/tutorial.php",
         "sbcs": false
     },
     "whython": {
         "name": "Whython",
-        "image": "attemptthisonline/whython",
+        "image": "docker.io/attemptthisonline/whython:latest",
         "version": "Latest",
         "url": "https://github.com/pxeger/whython",
         "sbcs": false,
@@ -726,21 +726,21 @@
     },
     "yq": {
         "name": "yq",
-        "image": "attemptthisonline/jq",
+        "image": "docker.io/attemptthisonline/jq:latest",
         "version": "Latest",
         "url": "https://kislyuk.github.io/yq/",
         "sbcs": false
     },
     "zig": {
         "name": "Zig",
-        "image": "attemptthisonline/zig",
+        "image": "docker.io/attemptthisonline/zig:latest",
         "version": "Latest",
         "url": "https://ziglang.org/",
         "sbcs": false
     },
     "zsh": {
         "name": "Zsh",
-        "image": "attemptthisonline/zsh",
+        "image": "docker.io/attemptthisonline/zsh:latest",
         "version": "5",
         "url": "https://www.zsh.org/",
         "sbcs": false,
