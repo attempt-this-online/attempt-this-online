@@ -19,9 +19,11 @@ display. This assumes ATO is being run with the default full setup.
 - `sandbox.rs` creates an isolated Linux container in a new [cgroup](https://docs.kernel.org/admin-guide/cgroup-v2.html)
     - The container has mounted:
          - `/` (the root file system): from `/usr/local/lib/ATO/rootfs`, an extracted Docker image containing the root
-         file system for the relevant language. The extraction is done as part of the `setup/setup` script, and the
-         layers are mounted using `overlayfs` and added to `/etc/fstab` by `setup/overlayfs_genfstab`
-         - Various other special Linux filesystems and files (`/proc`, `/sys`, `/dev/*`)
+         file system for the relevant language.
+         - Over the top of the root file system are an extra layer `/usr/local/share/ATO/overlayfs_upper`,
+            (which contains empty directories for mount points for `/ATO`, `/proc`, and `/dev`)
+            and a temporary writeable directory `/run/ATO/upper` to allow the user to "write" to the filesystem
+         - Various other special Linux filesystems and files (`/proc`, `/sys`, `/dev/*`, `/tmp`)
          - `/ATO/`: A `tmpfs` where the following few files will be put
          - `/ATO/bash`: A statically linked `/bin/bash` ([stolen from Debian](https://packages.debian.org/unstable/amd64/bash-static/download)),
          in case the language's Docker image doesn't have a bash
@@ -41,3 +43,12 @@ More details of the sandbox container can be found by consulting its (not-well-c
 
 [`main.rs`]: ../src/main.rs
 [`sandbox.rs`]: ../src/sandbox.rs
+
+## Image loading
+Images are downloaded from Docker Hub using [`skopeo`] and stored into `/usr/local/lib/ATO/containers`, which is managed
+by [`containers-storage`]. When ATO [starts up][startup], it uses [`containers-storage`] to mount the images;
+from there, they are remounted into `/usr/local/lib/ATO/rootfs` to ensure correct permissions and predictable path names.
+
+[startup]: ../setup/ATO
+[`skopeo`]: https://github.com/containers/skopeo
+[`containers-storage`]: https://github.com/containers/storage

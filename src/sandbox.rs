@@ -451,7 +451,7 @@ fn run_child(
 
 fn load_env(language: &Language) -> Result<Vec<CString>, Error> {
     const ENV_BASE_PATH: &str = "/usr/local/lib/ATO/env/";
-    let path = String::from(ENV_BASE_PATH) + &language.image.replace("/", "+");
+    let path = String::from(ENV_BASE_PATH) + &language.image.replace("/", "+").replace(":", "+");
     check!(std::fs::read(path), "error reading image env file: {}")
         .split_inclusive(|b| *b == 0) // split after null bytes, and include them in the results
         .map(|s| CString::from_vec_with_nul(s.to_vec()))
@@ -517,7 +517,7 @@ macro_rules! mount {
 
 fn get_rootfs(language: &Language) -> String {
     const IMAGE_BASE_PATH: &str = "/usr/local/lib/ATO/rootfs/";
-    String::from(IMAGE_BASE_PATH) + &language.image.replace("/", "+")
+    String::from(IMAGE_BASE_PATH) + &language.image.replace("/", "+").replace(":", "+")
 }
 
 fn get_runner(language_id: &String) -> String {
@@ -526,10 +526,12 @@ fn get_runner(language_id: &String) -> String {
 }
 
 fn setup_filesystem(request: &Request, language: &Language) -> Result<(), Error> {
+    // find out where the languages' image is stored
     let rootfs = get_rootfs(&language);
 
     // set the propogation type of all mounts to private - this is because:
-    // 1. when we bind-mount stuff we don't want that to propogate to the parent namespace
+    // 1. when we mount /run/ATO, and bind-mount other stuff,
+    //    we don't want those to propogate to the parent namespace
     // 2. we don't want any potential mounts in the parent namespace to appear here and mess things up either
     // 3. pivot_root below requires . and its parent to be mounted private anyway
     check!(mount::<str, str, str, str>(
@@ -546,18 +548,20 @@ fn setup_filesystem(request: &Request, language: &Language) -> Result<(), Error>
     // overlayfs requires separate "upper" and "work" directories, so create those
     check!(mkdir("/run/ATO/upper", Mode::S_IRWXU), "error creating overlayfs upper directory: {}");
     check!(mkdir("/run/ATO/work", Mode::S_IRWXU), "error creating overlayfs work directory: {}");
+    // also create a place to mount the new merged writeable rootfs
+    check!(mkdir("/run/ATO/merged", Mode::S_IRWXU), "error creating overlayfs merged directory: {}");
 
     // mount writeable upper layer on top of rootfs using overlayfs
     // also, the kernel now considers it a mount point, which is required for pivot_root to work
     check!(mount::<str, str, str, str>(
         None,
-        &rootfs,
+        "/run/ATO/merged",
         Some("overlay"),
         MsFlags::empty(),
-        Some(&format!("upperdir=/run/ATO/upper,lowerdir={rootfs},workdir=/run/ATO/work")),
+        Some(&format!("upperdir=/run/ATO/upper,lowerdir=/usr/local/share/ATO/overlayfs_upper:{rootfs},workdir=/run/ATO/work")),
     ), "error mounting new rootfs: {}");
 
-    check!(chdir::<str>(&rootfs), "error changing directory to new rootfs: {}");
+    check!(chdir::<str>("/run/ATO/merged"), "error changing directory to new rootfs: {}");
     // now . points to the new rootfs
 
     setup_special_files(&request.language)?;
