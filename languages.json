@@ -405,6 +405,13 @@
         "sbcs": false,
         "se_class": "kotlin"
     },
+    "koka": {
+        "name": "Koka",
+        "image": "docker.io/attemptthisonline/koka:latest",
+        "version": "Latest",
+        "url": "https://koka-lang.github.io",
+        "sbcs": false
+    },
     "lolcode": {
         "name": "LOLCODE",
         "image": "docker.io/attemptthisonline/lolcode:latest",
