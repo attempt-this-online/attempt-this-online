@@ -5,6 +5,7 @@ sed -i '/systemctl stop nginx && certbot renew && systemctl start nginx/d' /var/
 umount /usr/local/lib/ATO/rootfs/*
 containers-storage wipe --graph /usr/local/lib/ATO/containers --run /run/ATO/containers
 userdel ato
+umount /usr/local/lib/ATO/containers/overlay
 rm -rf \
     /run/ATO \
     /var/cache/ATO \
