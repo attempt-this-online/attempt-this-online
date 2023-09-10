@@ -156,7 +156,9 @@ target/debug/attempt-this-online
 This will bind to localhost on port 8500 by default. You can override this with the `ATO_BIND` environment variable.
 
 ### Tests
-There are some basic sandbox functionality tests written in Python (make sure you have version 3.10 or higher installed).
+There are some basic tests written in Python (make sure you have version 3.10 or higher installed). These can test both
+the sandbox's functionality, and all the languages.
+
 The `test/run` helper script will set up the testing environment for you if needed (as well as running the tests).
 Pass it the URL to the API, like this:
 
@@ -164,12 +166,13 @@ Pass it the URL to the API, like this:
 URL='ws://localhost:8500/api/v1/ws/execute' test/run
 ```
 
-Some of the tests take a few seconds to run (because they test timing things). To skip these, set the `FAST` environment
-variable:
+To skip the tests which require all languages' images to be installed, set the `FAST` environment variable to 1.
 
 ```bash
 FAST=1 URL='...' test/run
 ```
+
+Some of the tests still take a few seconds to run (because they test timing things). To skip these too, set `FAST` to 2.
 
 In addition, some of the tests don't make sense if ATO is running on a remote server (different to the one the test are
 running on), as they check things like the timing or the state of the operating system after calling ATO. These can be
