@@ -113,6 +113,7 @@ interface MetadataItem {
   se_class: string;
   sbcs: string;
   url: string;
+  hello_world?: any;
 }
 
 async function getMetadata() {
