@@ -33,8 +33,16 @@ guide](https://guides.github.com/introduction/flow/) on the matter.
    - URL (homepage of the language)
    - SBCS (set to `true` if the language's code uses a single-byte character set; this will change the behaviour of the
      byte counter in the frontend to assume all characters comprise one byte (rather than using UTF-8))
-   - se_class (provide this only if StackExchange has built-in syntax highlighting for the language; this will be added
+   - `se_class` (provide this only if StackExchange has built-in syntax highlighting for the language; this will be added
      when a CGCC post template is generated. See [here](https://meta.stackexchange.com/q/184108) for details)
+   - `hello_world`: an object containing a description of a simple "hello world"-type program in the language. It has
+     attributes:
+     - `code` (string, required)
+     - `input` (string, optional, defaults to empty)
+     - `options` and `arguments` (list of strings, defaulting to empty)
+     - `output` (string, required) - the expected stdout of the program (stderr is ignored)
+     - If your language cannot produce a simple hello world program fitting these criteria, write a comment on #127, and
+       leave this field undefined for now
 3. Create a runner script in `runners/`, named the same as the key in `languages.json`. Here is an example showing the
    general idea:
 
