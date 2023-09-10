@@ -18,6 +18,9 @@ TOO_LARGE = 1009
 POLICY_VIOLATION = 1008
 
 url = environ["URL"]
+
+REMOTE = bool(environ.get("REMOTE"))
+
 slow = mark.skipif(bool(environ.get("FAST")), reason="takes too long and FAST option set")
 
 
@@ -83,7 +86,7 @@ async def test_code(c):
     start = monotonic()
     await c.send(req("sleep 1"))
     assert loads(await c.recv()).keys() == {"Done"}
-    assert 1 < monotonic() - start < 1.1
+    assert REMOTE or 1 < monotonic() - start < 1.1
 
 
 @slow
@@ -94,7 +97,7 @@ async def test_parallelism():
 
     start = monotonic()
     await gather(inner(), inner())
-    assert 1 < monotonic() - start < 1.2
+    assert REMOTE or 1 < monotonic() - start < 1.2
 
 
 async def test_stdout(c):
@@ -139,7 +142,7 @@ async def test_timeout(c):
     start = monotonic()
     await c.send(req("sleep 3", timeout=1))
     r = loads(await c.recv())["Done"]
-    assert 1 < monotonic() - start < 1.1
+    assert REMOTE or 1 < monotonic() - start < 1.1
     assert r["timed_out"]
     assert r["status_type"] == "killed"
     assert r["status_value"] == SIGKILL
@@ -152,7 +155,7 @@ async def _test_error(msg, code=POLICY_VIOLATION, max_time=0.1):
         async with connect(url) as c:
             yield c
             await c.recv()
-    assert monotonic() - start < max_time
+    assert REMOTE or monotonic() - start < max_time
     assert e.value.code == code
     assert e.value.reason == msg
 
@@ -257,7 +260,7 @@ async def test_streaming(c):
         assert 0.9 < now - then < 1.1
         then = now
     assert "Done" in loads(await c.recv())
-    assert monotonic() - then < 0.1
+    assert REMOTE or monotonic() - then < 0.1
 
 
 @slow
@@ -267,7 +270,7 @@ async def test_kill(c):
     start = monotonic()
     await c.send(dumps("Kill"))
     r = loads(await c.recv())["Done"]
-    assert monotonic() - start < 0.1
+    assert REMOTE or monotonic() - start < 0.1
     assert r["status_type"] == "killed"
     assert r["status_value"] == SIGKILL
 
@@ -278,10 +281,11 @@ async def test_close_stdio(c, close):
     start = monotonic()
     await c.send(req(f"exec {close}; sleep 1"))
     assert "Done" in loads(await c.recv())
-    assert 1.0 < monotonic() - start < 1.1
+    assert REMOTE or 1 < monotonic() - start < 1.1
 
 
 async def pgrep(*args):
+    assert not REMOTE
     def inner():
         proc = subprocess.run(["pgrep", *args])
         match proc.returncode:
@@ -300,10 +304,10 @@ async def test_client_close():
     async with connect(url) as c:
         await c.send(req("sleep 5"))
         await sleep(1)
-        assert await pgrep("sleep")
+        assert REMOTE or await pgrep("sleep")
     await sleep(1)
-    assert monotonic() - start < 2.1
-    assert not await pgrep("sleep")
+    assert REMOTE or monotonic() - start < 2.1
+    assert REMOTE or not await pgrep("sleep")
 
 
 @slow
@@ -311,7 +315,7 @@ async def test_client_close_yes():
     async with connect(url) as c:
         await c.send(req("yes"))
     await sleep(1)
-    assert not await pgrep("yes")
+    assert REMOTE or not await pgrep("yes")
 
 
 async def test_large_output(c):
@@ -334,7 +338,7 @@ async def test_truncated(c, name):
         assert r == {name.capitalize(): bytes(CHUNK_SIZE)}
     r = loads(await c.recv())["Done"]
     assert r[f"{name}_truncated"] is True
-    assert monotonic() - start < 0.5
+    assert REMOTE or monotonic() - start < 0.5
 
 
 async def test_yes():
@@ -344,8 +348,8 @@ async def test_yes():
         async for msg in c:
             if "Done" in loads(msg):
                 break
-    assert monotonic() - start < 1
-    assert not await pgrep("yes")
+    assert REMOTE or monotonic() - start < 1
+    assert REMOTE or not await pgrep("yes")
 
 
 async def test_yes_kill():
@@ -358,8 +362,8 @@ async def test_yes_kill():
         async for msg in c:
             if "Done" in loads(msg):
                 break
-    assert monotonic() - start < 1
-    assert not await pgrep("yes")
+    assert REMOTE or monotonic() - start < 1
+    assert REMOTE or not await pgrep("yes")
 
 
 async def test_loopback(c):

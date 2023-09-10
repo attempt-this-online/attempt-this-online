@@ -168,7 +168,15 @@ Some of the tests take a few seconds to run (because they test timing things). T
 variable:
 
 ```bash
-FAST=1 URL='ws://localhost:8500/api/v1/ws/execute' test/run
+FAST=1 URL='...' test/run
+```
+
+In addition, some of the tests don't make sense if ATO is running on a remote server (different to the one the test are
+running on), as they check things like the timing or the state of the operating system after calling ATO. These can be
+skipped by setting the `REMOTE` environment variable:
+
+```bash
+REMOTE=1 URL='...' test/run
 ```
 
 ### Automatic rebuilds
