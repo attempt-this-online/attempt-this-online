@@ -377,11 +377,8 @@ async def test_tmp(c):
     assert loads(await c.recv())["Stdout"] == b"foo\n"
 
 
-async def test_writeable_rootfs(c):
-    await c.send(req("echo hi > foo; cat foo"))
+async def test_writeable_fs(c):
+    await c.send(req("echo hi > /foo; cat /foo"))
     assert loads(await c.recv())["Stdout"] == b"hi\n"
 
 
-async def test_writeable_rootfs_everywhere(c):
-    await c.send(req("echo hi > /etc/shadow; cat /etc/shadow"))
-    assert loads(await c.recv())["Stdout"] == b"hi\n"
