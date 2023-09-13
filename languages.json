@@ -468,7 +468,7 @@
     },
     "lolcode": {
         "name": "LOLCODE",
-        "hello_world": {"code": "HAI 1.2\nVISIBLE\"Hello, World!\"\nKTHXBYE", "output": "Hello, World!\n"},
+        "hello_world": {"code": "HAI 1.2\nVISIBLE \"Hello, World!\"\nKTHXBYE", "output": "Hello, World!\n"},
         "image": "docker.io/attemptthisonline/lolcode:latest",
         "version": "Latest",
         "url": "https://github.com/justinmeza/lci",
