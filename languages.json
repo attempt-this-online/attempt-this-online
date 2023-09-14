@@ -729,7 +729,7 @@
     },
     "scala3": {
         "name": "Scala 3",
-        "hello_world": {"code": "print(\"Hello, World!\")", "output": "Hello, World!"},
+        "hello_world": {"code": "@main\ndef main = print(\"Hello, World!\")", "output": "Hello, World!"},
         "image": "docker.io/attemptthisonline/scala3:latest",
         "version": "3",
         "url": "https://www.scala-lang.org/",
