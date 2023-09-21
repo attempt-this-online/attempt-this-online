@@ -485,6 +485,7 @@
     },
     "minigolf": {
         "name": "minigolf",
+        "hello_world": {"code": "[Hello, World!]", "options": ["-c"], "output": "Hello, World!\n"},
         "image": "docker.io/attemptthisonline/minigolf:latest",
         "version": "Latest",
         "url": "https://github.com/jfioasd/minigolf/",
