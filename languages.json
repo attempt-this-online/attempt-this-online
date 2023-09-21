@@ -413,6 +413,7 @@
     },
     "kamilalisp": {
         "name": "Kamilalisp",
+        "hello_world": {"code": "(io:writeln \"Hello, World!\")", "output": "Hello, World!\n"},
         "image": "docker.io/attemptthisonline/kamilalisp:latest",
         "version": "Latest",
         "url": "https://github.com/kspalaiologos/kamilalisp",
