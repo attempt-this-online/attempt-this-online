@@ -271,6 +271,7 @@
     },
     "flip": {
         "name": "Flip",
+        "hello_world": {"code": "\" H e l l o ,   W o r l d ! \" o #", "output": "Hello, World!\n"},
         "image": "docker.io/attemptthisonline/flip:latest",
         "version": "Latest",
         "url": "https://github.com/jfioasd/Flip",
