@@ -223,6 +223,7 @@
     },
     "elm": {
         "name": "Elm",
+        "hello_world": {"code": "main : Program () () ()\nmain = Platform.worker {init = \_ -> ((), Interact.put \"hello\"), update = \() () -> ((), Cmd.none), subscriptions = \() -> Sub.none}", "output": "Hello, World!"},
         "image": "docker.io/attemptthisonline/elm:latest",
         "version": "Latest",
         "url": "https://elm-lang.org/",
