@@ -508,6 +508,7 @@
     },
     "nibbles": {
         "name": "Nibbles",
+        "hello_world": {"code": "\"Hello, World!\"", "output": "Hello, World!\n"},
         "image": "docker.io/attemptthisonline/nibbles:latest",
         "version": "Latest",
         "url": "http://golfscript.com/nibbles/index.html",
