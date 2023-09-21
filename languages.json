@@ -767,7 +767,7 @@
     },
     "tex": {
         "name": "TeX",
-        "hello_world": {"code": "Hello, World!", "output": "Hello, World!"},
+        "hello_world": {"code": "Hello, World!\\end", "output": "Hello, World!\n                                            1\n\n\n"},
         "image": "docker.io/attemptthisonline/texlive:latest",
         "version": "Latest",
         "url": "https://tug.org/texlive/doc.html",
