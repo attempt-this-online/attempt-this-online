@@ -107,7 +107,7 @@
     },
     "c_gcc": {
         "name": "C (GCC)",
-        "hello_world": {"code": "#include <stdio.h>\nint main(void) { printf(\"Hello, World!\"); }", "output": "Hello, World!"},
+        "hello_world": {"code": "#include <stdio.h>\nint main(void) { puts(\"Hello, World!\"); }", "output": "Hello, World!\n"},
         "image": "docker.io/attemptthisonline/base:latest",
         "version": "11",
         "url": "https://gcc.gnu.org",
@@ -132,7 +132,7 @@
     },
     "clang": {
         "name": "C (clang)",
-        "hello_world": {"code": "#include <stdio.h>\nint main(void) { printf(\"Hello, World!\"); }", "output": "Hello, World!"},
+        "hello_world": {"code": "#include <stdio.h>\nint main(void) { puts(\"Hello, World!\"); }", "output": "Hello, World!\n"},
         "image": "docker.io/attemptthisonline/clang:latest",
         "version": "Latest",
         "url": "https://clang.llvm.org",
@@ -536,7 +536,7 @@
     },
     "objective_c_gcc": {
         "name": "Objective-C (GCC)",
-        "hello_world": {"code": "main() { puts(\"Hello, World!\"); }", "output": "Hello, World!\n"},
+        "hello_world": {"code": "#include <stdio.h>\nint main(void) { puts(\"Hello, World!\"); }", "output": "Hello, World!\n"},
         "image": "docker.io/attemptthisonline/gcc:latest",
         "version": "11",
         "url": "https://gcc.gnu.org",
@@ -545,7 +545,7 @@
     },
     "objective_cplusplus_gcc": {
         "name": "Objective-C++ (GCC)",
-        "hello_world": {"code": "int main(void) { puts(\"Hello, World!\"); }", "output": "Hello, World!"},
+        "hello_world": {"code": "#include <stdio.h>\nint main(void) { puts(\"Hello, World!\"); }", "output": "Hello, World!\n"},
         "image": "docker.io/attemptthisonline/gcc:latest",
         "version": "11",
         "url": "https://gcc.gnu.org",
