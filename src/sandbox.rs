@@ -544,7 +544,7 @@ fn setup_filesystem(request: &Request, language: &Language) -> Result<(), Error>
 
     // mount a tmpfs to contain the data written to the container's root filesystem
     // (which will be discarded when the container exits)
-    mount!("/run/ATO", "tmpfs", MS_NOSUID, "mode=755,size=65535k");
+    mount!("/run/ATO", "tmpfs", MS_NOSUID, "mode=755,size=655350k");
     // overlayfs requires separate "upper" and "work" directories, so create those
     check!(mkdir("/run/ATO/upper", Mode::S_IRWXU), "error creating overlayfs upper directory: {}");
     check!(mkdir("/run/ATO/work", Mode::S_IRWXU), "error creating overlayfs work directory: {}");
@@ -580,15 +580,15 @@ fn setup_filesystem(request: &Request, language: &Language) -> Result<(), Error>
 }
 
 fn setup_special_files(language_id: &String) -> Result<(), Error> {
-    mount!("./tmp", "tmpfs", MS_NOSUID | MS_NODEV, "mode=1755,size=65535k");
-    mount!("./ATO", "tmpfs", MS_NOSUID | MS_NODEV, "mode=755,size=65535k");
+    mount!("./tmp", "tmpfs", MS_NOSUID | MS_NODEV, "mode=1755,size=655350k");
+    mount!("./ATO", "tmpfs", MS_NOSUID | MS_NODEV, "mode=755,size=655350k");
     check!(mkdir("./ATO/context", Mode::S_IRWXU | Mode::S_IRGRP | Mode::S_IXGRP | Mode::S_IROTH | Mode::S_IXOTH), "error creating /ATO/context: {}");
     mount!("./proc", "proc",);
-    mount!("./dev", "tmpfs", MS_NOSUID | MS_STRICTATIME, "mode=755,size=65535k");
+    mount!("./dev", "tmpfs", MS_NOSUID | MS_STRICTATIME, "mode=755,size=655350k");
     check!(mkdir("./dev/pts", Mode::empty()), "error creating mount point for /dev/pts: {}");
     mount!("./dev/pts", "devpts", MS_NOSUID | MS_NOEXEC, "newinstance,ptmxmode=0666,mode=0620");
     check!(mkdir("./dev/shm", Mode::empty()), "error creating mount point for /dev/shm: {}");
-    mount!("shm", "./dev/shm", "tmpfs", MS_NOSUID | MS_NODEV | MS_NOEXEC, "mode=1777,size=65536k");
+    mount!("shm", "./dev/shm", "tmpfs", MS_NOSUID | MS_NODEV | MS_NOEXEC, "mode=1777,size=655350k");
     check!(mkdir("./dev/mqueue", Mode::empty()), "error creating mount point for /dev/mqueue: {}");
     mount!("./dev/mqueue", "mqueue", MS_NOSUID | MS_NODEV | MS_NOEXEC);
     mount!("./sys", "sysfs", MS_NOSUID | MS_NODEV | MS_NOEXEC);
