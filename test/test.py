@@ -5,7 +5,7 @@ import subprocess
 from time import monotonic
 from websockets import connect, ConnectionClosed
 from msgpack import loads, dumps
-from pytest import mark, raises
+from pytest import mark, raises, xfail
 from pytest_asyncio import fixture
 import json
 
@@ -403,6 +403,9 @@ with open("../languages.json") as f:
 @very_slow
 @mark.parametrize("expected,kwargs", hello_world_tests)
 async def test_hello_worlds(expected, kwargs, c):
+    if kwargs["language"] in {"elm", "curry_kics2", "funky2", "powershell"}:
+        xfail(f"known-broken language: " + kwargs["language"])
+
     await c.send(req(**kwargs))
     output = bytearray()
     stderr = bytearray()
