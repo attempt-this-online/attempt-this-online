@@ -111,7 +111,7 @@ To set up a minimal development environment:
 ```bash
 sudo mkdir -p /usr/local/{lib,share}/ATO
 sudo chown $USER:$USER /usr/local/{lib,share}/ATO
-mkdir /usr/local/lib/ATO/{rootfs/attemptthisonline+zsh/{proc,sys,dev,ATO},env} /usr/local/share/ATO/runners
+mkdir /usr/local/lib/ATO/{rootfs/attemptthisonline+zsh/{proc,sys,dev,ATO},env} /usr/local/share/ATO/{overlayfs_upper,runners}
 sudo docker run --rm -it attemptthisonline/zsh \
     tar --exclude /sys --exclude /proc --exclude /dev -c / \
     | tar -xC /usr/local/lib/ATO/rootfs/docker.io+attemptthisonline+zsh+latest
@@ -123,6 +123,8 @@ mkdir -p dist/attempt_this_online
 gcc -Wall -Werror -static yargs.c -o dist/attempt_this_online/yargs
 cargo build --all-targets
 ```
+
+The following steps need to be run every time you reboot:
 
 Set up the cgroup v2 pseudofilesystem. If systemd manages cgroup v2:
 
