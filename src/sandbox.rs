@@ -442,7 +442,7 @@ fn run_child(
     // this is safe because it's right before an exec
     unsafe { close_open_fds(FIRST_NON_STDIO_FD, &[]) } // should never error
 
-    if let Err(e) = execve(cstr!("/ATO/runner"), &[cstr!("/ATO/runner")], &env) {
+    if let Err(e) = execve(cstr!("/ATO/bash"), &[cstr!("/ATO/bash"), cstr!("/ATO/runner")], &env) {
         eprintln!("ATO internal error: error running execve: {e}")
     } else {
         eprintln!("ATO internal error: execve should never return if successful")
@@ -520,7 +520,7 @@ fn get_rootfs(language: &Language) -> String {
     String::from(IMAGE_BASE_PATH) + &language.image.replace("/", "+").replace(":", "+")
 }
 
-fn get_runner(language_id: &String) -> String {
+fn get_default_runner(language_id: &String) -> String {
     const LANGUAGE_BASE_PATH: &str = "/usr/local/share/ATO/runners/";
     String::from(LANGUAGE_BASE_PATH) + language_id
 }
@@ -613,7 +613,7 @@ fn setup_special_files(language_id: &String) -> Result<(), Error> {
     for (src, dest) in [
         ("/usr/local/lib/ATO/bash", "./ATO/bash"),
         ("/usr/local/lib/ATO/yargs", "./ATO/yargs"),
-        (&get_runner(&language_id), "./ATO/runner"),
+        (&get_default_runner(&language_id), "./ATO/default_runner"),
     ] {
         drop(check!(File::create(&dest), "error creating mount point for {}: {}", dest));
         mount!(&src, &dest, , MS_NOSUID | MS_BIND | MS_RDONLY);
@@ -624,6 +624,13 @@ fn setup_special_files(language_id: &String) -> Result<(), Error> {
 
 fn setup_request_files(request: &Request) -> Result<(), Error> {
     check!(std::fs::write("/ATO/code", &request.code), "error writing /ATO/code: {}");
+    if let Some(custom_runner) = &request.custom_runner {
+        use std::io::Write;
+        let mut file = check!(std::fs::File::create("/ATO/runner"), "error opening /ATO/runner: {}");
+        check!(file.write_all(&custom_runner), "error writing /ATO/runner: {}");
+    } else {
+        check!(std::os::unix::fs::symlink("/ATO/default_runner", "/ATO/runner"), "error linking /ATO/runner: {}");
+    }
     // TODO: stream input in instead of writing it to a file?
     check!(std::fs::write("/ATO/input", &request.input), "error writing /ATO/input: {}");
     check!(std::fs::write("/ATO/arguments", join_args(&request.arguments)), "error writing /ATO/arguments: {}");

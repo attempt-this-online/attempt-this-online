@@ -176,6 +176,8 @@ enum StreamResponse {
 pub struct Request {
     pub language: String,
     pub code: ByteBuf,
+    #[serde(default /* = None */)]
+    pub custom_runner: Option<ByteBuf>,
     pub input: ByteBuf,
     pub arguments: Vec<ByteBuf>,
     pub options: Vec<ByteBuf>,
