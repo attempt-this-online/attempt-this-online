@@ -5,9 +5,10 @@ import { deflateRaw, inflateRaw } from 'pako';
 const SCHEMA = 1;
 
 function save(data: any): string {
+  const optionsOrCustomRunner = data.isAdvanced ? data.customRunner : data.options;
   const compactedData = [
     data.language,
-    data.options,
+    optionsOrCustomRunner,
     data.header,
     data.headerEncoding,
     data.code,
@@ -18,6 +19,9 @@ function save(data: any): string {
     data.input,
     data.inputEncoding,
   ];
+  if (data.isAdvanced) {
+    compactedData.push(data.customRunnerEncoding);
+  }
   const msgpacked = msgpack.encode(compactedData);
   const compressed = deflateRaw(msgpacked);
   const b64encoded = fromUint8Array(compressed, true); // true means URL-safe
@@ -30,13 +34,13 @@ function load1(b64encoded: string): any {
   const compressed = toUint8Array(b64encoded);
   const msgpacked = inflateRaw(compressed);
   const compactedData = msgpack.decode(msgpacked) as any;
-  if (compactedData.length !== 11) {
-    console.error('invalid URL data (expected array of length 11)', compactedData);
+  if (compactedData.length < 11 || compactedData.length > 12) {
+    console.error('invalid URL data (expected array of length 11 or 12)', compactedData);
     return null;
   }
   const [
     language,
-    options,
+    optionsOrCustomRunner,
     header,
     headerEncoding,
     code,
@@ -46,7 +50,10 @@ function load1(b64encoded: string): any {
     programArguments,
     input,
     inputEncoding,
+    customRunnerEncoding,
   ] = compactedData;
+  const options = customRunnerEncoding ? null : optionsOrCustomRunner;
+  const customRunner = customRunnerEncoding ? optionsOrCustomRunner : null;
   return {
     language,
     options,
@@ -59,6 +66,8 @@ function load1(b64encoded: string): any {
     programArguments,
     input,
     inputEncoding,
+    customRunner,
+    customRunnerEncoding: customRunnerEncoding ?? null,
   };
 }
 
