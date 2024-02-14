@@ -40,6 +40,8 @@ A [msgpack]-encoded payload - a map with the following string keys:
 - `arguments`: an array of binaries - command-line arguments to be passed to the **program itself**
 - `timeout`: (optional) an integer which specifies the duration in seconds for which the program is allowed to run. Must
 be less than or equal to 60. If not specified, 60 is used.
+- `custom_runner`: (optional) a binary containing a Bash script to be run instead of invoking the language's compiler.
+(More explanation is given at https://ato.pxeger.com/run?1=m7O4qjjjwIKlpSVpuhZoFJQ-AAA)
 
 Typing is fairly lax; strings will be accepted in place of binaries (they will be encoded in UTF-8).
 
