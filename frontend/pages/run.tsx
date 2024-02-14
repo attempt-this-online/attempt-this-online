@@ -259,13 +259,13 @@ function _Run(
     } else {
       const loadedLanguage = router.query.L || router.query.l || loadedData.language;
       setLanguage(loadedLanguage);
-      if (loadedData.options) {
-        setOptions([loadedData.options, parseList(loadedData.options)]);
-        setIsAdvanced(false);
-      } else {
+      if (loadedData.isAdvanced) {
         setCustomRunner(loadedData.customRunner);
         setCustomRunnerEncoding(loadedData.customRunnerEncoding);
         setIsAdvanced(true);
+      } else {
+        setOptions([loadedData.options, parseList(loadedData.options)]);
+        setIsAdvanced(false);
       }
       setHeader(loadedData.header);
       setHeaderEncoding(loadedData.headerEncoding);
@@ -354,6 +354,7 @@ function _Run(
     [
       language,
       optionsString,
+      isAdvanced,
       customRunner,
       customRunnerEncoding,
       header,

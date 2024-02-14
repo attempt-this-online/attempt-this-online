@@ -52,11 +52,15 @@ function load1(b64encoded: string): any {
     inputEncoding,
     customRunnerEncoding,
   ] = compactedData;
-  const options = customRunnerEncoding ? null : optionsOrCustomRunner;
-  const customRunner = customRunnerEncoding ? optionsOrCustomRunner : null;
+  const isAdvanced = !!customRunnerEncoding;
+  const options = isAdvanced ? undefined : optionsOrCustomRunner;
+  const customRunner = isAdvanced ? optionsOrCustomRunner : undefined;
   return {
     language,
+    isAdvanced,
     options,
+    customRunner,
+    customRunnerEncoding: isAdvanced ? customRunnerEncoding : undefined,
     header,
     headerEncoding,
     code,
@@ -66,8 +70,6 @@ function load1(b64encoded: string): any {
     programArguments,
     input,
     inputEncoding,
-    customRunner,
-    customRunnerEncoding: customRunnerEncoding ?? null,
   };
 }
 
