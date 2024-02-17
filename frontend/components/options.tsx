@@ -1,7 +1,7 @@
 import CollapsibleText from 'components/collapsibleText';
 import { ArgvList } from 'components/argvList';
 
-const advancedModeExampleUrl = 'http://localhost:3000/run?1=TY_NSsNAFIX3eYrDWCURk1goRYgVfAI3gmApMp0fM5DOrclEArVv4qKb-kYu-jZOMhG9i5nLOd-9Z-bzKF5ehTh9b96R3z8-5IKk-usyEXkX6ROvqv8qUkLz1vJaRZpqGLttnT-xm2bZ9HpfQFIEX9Q67ywmsRIlgU0GkOEDWR7GkwEzGsultwPOsMB8htWqgCuVHYi-wg4vjdGoiRxI97BpMC4fcG0iSVYdjq3T6c3p-cxYUbX-Z7eNk4ay8i4y1mHDjY0T7MIjvNAVQ9sIbnXMziW7wkWXBHFbe-JX7XCJ3tiHhDHoMN5fa96o-ewH';
+const advancedModeExampleUrl = '/run?1=TY_RSsMwFIbv8xQ_cUortnUgItQJPoE3guAYUpLGBrqc2SZSmHsTL3azR_Jib2OadOi5ODn8_5fzJ98H8fYuxPFn_Yni8fmpECTrvykXzLvIXqq2_a8iI_QfrupqpqiDNhtnfcd2nufz610JSQy-yFnvLGZJLRoCnwWQ4wt5Ea-nAdMKy6W3I86xwO0NVqsStqlNIMaKO7w0RaMjsiA1wrrHtDzgSjNJpt4fnFXZ3fH1TBvROv-z-95KTXnzwLSxWFfaJCm28RFeGMow9qIyKuHnkl_hYkijuOk8cVIHXGI0djFhCtpPZ-y_';
 
 function Options({
   optionsString,
