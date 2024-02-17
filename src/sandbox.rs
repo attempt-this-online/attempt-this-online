@@ -8,7 +8,6 @@ use clone3::Clone3;
 use close_fds::close_open_fds;
 use hex::ToHex;
 use nix::{
-    dir::Dir,
     fcntl::{fcntl, FcntlArg, OFlag},
     mount::{mount, MsFlags},
     poll::{PollFd, PollFlags, poll},
@@ -128,7 +127,7 @@ pub fn invoke(
     let cgroup_cleanup = Cgroup{ cgroup: &cgroup };
     setup_cgroup(&cgroup)?;
     let cgroup_fd = check!(
-        Dir::open(&cgroup, OFlag::O_DIRECTORY | OFlag::O_PATH, Mode::empty()),
+        nix::fcntl::open(&cgroup, OFlag::O_DIRECTORY | OFlag::O_PATH, Mode::empty()),
         "error opening cgroup dir: {}",
     );
 
