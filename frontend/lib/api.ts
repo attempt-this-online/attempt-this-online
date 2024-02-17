@@ -67,6 +67,7 @@ async function runWs({
   options,
   programArguments,
   timeout,
+  customRunner,
 }: {
   language: string,
   input: Uint8Array,
@@ -74,6 +75,7 @@ async function runWs({
   options: string[],
   programArguments: string[],
   timeout: number,
+  customRunner: Uint8Array | null,
 }): Promise<[() => void, APIMessages]> {
   const url = new URL(`${BASE_URL}/api/v1/ws/execute`, document.baseURI);
   if (url.protocol === 'http:') {
@@ -97,6 +99,7 @@ async function runWs({
     options,
     arguments: programArguments,
     timeout,
+    custom_runner: customRunner,
   }));
 
   function kill() {

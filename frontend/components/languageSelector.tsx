@@ -3,7 +3,7 @@ import { useRef, useState, useEffect } from 'react';
 import { MetadataItem } from 'lib/api';
 
 export default function LanguageSelector({
-  languages, language, callback
+  languages, language, callback,
 }: {
   languages: Record<string, MetadataItem>,
   language: string | null,
@@ -19,11 +19,11 @@ export default function LanguageSelector({
   };
   const searchFilter = (value: string) => value.toLowerCase().includes(search.toLowerCase());
   const results = (
-    languages ?
-      Object.entries(languages)
-      .filter(([_, { name }]) => searchFilter(name))
-      .sort(([_, { name: a }], [_2, { name: b }]) => a.localeCompare(b))
-    : null
+    languages
+      ? Object.entries(languages)
+        .filter(([_, { name }]) => searchFilter(name))
+        .sort(([_, { name: a }], [_2, { name: b }]) => a.localeCompare(b))
+      : null
   );
   return (
     <>
@@ -32,11 +32,11 @@ export default function LanguageSelector({
         onClick={
           (event: any) => {
             if (language !== null) {
-                callback(null);
+              callback(null);
             }
           }
         }
-      ></div>
+      />
       <div
         className="fixed flex items-center justify-center overflow-auto z-50 left-0 right-0 top-0 bottom-0 pointer-events-none"
         onKeyUp={(event: any) => {
@@ -97,4 +97,4 @@ export default function LanguageSelector({
       </div>
     </>
   );
-};
+}
