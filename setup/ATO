@@ -5,7 +5,11 @@
 umount /usr/local/lib/ATO/rootfs/* || :
 
 CS() {
-    command containers-storage --graph /usr/local/lib/ATO/containers --run /run/ATO/containers "$@"
+    containers-storage \
+        --graph /usr/local/lib/ATO/containers \
+        --run /run/ATO/containers \
+        --storage-driver overlay \
+        "$@"
 }
 
 while read -r image image_pathsafe
