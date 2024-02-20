@@ -35,6 +35,13 @@
         "url": "https://www.gnu.org/software/gawk/",
         "sbcs": false
     },
+    "backhand": {
+        "name": "Backhand",
+        "image": "docker.io/attemptthisonline/backhand:latest",
+        "version": "Latest",
+        "url": "https://github.com/GrayJoKing/Backhand",
+        "sbcs": false
+    },
     "bash": {
         "name": "Bash",
         "image": "docker.io/attemptthisonline/bash:latest",
@@ -410,6 +417,13 @@
         "image": "docker.io/attemptthisonline/koka:latest",
         "version": "Latest",
         "url": "https://koka-lang.github.io",
+        "sbcs": false
+    },
+    "labyrinth": {
+        "name": "Labyrinth",
+        "image": "docker.io/attemptthisonline/labyrinth:latest",
+        "version": "Latest",
+        "url": "https://github.com/m-ender/labyrinth",
         "sbcs": false
     },
     "lolcode": {
