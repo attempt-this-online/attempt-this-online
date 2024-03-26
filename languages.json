@@ -709,13 +709,6 @@
         "url": "https://github.com/Thunno/Thunno2",
         "sbcs": true
     },
-    "tictac": {
-        "name": "Tictac",
-        "image": "docker.io/attemptthisonline/tictac:latest",
-        "version": "Latest",
-        "url": "https://github.com/pxeger/tictac",
-        "sbcs": true
-    },
     "tinybf": {
         "name": "TinyBF",
         "image": "docker.io/attemptthisonline/tio_brainfuck:latest",
