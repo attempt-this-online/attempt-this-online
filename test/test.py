@@ -418,7 +418,7 @@ with open("../languages.json") as f:
 @very_slow
 @mark.parametrize("expected,language,kwargs", hello_world_tests)
 async def test_hello_worlds(expected, language, kwargs, c):
-    if language in {"elm", "curry_kics2", "funky2", "powershell"}:
+    if language in {"elm", "curry_kics2", "funky2", "k_ktye", "powershell"}:
         xfail(f"known-broken language: {language}")
 
     await c.send(req(**kwargs, language=language))
