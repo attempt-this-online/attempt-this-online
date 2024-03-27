@@ -45,7 +45,7 @@ def req(code, *, custom_runner=None, input="", options=(), arguments=(), languag
     d = {
         "language": language,
         "code": to_bytes(code),
-        "code": to_bytes(custom_runner),
+        "custom_runner": to_bytes(custom_runner),
         "input": to_bytes(input),
         "arguments": [to_bytes(a) for a in arguments],
         "options": [to_bytes(a) for a in options],
