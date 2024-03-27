@@ -2,7 +2,7 @@
 
 set -e
 
-VERSION="0.2.3"
+VERSION="0.2.4"
 
 error() {
     echo "$@" >&2; exit 2
@@ -36,7 +36,7 @@ whoami | grep -xFq root || error you must run this script as root
     python \
     skopeo \
 
-curl -sSL "https://github.com/attempt-this-online/containers-storage/releases/download/v1.48.0/containers-storage" \
+curl -sSL "https://github.com/attempt-this-online/containers-storage/releases/download/v1.51.0/containers-storage.linux.amd64" \
     -o /usr/local/bin/containers-storage
 
 chmod 755 /usr/local/bin/containers-storage

@@ -8,7 +8,6 @@ use clone3::Clone3;
 use close_fds::close_open_fds;
 use hex::ToHex;
 use nix::{
-    dir::Dir,
     fcntl::{fcntl, FcntlArg, OFlag},
     mount::{mount, MsFlags},
     poll::{PollFd, PollFlags, poll},
@@ -128,7 +127,7 @@ pub fn invoke(
     let cgroup_cleanup = Cgroup{ cgroup: &cgroup };
     setup_cgroup(&cgroup)?;
     let cgroup_fd = check!(
-        Dir::open(&cgroup, OFlag::O_DIRECTORY | OFlag::O_PATH, Mode::empty()),
+        nix::fcntl::open(&cgroup, OFlag::O_DIRECTORY | OFlag::O_PATH, Mode::empty()),
         "error opening cgroup dir: {}",
     );
 
@@ -442,7 +441,7 @@ fn run_child(
     // this is safe because it's right before an exec
     unsafe { close_open_fds(FIRST_NON_STDIO_FD, &[]) } // should never error
 
-    if let Err(e) = execve(cstr!("/ATO/runner"), &[cstr!("/ATO/runner")], &env) {
+    if let Err(e) = execve(cstr!("/ATO/bash"), &[cstr!("/ATO/bash"), cstr!("/ATO/runner")], &env) {
         eprintln!("ATO internal error: error running execve: {e}")
     } else {
         eprintln!("ATO internal error: execve should never return if successful")
@@ -520,7 +519,7 @@ fn get_rootfs(language: &Language) -> String {
     String::from(IMAGE_BASE_PATH) + &language.image.replace("/", "+").replace(":", "+")
 }
 
-fn get_runner(language_id: &String) -> String {
+fn get_default_runner(language_id: &String) -> String {
     const LANGUAGE_BASE_PATH: &str = "/usr/local/share/ATO/runners/";
     String::from(LANGUAGE_BASE_PATH) + language_id
 }
@@ -544,7 +543,7 @@ fn setup_filesystem(request: &Request, language: &Language) -> Result<(), Error>
 
     // mount a tmpfs to contain the data written to the container's root filesystem
     // (which will be discarded when the container exits)
-    mount!("/run/ATO", "tmpfs", MS_NOSUID, "mode=755,size=65535k");
+    mount!("/run/ATO", "tmpfs", MS_NOSUID, "mode=755,size=655350k");
     // overlayfs requires separate "upper" and "work" directories, so create those
     check!(mkdir("/run/ATO/upper", Mode::S_IRWXU), "error creating overlayfs upper directory: {}");
     check!(mkdir("/run/ATO/work", Mode::S_IRWXU), "error creating overlayfs work directory: {}");
@@ -580,15 +579,15 @@ fn setup_filesystem(request: &Request, language: &Language) -> Result<(), Error>
 }
 
 fn setup_special_files(language_id: &String) -> Result<(), Error> {
-    mount!("./tmp", "tmpfs", MS_NOSUID | MS_NODEV, "mode=1755,size=65535k");
-    mount!("./ATO", "tmpfs", MS_NOSUID | MS_NODEV, "mode=755,size=65535k");
+    mount!("./tmp", "tmpfs", MS_NOSUID | MS_NODEV, "mode=1755,size=655350k");
+    mount!("./ATO", "tmpfs", MS_NOSUID | MS_NODEV, "mode=755,size=655350k");
     check!(mkdir("./ATO/context", Mode::S_IRWXU | Mode::S_IRGRP | Mode::S_IXGRP | Mode::S_IROTH | Mode::S_IXOTH), "error creating /ATO/context: {}");
     mount!("./proc", "proc",);
-    mount!("./dev", "tmpfs", MS_NOSUID | MS_STRICTATIME, "mode=755,size=65535k");
+    mount!("./dev", "tmpfs", MS_NOSUID | MS_STRICTATIME, "mode=755,size=655350k");
     check!(mkdir("./dev/pts", Mode::empty()), "error creating mount point for /dev/pts: {}");
     mount!("./dev/pts", "devpts", MS_NOSUID | MS_NOEXEC, "newinstance,ptmxmode=0666,mode=0620");
     check!(mkdir("./dev/shm", Mode::empty()), "error creating mount point for /dev/shm: {}");
-    mount!("shm", "./dev/shm", "tmpfs", MS_NOSUID | MS_NODEV | MS_NOEXEC, "mode=1777,size=65536k");
+    mount!("shm", "./dev/shm", "tmpfs", MS_NOSUID | MS_NODEV | MS_NOEXEC, "mode=1777,size=655350k");
     check!(mkdir("./dev/mqueue", Mode::empty()), "error creating mount point for /dev/mqueue: {}");
     mount!("./dev/mqueue", "mqueue", MS_NOSUID | MS_NODEV | MS_NOEXEC);
     mount!("./sys", "sysfs", MS_NOSUID | MS_NODEV | MS_NOEXEC);
@@ -613,7 +612,7 @@ fn setup_special_files(language_id: &String) -> Result<(), Error> {
     for (src, dest) in [
         ("/usr/local/lib/ATO/bash", "./ATO/bash"),
         ("/usr/local/lib/ATO/yargs", "./ATO/yargs"),
-        (&get_runner(&language_id), "./ATO/runner"),
+        (&get_default_runner(&language_id), "./ATO/default_runner"),
     ] {
         drop(check!(File::create(&dest), "error creating mount point for {}: {}", dest));
         mount!(&src, &dest, , MS_NOSUID | MS_BIND | MS_RDONLY);
@@ -624,6 +623,13 @@ fn setup_special_files(language_id: &String) -> Result<(), Error> {
 
 fn setup_request_files(request: &Request) -> Result<(), Error> {
     check!(std::fs::write("/ATO/code", &request.code), "error writing /ATO/code: {}");
+    if let Some(custom_runner) = &request.custom_runner {
+        use std::io::Write;
+        let mut file = check!(std::fs::File::create("/ATO/runner"), "error opening /ATO/runner: {}");
+        check!(file.write_all(&custom_runner), "error writing /ATO/runner: {}");
+    } else {
+        check!(std::os::unix::fs::symlink("/ATO/default_runner", "/ATO/runner"), "error linking /ATO/runner: {}");
+    }
     // TODO: stream input in instead of writing it to a file?
     check!(std::fs::write("/ATO/input", &request.input), "error writing /ATO/input: {}");
     check!(std::fs::write("/ATO/arguments", join_args(&request.arguments)), "error writing /ATO/arguments: {}");

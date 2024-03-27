@@ -119,11 +119,11 @@ To set up a minimal development environment:
 ```bash
 sudo mkdir -p /usr/local/{lib,share}/ATO
 sudo chown $USER:$USER /usr/local/{lib,share}/ATO
-mkdir /usr/local/lib/ATO/{rootfs/attemptthisonline+zsh/{proc,sys,dev,ATO},env} /usr/local/share/ATO/runners
+mkdir /usr/local/lib/ATO/{rootfs/attemptthisonline+zsh/{proc,sys,dev,ATO},env} /usr/local/share/ATO/{overlayfs_upper,runners}
 sudo docker run --rm -it attemptthisonline/zsh \
     tar --exclude /sys --exclude /proc --exclude /dev -c / \
-    | tar -xC /usr/local/lib/ATO/rootfs/attemptthisonline+zsh
-printf 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\0LANG=C.UTF-8\0' > /usr/local/lib/ATO/env/attemptthisonline+zsh
+    | tar -xC /usr/local/lib/ATO/rootfs/docker.io+attemptthisonline+zsh+latest
+printf 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\0LANG=C.UTF-8\0' > /usr/local/lib/ATO/env/docker.io+attemptthisonline+zsh+latest
 ln -s "$(pwd)/runners/zsh" /usr/local/share/ATO/runners/zsh
 ln -s "$(which bash)" /usr/local/lib/ATO/bash
 ln -s "$(pwd)/dist/attempt_this_online/yargs" /usr/local/lib/ATO/yargs
@@ -131,6 +131,8 @@ mkdir -p dist/attempt_this_online
 gcc -Wall -Werror -static yargs.c -o dist/attempt_this_online/yargs
 cargo build --all-targets
 ```
+
+The following steps need to be run every time you reboot:
 
 Set up the cgroup v2 pseudofilesystem. If systemd manages cgroup v2:
 

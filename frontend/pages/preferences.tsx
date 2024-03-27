@@ -103,7 +103,7 @@ export default function Preferences() {
                   dummy={{ current: null }}
                   id="demo"
                   value={BIG_TEXT_BOXES_EXPLANATION[bigTextBoxes]}
-                  readOnly={true}
+                  readOnly
                 />
               </div>
             </div>

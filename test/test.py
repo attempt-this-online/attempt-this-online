@@ -41,10 +41,11 @@ def to_bytes(x: str | bytes):
         return x
 
 
-def req(code, input="", options=(), arguments=(), language="zsh", timeout=60, hook=None):
+def req(code, *, custom_runner=None, input="", options=(), arguments=(), language="zsh", timeout=60, hook=None):
     d = {
         "language": language,
         "code": to_bytes(code),
+        "code": to_bytes(custom_runner),
         "input": to_bytes(input),
         "arguments": [to_bytes(a) for a in arguments],
         "options": [to_bytes(a) for a in options],
@@ -113,6 +114,17 @@ async def test_parallelism():
 async def test_stdout(c):
     await c.send(req("echo hello"))
     assert loads(await c.recv()) == {"Stdout": b"hello\n"}
+    assert loads(await c.recv()).keys() == {"Done"}
+
+
+async def test_custom_runner(c):
+    start = monotonic()
+    await c.send(req("hello", custom_runner="echo $BASH_VERSION; rev /ATO/code"))
+    bash_version = loads(await c.recv())["Stdout"].decode()
+    print(f"BASH_VERSION: {bash_version}")
+    assert bash_version
+    output = loads(await c.recv())["Stdout"].decode()
+    assert output == "olleh"
     assert loads(await c.recv()).keys() == {"Done"}
 
 
@@ -250,10 +262,13 @@ async def test_too_large_request():
 
 
 @mark.parametrize("kwargs", (
+    # try different input formats
     {"input": "unicode"},
     {"input": b"bytes"},
     {"input": list(b"bytes")},
+    # don't include optional paramters
     {"hook": lambda d: d.pop("timeout")},
+    {"hook": lambda d: d.pop("custom_runner")},
 ))
 async def test_valid_request_types(c, kwargs):
     await c.send(req("", **kwargs))

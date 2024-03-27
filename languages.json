@@ -40,6 +40,13 @@
         "url": "https://www.gnu.org/software/gawk/",
         "sbcs": false
     },
+    "backhand": {
+        "name": "Backhand",
+        "image": "docker.io/attemptthisonline/backhand:latest",
+        "version": "Latest",
+        "url": "https://github.com/GrayJoKing/Backhand",
+        "sbcs": false
+    },
     "bash": {
         "name": "Bash",
         "hello_world": {"code": "echo \"Hello, World!\"", "output": "Hello, World!\n"},
@@ -469,6 +476,13 @@
         "url": "https://koka-lang.github.io",
         "sbcs": false
     },
+    "labyrinth": {
+        "name": "Labyrinth",
+        "image": "docker.io/attemptthisonline/labyrinth:latest",
+        "version": "Latest",
+        "url": "https://github.com/m-ender/labyrinth",
+        "sbcs": false
+    },
     "lolcode": {
         "name": "LOLCODE",
         "hello_world": {"code": "HAI 1.2\nVISIBLE \"Hello, World!\"\nKTHXBYE", "output": "Hello, World!\n"},
@@ -788,13 +802,6 @@
         "image": "docker.io/attemptthisonline/thunno2:latest",
         "version": "Latest",
         "url": "https://github.com/Thunno/Thunno2",
-        "sbcs": true
-    },
-    "tictac": {
-        "name": "Tictac",
-        "image": "docker.io/attemptthisonline/tictac:latest",
-        "version": "Latest",
-        "url": "https://github.com/pxeger/tictac",
         "sbcs": true
     },
     "tinybf": {

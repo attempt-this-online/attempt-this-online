@@ -75,7 +75,7 @@ int main(int argc, char * argv []) {
             };
             if (file_size != 0 && file_buf[j] != 0) {
                 fprintf(stderr, "%s\n", "yargs: string was not null-terminated!");
-            };    
+            };
         } else {
             APPEND(argv[i]);
         };
