@@ -409,19 +409,19 @@ async def test_writeable_fs(c):
 
 with open("../languages.json") as f:
     hello_world_tests = [
-        (lang["hello_world"].pop("output"), lang["hello_world"] | {"language": lang_id})
+        (lang["hello_world"].pop("output"), lang_id, lang["hello_world"])
         for lang_id, lang in json.load(f).items()
         if "hello_world" in lang
     ]
 
 
 @very_slow
-@mark.parametrize("expected,kwargs", hello_world_tests)
-async def test_hello_worlds(expected, kwargs, c):
-    if kwargs["language"] in {"elm", "curry_kics2", "funky2", "powershell"}:
-        xfail(f"known-broken language: " + kwargs["language"])
+@mark.parametrize("expected,language,kwargs", hello_world_tests)
+async def test_hello_worlds(expected, language, kwargs, c):
+    if language in {"elm", "curry_kics2", "funky2", "powershell"}:
+        xfail(f"known-broken language: {language}")
 
-    await c.send(req(**kwargs))
+    await c.send(req(**kwargs, language=language))
     output = bytearray()
     stderr = bytearray()
     async for msg in c:
