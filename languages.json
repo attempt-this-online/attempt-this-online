@@ -214,7 +214,7 @@
     },
     "dyalog_apl": {
         "name": "APL (Dyalog APL)",
-        "hello_world": {"code": "⎕←'Hello, World!'", "output": "Hello, World!\n"},
+        "hello_world": {"code": "⎕←'Hello, World!'", "output": "Hello, World!\r"},
         "image": "docker.io/dyalog/dyalog:latest",
         "version": "Latest",
         "url": "https://www.dyalog.com/products.htm",
