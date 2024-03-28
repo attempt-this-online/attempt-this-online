@@ -152,7 +152,7 @@ Build and run the Docker container:
 
 ```bash
 sudo docker build -t ato_dev /dev/shm -f Dockerfile
-sudo docker run -it --rm -v "$(pwd)":/src -v /sys/fs/cgroup/user.slice/user-$(id -u).slice/user@$(id -u).service/ATO:/run/cgroup2 -p 8500:8500 --privileged ato_dev
+sudo docker run -it --rm -v "$(pwd)":/src -v /sys/fs/cgroup/user.slice/user-$(id -u).slice/user@$(id -u).service/ATO:/run/cgroup2 -p 127.0.0.1:8500:8500 --privileged ato_dev
 ```
 
 ### Tests
