@@ -1,15 +1,13 @@
-#![feature(io_error_more, let_chains)]
+use crate::constants::*;
+use crate::languages::*;
+use crate::network::setup_network;
+use crate::{check, Error, Request, StreamResponse, Connection, ControlMessage};
 
-mod constants;
-mod languages;
 use capctl::{caps, prctl};
-use crate::{constants::*, languages::*};
 use clone3::Clone3;
 use close_fds::close_open_fds;
 use hex::ToHex;
 use nix::{
-    dir::Dir,
-    errno::Errno,
     fcntl::{fcntl, FcntlArg, OFlag},
     mount::{mount, MsFlags},
     poll::{PollFd, PollFlags, poll},
@@ -23,22 +21,11 @@ use nix::{
     unistd::{chdir, close, dup2, execve, Gid, mkdir, pipe, pivot_root, read, setresgid, setresuid, symlinkat, Uid},
 };
 use rand::Rng;
-use serde::{Deserialize, Serialize};
 use serde_bytes::ByteBuf;
 use std::ffi::{CStr, CString};
-use std::cmp::min;
 use std::fs::File;
 use std::path::PathBuf;
-
-/// like the ? postfix operator, but formats errors to strings
-macro_rules! check {
-    ($x:expr, $f:literal $(, $($a:expr),+)? $(,)?) => {
-        $x.map_err(|e| Some(format!($f, $($($a,)*)? e)))?
-    };
-    ($x:expr $(,)?) => {
-        $x.map_err(|e| Some(e.to_string()))?
-    }
-}
+use std::sync::{Arc, Mutex};
 
 /// log `Err`s to stderr but don't stop execution
 macro_rules! check_continue {
@@ -61,190 +48,6 @@ macro_rules! cstr {
     }
 }
 
-#[derive(Serialize)]
-enum StreamResponse {
-    Stdout(ByteBuf),
-    Stderr(ByteBuf),
-    Done {
-        timed_out: bool,
-        status_type: &'static str,
-        status_value: i32,
-        real: i64,
-        kernel: i64,
-        user: i64,
-        max_mem: i64,
-        waits: i64,
-        preemptions: i64,
-        major_page_faults: i64,
-        minor_page_faults: i64,
-        input_ops: i64,
-        output_ops: i64,
-    }
-}
-
-fn output_message(message: StreamResponse) -> Result<(), Option<String>> {
-    let encoded_message = check!(rmp_serde::to_vec_named(&message));
-    // to ensure packeted writes do not get split up, they must be <= PIPE_BUF
-    // see pipe(2) § O_DIRECT and pipe(7) § PIPE_BUF
-    assert!(encoded_message.len() <= PIPE_BUF);
-    match nix::unistd::write(STDOUT_FD, &encoded_message) {
-        Ok(_) => Ok(()),
-        Err(Errno::EPIPE) => {
-            // client went away
-            Err(None)
-        }
-        Err(e) => {
-            Err(Some(format!("error writing message: {e}")))
-        }
-    }
-}
-
-#[allow(dead_code)]
-#[derive(Deserialize)]
-struct Request {
-    language: String,
-    code: ByteBuf,
-    input: ByteBuf,
-    arguments: Vec<ByteBuf>,
-    options: Vec<ByteBuf>,
-    #[serde(default = "default_timeout")]
-    timeout: i32,
-}
-
-fn default_timeout() -> i32 { 60 }
-
-struct PacketRead {
-    fd: i32,
-    buf: [u8; PIPE_BUF],
-    buf_len: usize,
-    buf_pos: usize,
-}
-
-impl PacketRead {
-    const fn new(fd: i32) -> Self {
-        PacketRead {
-            fd,
-            buf: [0; PIPE_BUF],
-            buf_len: 0,
-            buf_pos: 0,
-        }
-    }
-}
-
-impl std::io::Read for PacketRead {
-    fn read(&mut self, out: &mut [u8]) -> Result<usize, std::io::Error> {
-        let mut total = 0;
-        // TODO: chunking here makes an effort to fill all of `out`. Is that what we want?
-        for chunk in out.chunks_mut(PIPE_BUF) {
-            assert!(self.buf_pos <= self.buf_len);
-            if self.buf_pos == self.buf_len {
-                // refill buffer
-                self.buf_len = read(self.fd, &mut self.buf).map_err(Into::<std::io::Error>::into)?;
-                self.buf_pos = 0;
-            }
-            let amount_read = min(chunk.len(), self.buf_len - self.buf_pos);
-            total += amount_read;
-            chunk[..amount_read].copy_from_slice(&self.buf[self.buf_pos..][..amount_read]);
-            self.buf_pos += amount_read;
-        }
-        Ok(total)
-    }
-}
-
-fn main() -> std::process::ExitCode {
-    // some care must be taken over error messages - see comments in run_child
-
-    // note also that throughout the code, the Error variant of our Result types is Option<String>
-    // when this is Some("..."), it's a normal error message
-    // but when this is None, it means there was an "expected" error:
-    // we need to exit the program because of it
-    // but nothing's actually gone wrong, so it's not logged
-    // so far this only happens when the client goes away during execution
-
-    // use stdout in "packet" mode - see pipe(2) § O_DIRECT
-    // this ensures that calls to write(2) correspond one-to-one with websocket messages.
-    // and also use stdin in packet mode:
-    // this ensures that calls to read(2) never return the contents of more than one websocket message
-    // (although incoming websocket messages may be spread across multiple pipe packets and thus require multiple reads)
-    // This prevents both:
-    // - data loss from multiple messages being put into one read, with messages after the first being ignored
-    // - "slow loris" attacks - see https://github.com/attempt-this-online/attempt-this-online/issues/88
-    // Note that this means read(2)s from stdin must always ask for at least PIPE_BUF bytes;
-    // otherwise, the remained of a packet may be silently discarded.
-    // PacketRead contains an implementation of Read which provides this guarantee
-    for (name, fd) in [("stdout", STDOUT_FD), ("stdin", STDIN_FD)] {
-        if let Err(e) = fcntl(fd, FcntlArg::F_SETFL(OFlag::O_DIRECT)) {
-            eprintln!("error setting {name} pipe to O_DIRECT: {e}");
-            return std::process::ExitCode::from(INTERNAL_ERROR)
-        }
-    }
-
-    let mut packet_stdin: PacketRead = PacketRead::new(STDIN_FD);
-
-    let request = match rmp_serde::from_read::<_, Request>(&mut packet_stdin) {
-        Ok(r) => r,
-        Err(e) => {
-            use rmp_serde::decode::Error::*;
-            let why =
-                if let InvalidMarkerRead(ref ei) | InvalidDataRead(ref ei) = e
-                    && ei.kind() != std::io::ErrorKind::UnexpectedEof {
-                    eprintln!("error reading request: {e}");
-                    INTERNAL_ERROR
-                } else {
-                    eprintln!("invalid request: {e}");
-                    POLICY_VIOLATION
-                };
-            return std::process::ExitCode::from(why);
-        }
-    };
-    let language = match validate(&request) {
-        Ok(l) => l,
-        Err(e) => {
-            eprintln!("invalid request: {e}");
-            return std::process::ExitCode::from(POLICY_VIOLATION);
-        }
-    };
-    if let Err(Some(e)) = invoke(packet_stdin, &request, language) {
-        eprintln!("{e}");
-        return std::process::ExitCode::from(INTERNAL_ERROR);
-    } else {
-        return std::process::ExitCode::from(NORMAL);
-    }
-}
-
-enum ValidationError<'a> {
-    NoSuchLanguage(&'a String),
-    NullByteInArgument,
-    InvalidTimeout(i32),
-}
-
-impl<'a> std::fmt::Display for ValidationError<'a> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            ValidationError::NoSuchLanguage(name) => write!(f, "no such language: {}", name),
-            ValidationError::NullByteInArgument => write!(f, "argument contains null byte"),
-            ValidationError::InvalidTimeout(val) => write!(f, "timeout not in range 1-60: {}", val),
-        }
-    }
-}
-
-fn validate(request: &Request) -> Result<&Language, ValidationError> {
-    if request.timeout < 1 || request.timeout > 60 {
-        return Err(ValidationError::InvalidTimeout(request.timeout));
-    }
-    for arg in request.options.iter().chain(request.arguments.iter()) {
-        if arg.contains(&0) {
-            return Err(ValidationError::NullByteInArgument);
-        }
-    }
-    if let Some(l) = LANGUAGES.get(&request.language) {
-        Ok(l)
-    } else {
-        Err(ValidationError::NoSuchLanguage(&request.language))
-    }
-}
-
-const STDIN_FD: std::os::unix::io::RawFd = 0;
 const STDOUT_FD: std::os::unix::io::RawFd = 1;
 const STDERR_FD: std::os::unix::io::RawFd = 2;
 
@@ -285,9 +88,9 @@ impl Drop for Cgroup<'_> {
     }
 }
 
-fn create_cgroup() -> Result<PathBuf, Option<String>> {
+fn create_cgroup() -> Result<PathBuf, Error> {
     use std::env::VarError::*;
-    let cgroup_path = std::env::var("ATO_CGROUP_PATH").map_err(|e| Some(match e {
+    let cgroup_path = std::env::var("ATO_CGROUP_PATH").map_err(|e| Error::InternalError(match e {
             NotPresent => "error creating cgroup: $ATO_CGROUP_PATH not provided",
             NotUnicode(_) => "error creating cgroup: $ATO_CGROUP_PATH is invalid Unicode",
         }.to_string())
@@ -298,13 +101,11 @@ fn create_cgroup() -> Result<PathBuf, Option<String>> {
     Ok(path)
 }
 
-fn setup_cgroup(path: &PathBuf) -> Result<(), Option<String>> {
+fn setup_cgroup(path: &PathBuf) -> Result<(), Error> {
     // this sets some resource limits, but the others are set with ordinary POSIX rlimits:
     // see the set_resource_limits function
-    const MEMORY_HIGH: u64 = 200 * MiB;
-    const MEMORY_MAX: u64 = 256 * MiB;
-    check!(std::fs::write(path.join("memory.high"), MEMORY_HIGH.to_string()), "error writing cgroup memory.high: {}");
-    check!(std::fs::write(path.join("memory.max"), MEMORY_MAX.to_string()), "error writing cgroup memory.max: {}");
+    // const MEMORY_HIGH: u64 = 512 * MiB;
+    // check!(std::fs::write(path.join("memory.high"), MEMORY_HIGH.to_string()), "error writing cgroup memory.high: {}");
     // disable swap
     check!(std::fs::write(path.join("memory.swap.max"), "0"), "error writing cgroup memory.swap.max: {}");
     Ok(())
@@ -316,12 +117,17 @@ fn random_id() -> String {
     rand::thread_rng().gen::<[u8; RANDOM_ID_SIZE]>().encode_hex::<String>()
 }
 
-fn invoke(packet_stdin: PacketRead, request: &Request, language: &Language) -> Result<(), Option<String>> {
+pub fn invoke(
+    request: &Request,
+    language: &Language,
+    connection: &mut Connection,
+    connection_fd: i32,
+) -> Result<(), Error> {
     let cgroup = create_cgroup()?;
     let cgroup_cleanup = Cgroup{ cgroup: &cgroup };
     setup_cgroup(&cgroup)?;
     let cgroup_fd = check!(
-        Dir::open(&cgroup, OFlag::O_DIRECTORY | OFlag::O_PATH, Mode::empty()),
+        nix::fcntl::open(&cgroup, OFlag::O_DIRECTORY | OFlag::O_PATH, Mode::empty()),
         "error opening cgroup dir: {}",
     );
 
@@ -364,80 +170,121 @@ fn invoke(packet_stdin: PacketRead, request: &Request, language: &Language) -> R
         check!(close(stdout_w), "error closing stdout write end: {}");
         check!(close(stderr_w), "error closing stderr write end: {}");
 
-        run_parent(packet_stdin, stdout_r, stderr_r, pidfd, cgroup_cleanup, timer, request.timeout)
+        run_parent(stdout_r, stderr_r, pidfd, cgroup_cleanup, timer, request.timeout, connection, connection_fd)
+    }
+}
+
+fn wait_child(
+    pidfd: i32,
+    connection: Arc<Mutex<&mut Connection>>,
+    connection_fd: i32,
+    timeout: i32,
+ ) -> Result<bool, Error> {
+    // use a poll to wait for either:
+    // - timeout to expire
+    // - child to exit
+    // - client to request us to kill the child
+    let mut poll_args = [
+        // pidfd fires a POLLIN event when the process finishes
+        PollFd::new(pidfd, PollFlags::POLLIN),
+        PollFd::new(connection_fd, PollFlags::POLLIN),
+    ];
+    let poll_result = check!(poll(&mut poll_args, timeout * 1000 /* ms */), "error polling: {}");
+    let [poll_child, poll_stdin] = poll_args;
+    if poll_result == 0 {
+        // timed out
+        Ok(true)
+    } else if poll_child.revents().ok_or(Error::InternalError("poll returned unexpected event".into()))?.contains(PollFlags::POLLIN) {
+        // child finished
+        Ok(false)
+    } else {
+        let stdin_events = poll_stdin.revents().ok_or(Error::InternalError("poll returned unexpected event".into()))?;
+        if stdin_events.contains(PollFlags::POLLIN) {
+            // received control message via stdin
+            use ControlMessage::*;
+            match connection.lock().unwrap().read_message()? {
+                Kill => {
+                    // continue to drop (i.e. kill), and set timed_out = false
+                    Ok(false)
+                }
+                // Ok(_) => ...
+            }
+        } else if stdin_events.contains(PollFlags::POLLHUP) {
+            // client disappeared: continue to kill
+            Ok(false)
+        } else {
+            return Err(Error::InternalError(format!("unexpected poll result: {poll_result}, {poll_args:?}")));
+        }
+    }
+}
+
+struct QuitEventFd {
+    fd: i32,
+}
+
+impl QuitEventFd {
+    fn new() -> Result<Self, Error> {
+        // eventfd is basically a condition variable, but which we can poll on
+        let fd = check!(eventfd(0, EfdFlags::empty()), "error creating eventfd: {}");
+        Ok(QuitEventFd { fd })
+    }
+}
+
+impl Drop for QuitEventFd {
+    fn drop(&mut self) {
+        check_continue!(nix::unistd::write(self.fd, &1u64.to_ne_bytes()), "error writing to quit eventfd: {}");
     }
 }
 
 fn run_parent(
-    mut packet_stdin: PacketRead,
     stdout_r: i32,
     stderr_r: i32,
     pidfd: i32,
     cgroup_cleanup: Cgroup,
     timer: std::time::Instant,
     timeout: i32,
-) -> Result<(), Option<String>> {
-    // eventfd is basically a condition variable, but which we can poll on
-    let quit = check!(eventfd(0, EfdFlags::empty()), "error creating eventfd: {}");
+    connection: &mut Connection,
+    connection_fd: i32,
+) -> Result<(), Error> {
+    let (
+        timed_out,
+        connection,
+        [stdout_truncated, stderr_truncated],
+    ) = std::thread::scope(move |threads| {
+        let connection = Arc::new(Mutex::new(connection));
+        // there has to be a better way of doing this
+        let connection2 = connection.clone();
 
-    let output_handler = std::thread::spawn(move || handle_output(stdout_r, stderr_r, quit));
+        // RAII ensures that the quit eventfd is triggered when it's dropped, so that the
+        // output_handler doesn't get confused if the main thread encounters an error
+        let quit = QuitEventFd::new()?;
 
-    let timed_out = {
-        // use a poll to wait for either:
-        // - timeout to expire
-        // - child to exit
-        // - client to request us to kill the child
-        let mut poll_args = [
-            // pidfd fires a POLLIN event when the process finishes
-            PollFd::new(pidfd, PollFlags::POLLIN),
-            // when a websocket message is received
-            PollFd::new(STDIN_FD, PollFlags::POLLIN),
-        ];
-        let poll_result = check!(poll(&mut poll_args, timeout * 1000 /* ms */), "error polling: {}");
-        let [poll_child, poll_stdin] = poll_args;
-        if poll_result == 0 {
-            // timed out
-            true
-        } else if poll_child.revents().ok_or(Some("poll returned unexpected event".into()))?.contains(PollFlags::POLLIN) {
-            // child finished
-            false
-        } else {
-            let stdin_events = poll_stdin.revents().ok_or(Some("poll returned unexpected event".into()))?;
-            if stdin_events.contains(PollFlags::POLLIN) {
-                // received control message via stdin
-                #[derive(Deserialize)]
-                enum ControlMessage {
-                    Kill,
-                }
-                use ControlMessage::*;
-                match rmp_serde::from_read::<_, ControlMessage>(&mut packet_stdin) {
-                    Err(e) => {
-                        return Err(Some(format!("error reading control message: {e}")));
-                    }
-                    Ok(Kill) => {
-                        // continue to drop (i.e. kill), and set timed_out = false
-                        false
-                    }
-                    // Ok(_) => ...
-                }
-            } else if stdin_events.contains(PollFlags::POLLHUP) {
-                // client disappeared: continue to kill
-                false
-            } else {
-                return Err(Some(format!("unexpected poll result: {poll_result}, {poll_args:?}")));
-            }
-        }
-    };
+        let output_handler = threads.spawn(move || handle_output(stdout_r, stderr_r, quit.fd, connection2));
 
-    // kill process
-    drop(cgroup_cleanup);
+        // wait for child
+        let timed_out = wait_child(pidfd, connection.clone(), connection_fd, timeout)?;
 
-    check!(nix::unistd::write(quit, &1u64.to_ne_bytes()), "error writing to quit eventfd: {}");
+        // kill process
+        drop(cgroup_cleanup);
 
-    if let Err(e) = output_handler.join() {
-        // output handler panicked, so do likewise
-        std::panic::panic_any(e);
-    }
+        // tell output_handler to quit
+        drop(quit);
+
+        let truncateds = match output_handler.join() {
+            // thread panicked, so do likewise
+            Err(panic) => std::panic::panic_any(panic),
+            // returned normally
+            Ok(Ok(truncateds)) => truncateds,
+            Ok(Err(e)) => return Err(e),
+        };
+
+        let connection =
+            Arc::try_unwrap(connection)
+            .unwrap_or_else(|_| panic!("excess references to Arc<Connection>"))
+            .into_inner()
+            .unwrap();
+        Ok((timed_out, connection, truncateds))
+    })?;
 
     // TODO: investigate why this reports ECHILD if the child errors and __WALL is not provided
     // something to do with the fact we use a second thread above which is a different kind of child process?
@@ -458,10 +305,12 @@ fn run_parent(
 
     let stats = check!(getrusage(RUSAGE_CHILDREN), "error getting resource usage: {}");
 
-    output_message(StreamResponse::Done {
+    connection.output_message(StreamResponse::Done {
         timed_out,
         status_type,
         status_value,
+        stdout_truncated,
+        stderr_truncated,
         real: timer.elapsed().as_nanos() as i64,
         kernel: stats.system_time().num_nanoseconds(),
         user: stats.user_time().num_nanoseconds(),
@@ -476,40 +325,58 @@ fn run_parent(
     Ok(())
 }
 
-fn handle_output(stdout_r: i32, stderr_r: i32, quit: i32) -> Result<(), Option<String>> {
+fn handle_output(stdout_r: i32, stderr_r: i32, quit: i32, connection: Arc<Mutex<&mut Connection>>) -> Result<[bool; 2], Error> {
     for (name, pipe) in [("stdout", stdout_r), ("stderr", stderr_r)] {
         check!(fcntl(pipe, FcntlArg::F_SETFL(OFlag::O_NONBLOCK)), "error setting O_NONBLOCK on {} read end: {}", name);
     }
 
-    const MAX_SENSIBLE_OUTPUT_SIZE: usize = 1 * MiB as usize;
+    const OUTPUT_BUF_SIZE: usize = 16 * KiB as usize;
+    const MAX_SENSIBLE_OUTPUT_SIZE: usize = 128 * KiB as usize;
     let mut totals = [0usize; 2];
+    let mut open = [true; 2];
+    let mut truncated = [false; 2];
 
-    let mut poll_arg = [
-        PollFd::new(quit, PollFlags::POLLIN),
-        PollFd::new(stdout_r, PollFlags::POLLIN),
-        PollFd::new(stderr_r, PollFlags::POLLIN),
-    ];
+    type StreamId = fn(ByteBuf) -> StreamResponse;
+
     loop {
+        let mut poll_arg = vec![
+            PollFd::new(quit, PollFlags::POLLIN),
+        ];
+        let mut poll_todo = vec![];
+
+        if open[0] {
+            poll_arg.push(PollFd::new(stdout_r, PollFlags::POLLIN));
+            poll_todo.push((0, "stdout", stdout_r, StreamResponse::Stdout as StreamId));
+        }
+        if open[1] {
+            poll_arg.push(PollFd::new(stderr_r, PollFlags::POLLIN));
+            poll_todo.push((1, "stderr", stderr_r, StreamResponse::Stderr as StreamId));
+        }
+
         check!(poll(&mut poll_arg, -1 /* infinite timeout */), "error polling for output: {}");
-        let [poll_quit, poll_stdout, poll_stderr] = poll_arg;
-        type StreamId = fn(ByteBuf) -> StreamResponse;
-        for (i, name, poll, pipe, stream_id) in [
-            (0, "stdout", poll_stdout, stdout_r, StreamResponse::Stdout as StreamId),
-            (1, "stderr", poll_stderr, stderr_r, StreamResponse::Stderr as StreamId),
-        ] {
-            if poll.revents().ok_or(Some("poll returned unexpected event".into()))?.contains(PollFlags::POLLIN) {
+        let poll_quit = poll_arg[0];
+
+        for ((i, name, pipe, stream_id), poll) in poll_todo.into_iter().zip(&poll_arg[1..]) {
+            let revents = poll.revents().ok_or(Error::InternalError("poll returned unexpected event".into()))?;
+            if revents.contains(PollFlags::POLLHUP) {
+                open[i] = false;
+            } else if revents.contains(PollFlags::POLLIN) {
                 let mut buf = [0u8; OUTPUT_BUF_SIZE];
-                let len = check!(read(pipe, &mut buf), "error reading from {}: {}", name);
+                let len = check!(read(pipe, &mut buf), "error reading from {name}: {}");
                 totals[i] += len;
                 if totals[i] > MAX_SENSIBLE_OUTPUT_SIZE {
-                    todo!("can't handle too much output yet")
+                    check!(close(pipe), "error closing {name} (after too much output): {}");
+                    open[i] = false;
+                    truncated[i] = true;
                 }
                 let message = stream_id(ByteBuf::from(&buf[..len]));
-                output_message(message)?;
+                connection.lock().unwrap().output_message(message)?;
             }
         }
-        if poll_quit.revents().ok_or(Some("poll returned unexpected event".into()))?.contains(PollFlags::POLLIN) {
-            return Ok(())
+
+        let quit_revents = poll_quit.revents().ok_or(Error::InternalError("poll returned unexpected event".into()))?;
+        if quit_revents.contains(PollFlags::POLLIN) {
+            return Ok(truncated)
         }
     }
 }
@@ -524,51 +391,49 @@ fn run_child(
 ) -> (/* never returns on success */) {
     // to have reliable error reporting, the state of stdout and stderr must be managed carefully:
 
-    // also, error messages that don't go via the web server's error handling logic (i.e., which look like just stdout/stderr messages)
-    //  should be prefixed with "ATO internal error" to make it clear they're not from the user's program
-
-    // here, stdout points "directly" to the client websocket, so we mustn't print junk to stdout.
-    // stderr points to the web server's error handling logic (which puts them in the websocket close messages and the systemd log)
-    // so we log errors to stderr only
-
     // replace current stdout with the pipe we created for it
     if let Err(e) = dup2(stdout_w, STDOUT_FD) {
+        // all the possible causes for dup2 to error (see the manual page) should be impossible™
+        // so this should never be reached
         eprintln!("error dup2ing stdout: {e}");
         return
     }
-    // stdout now points to a pipe that the parent handles, so we messages to it will reach the user safely and we don't need to worry about junk.
-    // so we should log errors to both stderr and stdout
-    macro_rules! eoprintln {
+
+    macro_rules! log_error {
         ($($x:expr),*) => {
-            // goes to handle_output and therefore looks like a normal stdout message, so must be prefixed
+            // goes to handle_output and therefore looks like a normal stdout message to the user,
+            // so this should be prefixed with "ATO internal error" to make it clearer it's not from the user's program
             println!("ATO internal error: {}", format!($($x,)*));
-            // goes via web server logic, so ok alone
+            // stderr still points to the web server log, so we continue writing there
             eprintln!($($x,)*);
         }
     }
 
+    // TODO: simplify this, because load_env and setup_child only ever return InternalError
+
     let env = match load_env(&language) {
         Ok(r) => r,
         Err(e) => {
-            if let Some(e) = e {
-                eoprintln!("{e}");
+            if let Error::InternalError(e) = e {
+                log_error!("{e}");
             }
             return
         }
     };
 
     if let Err(e) = setup_child(&request, &language, outside_uid, outside_gid) {
-        if let Some(e) = e {
-            eoprintln!("{e}");
+        if let Error::InternalError(e) = e {
+            log_error!("{e}");
         }
         return
     }
 
     if let Err(e) = dup2(stderr_w, STDERR_FD) {
-        eoprintln!("error dup2ing stderr: {e}");
+        log_error!("error dup2ing stderr: {e}");
         return
     }
-    // stderr now points to handle_output too; the web server's error handling logic is now useless.
+
+    // stderr now points to handle_output too; the web server's log is now inaccessible
     // From here on out, we log errors to stderr only, because logging to both would cause pointless duplication
 
     // close all remaining FDs except STDIO (0/1/2) - this includes dangling stdxxx_w pipes
@@ -576,21 +441,21 @@ fn run_child(
     // this is safe because it's right before an exec
     unsafe { close_open_fds(FIRST_NON_STDIO_FD, &[]) } // should never error
 
-    if let Err(e) = execve(cstr!("/ATO/runner"), &[cstr!("/ATO/runner")], &env) {
+    if let Err(e) = execve(cstr!("/ATO/bash"), &[cstr!("/ATO/bash"), cstr!("/ATO/runner")], &env) {
         eprintln!("ATO internal error: error running execve: {e}")
     } else {
         eprintln!("ATO internal error: execve should never return if successful")
     }
 }
 
-fn load_env(language: &Language) -> Result<Vec<CString>, Option<String>> {
+fn load_env(language: &Language) -> Result<Vec<CString>, Error> {
     const ENV_BASE_PATH: &str = "/usr/local/lib/ATO/env/";
-    let path = String::from(ENV_BASE_PATH) + &language.image.replace("/", "+");
+    let path = String::from(ENV_BASE_PATH) + &language.image.replace("/", "+").replace(":", "+");
     check!(std::fs::read(path), "error reading image env file: {}")
         .split_inclusive(|b| *b == 0) // split after null bytes, and include them in the results
         .map(|s| CString::from_vec_with_nul(s.to_vec()))
         .collect::<Result<Vec<_>, _>>() // collects errors too
-        .map_err(|e| Some(format!("error building env string: {e}")))
+        .map_err(|e| Error::InternalError(format!("error building env string: {e}")))
 }
 
 fn setup_child(
@@ -598,19 +463,20 @@ fn setup_child(
     language: &Language,
     outside_uid: Uid,
     outside_gid: Gid,
-) -> Result<(), Option<String>> {
+) -> Result<(), Error> {
     const SIGKILL: i32 = 9;
     // set up to die if our parent dies
     check!(prctl::set_pdeathsig(Some(SIGKILL)), "error setting parent death signal: {}");
 
     set_ids(outside_uid, outside_gid)?;
+    setup_network()?;
     setup_filesystem(&request, &language)?;
     drop_caps()?;
     set_resource_limits()?;
     Ok(())
 }
 
-fn set_ids(outside_uid: Uid, outside_gid: Gid) -> Result<(), Option<String>> {
+fn set_ids(outside_uid: Uid, outside_gid: Gid) -> Result<(), Error> {
     // we're currently nobody (65534) inside the container which means we can't do anything.
     // so we declare ourselves root inside the container, but this requires a mapping for who we become from the perspective of processes outside the container
 
@@ -650,21 +516,23 @@ macro_rules! mount {
 
 fn get_rootfs(language: &Language) -> String {
     const IMAGE_BASE_PATH: &str = "/usr/local/lib/ATO/rootfs/";
-    String::from(IMAGE_BASE_PATH) + &language.image.replace("/", "+")
+    String::from(IMAGE_BASE_PATH) + &language.image.replace("/", "+").replace(":", "+")
 }
 
-fn get_runner(language_id: &String) -> String {
+fn get_default_runner(language_id: &String) -> String {
     const LANGUAGE_BASE_PATH: &str = "/usr/local/share/ATO/runners/";
     String::from(LANGUAGE_BASE_PATH) + language_id
 }
 
-fn setup_filesystem(request: &Request, language: &Language) -> Result<(), Option<String>> {
+fn setup_filesystem(request: &Request, language: &Language) -> Result<(), Error> {
+    // find out where the languages' image is stored
     let rootfs = get_rootfs(&language);
 
     // set the propogation type of all mounts to private - this is because:
-    // 1. when we bind-mount stuff we don't want that to propogate to the parent namespace
+    // 1. when we mount /run/ATO, and bind-mount other stuff,
+    //    we don't want those to propogate to the parent namespace
     // 2. we don't want any potential mounts in the parent namespace to appear here and mess things up either
-    // 2. pivot_root below requires . and its parent to be mounted private anyway
+    // 3. pivot_root below requires . and its parent to be mounted private anyway
     check!(mount::<str, str, str, str>(
         None,
         "/",
@@ -673,18 +541,26 @@ fn setup_filesystem(request: &Request, language: &Language) -> Result<(), Option
         None,
     ), "error setting / to MS_PRIVATE: {}");
 
-    // bind-mount rootfs onto itself for two reasons:
-    // 1. the kernel now considers it a mount point, which is required for pivot_root to work
-    // 2. we can make it read-only
-    check!(mount::<str, str, str, str>(
-        Some(&rootfs),
-        &rootfs,
-        None,
-        MsFlags::MS_BIND | MsFlags::MS_RDONLY | MsFlags::MS_REC,
-        None,
-    ), "error bind-mounting new rootfs onto itself: {}");
+    // mount a tmpfs to contain the data written to the container's root filesystem
+    // (which will be discarded when the container exits)
+    mount!("/run/ATO", "tmpfs", MS_NOSUID, "mode=755,size=655350k");
+    // overlayfs requires separate "upper" and "work" directories, so create those
+    check!(mkdir("/run/ATO/upper", Mode::S_IRWXU), "error creating overlayfs upper directory: {}");
+    check!(mkdir("/run/ATO/work", Mode::S_IRWXU), "error creating overlayfs work directory: {}");
+    // also create a place to mount the new merged writeable rootfs
+    check!(mkdir("/run/ATO/merged", Mode::S_IRWXU), "error creating overlayfs merged directory: {}");
 
-    check!(chdir::<str>(&rootfs), "error changing directory to new rootfs: {}");
+    // mount writeable upper layer on top of rootfs using overlayfs
+    // also, the kernel now considers it a mount point, which is required for pivot_root to work
+    check!(mount::<str, str, str, str>(
+        None,
+        "/run/ATO/merged",
+        Some("overlay"),
+        MsFlags::empty(),
+        Some(&format!("upperdir=/run/ATO/upper,lowerdir=/usr/local/share/ATO/overlayfs_upper:{rootfs},workdir=/run/ATO/work")),
+    ), "error mounting new rootfs: {}");
+
+    check!(chdir::<str>("/run/ATO/merged"), "error changing directory to new rootfs: {}");
     // now . points to the new rootfs
 
     setup_special_files(&request.language)?;
@@ -702,15 +578,16 @@ fn setup_filesystem(request: &Request, language: &Language) -> Result<(), Option
     Ok(())
 }
 
-fn setup_special_files(language_id: &String) -> Result<(), Option<String>> {
-    mount!("./ATO", "tmpfs", MS_NOSUID | MS_NODEV, "mode=755,size=65535k");
+fn setup_special_files(language_id: &String) -> Result<(), Error> {
+    mount!("./tmp", "tmpfs", MS_NOSUID | MS_NODEV, "mode=1755,size=655350k");
+    mount!("./ATO", "tmpfs", MS_NOSUID | MS_NODEV, "mode=755,size=655350k");
     check!(mkdir("./ATO/context", Mode::S_IRWXU | Mode::S_IRGRP | Mode::S_IXGRP | Mode::S_IROTH | Mode::S_IXOTH), "error creating /ATO/context: {}");
     mount!("./proc", "proc",);
-    mount!("./dev", "tmpfs", MS_NOSUID | MS_STRICTATIME, "mode=755,size=65535k");
+    mount!("./dev", "tmpfs", MS_NOSUID | MS_STRICTATIME, "mode=755,size=655350k");
     check!(mkdir("./dev/pts", Mode::empty()), "error creating mount point for /dev/pts: {}");
     mount!("./dev/pts", "devpts", MS_NOSUID | MS_NOEXEC, "newinstance,ptmxmode=0666,mode=0620");
     check!(mkdir("./dev/shm", Mode::empty()), "error creating mount point for /dev/shm: {}");
-    mount!("shm", "./dev/shm", "tmpfs", MS_NOSUID | MS_NODEV | MS_NOEXEC, "mode=1777,size=65536k");
+    mount!("shm", "./dev/shm", "tmpfs", MS_NOSUID | MS_NODEV | MS_NOEXEC, "mode=1777,size=655350k");
     check!(mkdir("./dev/mqueue", Mode::empty()), "error creating mount point for /dev/mqueue: {}");
     mount!("./dev/mqueue", "mqueue", MS_NOSUID | MS_NODEV | MS_NOEXEC);
     mount!("./sys", "sysfs", MS_NOSUID | MS_NODEV | MS_NOEXEC);
@@ -735,7 +612,7 @@ fn setup_special_files(language_id: &String) -> Result<(), Option<String>> {
     for (src, dest) in [
         ("/usr/local/lib/ATO/bash", "./ATO/bash"),
         ("/usr/local/lib/ATO/yargs", "./ATO/yargs"),
-        (&get_runner(&language_id), "./ATO/runner"),
+        (&get_default_runner(&language_id), "./ATO/default_runner"),
     ] {
         drop(check!(File::create(&dest), "error creating mount point for {}: {}", dest));
         mount!(&src, &dest, , MS_NOSUID | MS_BIND | MS_RDONLY);
@@ -744,8 +621,15 @@ fn setup_special_files(language_id: &String) -> Result<(), Option<String>> {
     Ok(())
 }
 
-fn setup_request_files(request: &Request) -> Result<(), Option<String>> {
+fn setup_request_files(request: &Request) -> Result<(), Error> {
     check!(std::fs::write("/ATO/code", &request.code), "error writing /ATO/code: {}");
+    if let Some(custom_runner) = &request.custom_runner {
+        use std::io::Write;
+        let mut file = check!(std::fs::File::create("/ATO/runner"), "error opening /ATO/runner: {}");
+        check!(file.write_all(&custom_runner), "error writing /ATO/runner: {}");
+    } else {
+        check!(std::os::unix::fs::symlink("/ATO/default_runner", "/ATO/runner"), "error linking /ATO/runner: {}");
+    }
     // TODO: stream input in instead of writing it to a file?
     check!(std::fs::write("/ATO/input", &request.input), "error writing /ATO/input: {}");
     check!(std::fs::write("/ATO/arguments", join_args(&request.arguments)), "error writing /ATO/arguments: {}");
@@ -762,7 +646,7 @@ fn join_args(args: &Vec<ByteBuf>) -> ByteBuf {
     b
 }
 
-fn drop_caps() -> Result<(), Option<String>> {
+fn drop_caps() -> Result<(), Error> {
     // drop as many privileges as possible
     // for more info on caps, see man capabilities(7)
 
@@ -779,7 +663,7 @@ fn drop_caps() -> Result<(), Option<String>> {
     Ok(())
 }
 
-fn set_resource_limits() -> Result<(), Option<String>> {
+fn set_resource_limits() -> Result<(), Error> {
     // resource limits work as follows: each one has a "soft" and "hard" limit.
     // for most limits, the process will get an error if it goes beyond the soft limit;
     // the soft limit can be raised by the process but never to higher than the hard limit.

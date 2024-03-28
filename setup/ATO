@@ -1,13 +1,37 @@
 #!/bin/sh -e
 # Start script for the Attempt This Online server - to be run as root
 
-base_cg=/sys/fs/cgroup/system.slice/ATO.service
-mkdir -p "$base_cg/server"
-# move self into a subtree of ATO.service, because otherwise ATO.service itself cannot be configured properly. See https://www.kernel.org/doc/html/latest/admin-guide/cgroup-v2.html#no-internal-process-constraint
-echo "$$" > "$base_cg/server/cgroup.procs"
-echo +memory > "$base_cg/cgroup.subtree_control"
+# unmount any images if they're already mounted (|| : ignores errors)
+umount /usr/local/lib/ATO/rootfs/* || :
+
+CS() {
+    containers-storage \
+        --graph /usr/local/lib/ATO/containers \
+        --run /run/ATO/containers \
+        --storage-driver overlay \
+        "$@"
+}
+
+while read -r image image_pathsafe
+do
+    mountpoint=$(CS mount --read-only "$image")
+    # $mountpoint and its ancestor directories are (probably) not readable by the ato user,
+    # so bind-mount it somewhere we know is (and also so we can control the path)
+    # (this fails with EROFS when $mountpoint is already in use as a mountpoint for a different image,
+    # so ignore errors again with || :)
+    chmod 755 "$mountpoint" || :
+    mount --bind --mkdir "$mountpoint" /usr/local/lib/ATO/rootfs/"$image_pathsafe" -o ro=recursive
+done < /usr/local/lib/ATO/to_mount
+
+export ATO_CGROUP_PATH=/sys/fs/cgroup/system.slice/ATO.service
+mkdir -p "$ATO_CGROUP_PATH/server"
+# move self into a subtree of ATO.service, because otherwise ATO.service itself cannot be configured properly.
+# See https://www.kernel.org/doc/html/latest/admin-guide/cgroup-v2.html#no-internal-process-constraint
+echo "$$" > "$ATO_CGROUP_PATH/server/cgroup.procs"
+echo +memory > "$ATO_CGROUP_PATH/cgroup.subtree_control"
 
 mkdir -p /run/ATO
 chown ato:ato /run/ATO
 chmod 775 /run/ATO
+
 setpriv --reuid ato --regid ato --init-groups /usr/local/lib/ATO/server

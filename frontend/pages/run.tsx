@@ -13,6 +13,7 @@ import ResizeableText from 'components/resizeableText';
 import LanguageSelector from 'components/languageSelector';
 import Footer from 'components/footer';
 import Navbar from 'components/navbar';
+import Options from 'components/options';
 import Notification from 'components/notification';
 import { ArgvList, parseList } from 'components/argvList';
 import * as API from 'lib/api';
@@ -83,6 +84,8 @@ function _Run(
 ) {
   const router = useRouter();
 
+  const codeBox = useRef<any>(null);
+
   let [language, setLanguage] = useState<string | null>(null);
   const [header, setHeader] = useState('');
   const [headerEncoding, setHeaderEncoding] = useState('utf-8');
@@ -107,6 +110,10 @@ function _Run(
 
   const [[optionsString, options], setOptions] = useState<[string, string[] | null]>(['', []]);
   const [[argsString, programArguments], setProgramArguments] = useState<[string, string[] | null]>(['', []]);
+
+  const [isAdvanced, setIsAdvanced] = useState(false);
+  const [customRunner, setCustomRunner] = useState('');
+  const [customRunnerEncoding, setCustomRunnerEncoding] = useState('utf-8');
 
   const [submitting, setSubmitting] = useState(false);
   const [notifications, setNotifications] = useState<{ id: number, text: string }[]>([]);
@@ -154,14 +161,16 @@ function _Run(
     let pData;
 
     try {
-      [killCallback1, pData] = await API.runWs({
+      const payload = {
         language: language!,
         input: inputBytes,
         code: combined,
         options: options!,
         programArguments: programArguments!,
         timeout: 60, // TODO
-      });
+        customRunner: isAdvanced ? ENCODERS[customRunnerEncoding](customRunner) : null,
+      };
+      [killCallback1, pData] = await API.runWs(payload);
     } catch (e) {
       console.error(e);
       notify('An error occurred; see the console for details');
@@ -195,7 +204,7 @@ function _Run(
           `
           Real time: ${data.Done.real / 1e9} s
           Kernel time: ${data.Done.kernel / 1e9} s
-          User time: ${data.Done.kernel / 1e9} s
+          User time: ${data.Done.user / 1e9} s
           Maximum lifetime memory usage: ${data.Done.max_mem} KiB
           Waits (voluntary context switches): ${data.Done.waits}
           Preemptions (involuntary context switches): ${data.Done.preemptions}
@@ -213,7 +222,7 @@ function _Run(
           notify('stdout exceeded 128KiB and was truncated');
         }
         if (data.Done.stderr_truncated) {
-          notify('stderr exceeded 32KiB and was truncated');
+          notify('stderr exceeded 128KiB and was truncated');
         }
       }
       if ('Stdout' in data) {
@@ -224,7 +233,6 @@ function _Run(
         const output = data.Stderr;
         setStderr(current => concatUint8Array(current, output));
       }
-
     } while (pData);
 
     setSubmitting(false);
@@ -244,13 +252,21 @@ function _Run(
       const loadedLanguage = router.query.L || router.query.l;
       if (loadedLanguage) {
         setLanguage(loadedLanguage as string);
+        codeBox?.current?.focus();
       } else {
         setLanguageSelectorOpen(true);
       }
     } else {
       const loadedLanguage = router.query.L || router.query.l || loadedData.language;
       setLanguage(loadedLanguage);
-      setOptions([loadedData.options, parseList(loadedData.options)]);
+      if (loadedData.isAdvanced) {
+        setCustomRunner(loadedData.customRunner);
+        setCustomRunnerEncoding(loadedData.customRunnerEncoding);
+        setIsAdvanced(true);
+      } else {
+        setOptions([loadedData.options, parseList(loadedData.options)]);
+        setIsAdvanced(false);
+      }
       setHeader(loadedData.header);
       setHeaderEncoding(loadedData.headerEncoding);
       setCode(loadedData.code);
@@ -265,8 +281,9 @@ function _Run(
       setInputEncoding(loadedData.inputEncoding);
       // further updates the router.query should not trigger updates
       setShouldLoad(false);
+      codeBox?.current?.focus();
     }
-  }, [router, shouldLoad]);
+  }, [router, shouldLoad, codeBox]);
 
   if (languages && language && !languages[language]) {
     alert(`Unknown language:\n${language}`);
@@ -312,13 +329,16 @@ function _Run(
     () => {
       if (!router.isReady) {
         return;
-      } else if (!language) {
+      } if (!language) {
         // not chosen
         return;
       }
       updateURL.current(router, {
         language,
         options: optionsString,
+        isAdvanced,
+        customRunner,
+        customRunnerEncoding,
         header,
         headerEncoding,
         code,
@@ -334,6 +354,9 @@ function _Run(
     [
       language,
       optionsString,
+      isAdvanced,
+      customRunner,
+      customRunnerEncoding,
       header,
       headerEncoding,
       code,
@@ -361,7 +384,7 @@ function _Run(
       inputEncoding,
     });
     const baseUrl = window.location.host + window.location.pathname;
-    return `https://${baseUrl}?${saveCode}`
+    return `https://${baseUrl}?${saveCode}`;
   };
 
   const [clipboardCopyModalOpen, setClipboardCopyModalOpen] = useState(false);
@@ -399,7 +422,7 @@ ${markdownCode}
     setClipboardCopyModalOpen(false);
     navigator.clipboard.writeText(
       `${languages[language].name}, ${byteLength} ${pluralise('byte', byteLength)}:`
-      + ` [\`${code}\`](${getCurrentURL()})`
+      + ` [\`${code}\`](${getCurrentURL()})`,
     );
 
     notify('Copied to clipboard!');
@@ -412,6 +435,9 @@ ${markdownCode}
   const keyDownHandler = (e: any) => {
     if (readyToSubmit && e.ctrlKey && !e.shiftKey && !e.metaKey && !e.altKey && e.key === 'Enter') {
       submit(e);
+    } else if (e.ctrlKey && !e.shiftKey && !e.metaKey && !e.altKey && e.key === 'h') {
+      e.preventDefault();
+      setLanguageSelectorOpen(true);
     }
   };
 
@@ -429,7 +455,16 @@ ${markdownCode}
         <Navbar />
         <div className="grow relative">
           {languageSelectorOpen ? (
-            <LanguageSelector {...{ language, languages, setLanguage, setLanguageSelectorOpen }} />
+            <LanguageSelector
+              {...{ language, languages }}
+              callback={(id: string) => {
+                if (id !== null) {
+                  setLanguage(id);
+                }
+                setLanguageSelectorOpen(false);
+                codeBox?.current?.focus();
+              }}
+            />
           ) : null}
           <div className="sticky h-0 top-4 z-20 pointer-events-none">
             {notifications.map(
@@ -521,23 +556,28 @@ ${markdownCode}
                           onClick={copyCGCCPost}
                           className="rounded px-4 py-2 bg-gray-300 dark:bg-gray-700 dark:text-white hover:bg-gray-400 dark:hover:bg-gray-600 focus:outline-none focus:ring transition"
                         >
-                          <abbr title="Code Golf and Coding Challenges (Stack Exchange)">CGCC</abbr> Post
+                          <abbr title="Code Golf and Coding Challenges (Stack Exchange)">CGCC</abbr>
+                          {' '}
+                          Post
                         </button>
                       </div>
                     </fieldset>
                   )}
                 </div>
               </div>
-              <div className="pt-3 pb-1">
-                <ArgvList
-                  id="options"
-                  state={[optionsString, options]}
-                  setState={setOptions}
-                  keyDownHandler={keyDownHandler}
-                >
-                  Options:
-                </ArgvList>
-              </div>
+              <Options
+                optionsString={optionsString}
+                options={options}
+                setOptions={setOptions}
+                keyDownHandler={keyDownHandler}
+                isAdvanced={isAdvanced}
+                setIsAdvanced={setIsAdvanced}
+                customRunner={customRunner}
+                setCustomRunner={setCustomRunner}
+                customRunnerEncoding={customRunnerEncoding}
+                setCustomRunnerEncoding={setCustomRunnerEncoding}
+                dummy={dummy}
+              />
               <CollapsibleText
                 value={header}
                 setValue={setHeader}
@@ -557,6 +597,7 @@ ${markdownCode}
                 id="code"
                 onKeyDown={keyDownHandler}
                 dummy={dummy}
+                ref={codeBox}
               >
                 Code
               </CollapsibleText>
@@ -616,7 +657,7 @@ ${markdownCode}
                 {submitting && (
                   <button
                     type="button"
-                    className="rounded ml-4 px-4 py-2 bg-red-500 hover:bg-red-400 text-white focus:outline-none ring-red-300/50 focus:ring disabled:bg-gray-200 disabled:text-black dark:disabled:bg-gray-700 dark:disabled:text-white disabled:cursor-not-allowed transition"
+                    className="rounded ml-4 px-4 py-2 bg-red-500 hover:bg-red-500 text-white focus:outline-none ring-red-300/50 focus:ring disabled:bg-gray-200 disabled:text-black dark:disabled:bg-gray-700 dark:disabled:text-white disabled:cursor-not-allowed transition"
                     disabled={!killCallback}
                     onClick={() => killCallback?.()}
                   >
@@ -636,7 +677,7 @@ ${markdownCode}
               onEncodingChange={e => setStdoutEncoding(e.target.value)}
               id="stdout"
               onKeyDown={keyDownHandler}
-              readOnly={true}
+              readOnly
               dummy={dummy}
             >
               <code>stdout</code>
@@ -649,7 +690,7 @@ ${markdownCode}
               onEncodingChange={e => setStderrEncoding(e.target.value)}
               id="stderr"
               onKeyDown={keyDownHandler}
-              readOnly={true}
+              readOnly
               dummy={dummy}
             >
               <code>stderr</code>
@@ -657,7 +698,10 @@ ${markdownCode}
               output
             </CollapsibleText>
             <details open={timingOpen} className="my-6">
-              <summary className="cursor-pointer focus-within:ring rounded pl-2 hover:bg-gray-200 dark:hover:bg-gray-700 transition py-1 -mt-3 -mb-1">
+              <summary
+                className="cursor-pointer focus-within:ring rounded pl-2 hover:bg-gray-200 dark:hover:bg-gray-700 transition py-1 -mt-3 -mb-1"
+                tabIndex={-1}
+              >
                 <button
                   type="button"
                   onClick={() => { setTimingOpen(!timingOpen); }}
@@ -667,7 +711,7 @@ ${markdownCode}
                 </button>
               </summary>
               <ResizeableText
-                readOnly={true}
+                readOnly
                 value={timing}
                 dummy={dummy}
               />

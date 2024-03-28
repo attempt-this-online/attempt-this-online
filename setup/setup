@@ -2,7 +2,7 @@
 
 set -e
 
-VERSION="0.1.16"
+VERSION="0.2.4"
 
 error() {
     echo "$@" >&2; exit 2
@@ -26,13 +26,20 @@ whoami | grep -xFq root || error you must run this script as root
 # - cronie: automate renewal of certbot certificates, cache cleaning, etc.
 # - nginx: web server
 # - sed: configuration editing on installation
+# - python: helper scripts during installation
 # - skopeo: for docker image extraction
 [ -z "$ATO_NO_DEPS" ] && pacman -Syu --noconfirm --needed \
     certbot \
     cronie \
     nginx \
     sed \
-    skopeo
+    python \
+    skopeo \
+
+curl -sSL "https://github.com/attempt-this-online/containers-storage/releases/download/v1.51.0/containers-storage.linux.amd64" \
+    -o /usr/local/bin/containers-storage
+
+chmod 755 /usr/local/bin/containers-storage
 
 # don't use /tmp because it has weird permissions
 mkdir -p /var/cache/ATO
@@ -55,7 +62,6 @@ useradd -rs /usr/bin/nologin -md /var/lib/ATO_home ato
 
 # install backend
 install -m 500 -o ato -g ato server /usr/local/lib/ATO/
-install -m 500 -o ato -g ato invoke /usr/local/lib/ATO/invoke
 
 # install runners
 cp -RT runners /usr/local/share/ATO/runners
@@ -93,7 +99,7 @@ install -dm 750 -o root -g http /var/www/_letsencrypt
 certbot certonly -n --standalone -d "$1" -d "www.$1" --agree-tos --register-unsafely-without-email
 # configure cronie to automatically renew certificates
 # (every day at 10:07)
-echo "7 10 * * * certbot renew && systemctl reload nginx" >> /var/spool/cron/root
+echo "7 10 * * * systemctl stop nginx && certbot renew && systemctl start nginx" >> /var/spool/cron/root
 systemctl enable --now cronie.service
 
 # install yargs
@@ -125,8 +131,10 @@ mkdir -p /usr/local/share/ATO/overlayfs_upper/ATO /usr/local/share/ATO/overlayfs
 echo Finished system setup.
 echo Now extracting Docker images - this will take a long time...
 
-mkdir -p /usr/local/lib/ATO/env /usr/local/lib/ATO/layers
-mkdir -p /var/cache/ATO/images
+mkdir -p /usr/local/lib/ATO/env /usr/local/lib/ATO/containers /usr/local/lib/ATO/rootfs
+chown -R ato:ato /usr/local/lib/ATO
+
+STORAGE_BACKEND='containers-storage:[/usr/local/lib/ATO/containers+/run/ATO/containers]'
 
 [ -z "$ATO_NO_IMAGES" ] && \
 while read -r image
@@ -135,30 +143,18 @@ do
     [ -z "$image" ] || [ "$image" = "#" ] && continue
     echo "$image"
 
-    skopeo copy docker://"$image" docker-archive:>(tar -xC /var/cache/ATO/images)
-    # shellcheck disable=SC2010
-    ls /var/cache/ATO/images |
-    grep -Ex '[0-9a-f]+\.tar' |
-        while read -r filename
-        do
-            layer_id="${filename%.tar}"
+    # download image from Docker registry
+    skopeo copy docker://"$image" "$STORAGE_BACKEND$image"
 
-            # skip duplicate layers
-            [ -d "/usr/local/lib/ATO/layers/$layer_id" ] && continue
-
-            mkdir "/usr/local/lib/ATO/layers/$layer_id"
-            tar -xf "/var/cache/ATO/images/$layer_id.tar" -C \
-                "/usr/local/lib/ATO/layers/$layer_id"
-        done
-
-    # replace slash with plus so that it can be used as an individual filename
-    image_pathsafe="$(echo "$image" | tr '/' '+')"
-    setup/overlayfs_genfstab "$image_pathsafe" >> /etc/fstab
+    # replace / so the image name is safe in filenames,
+    # and : so it's safe in mount arguments which accept a colon-separated list
+    image_pathsafe="$(echo "$image" | tr '/:' '+')"
 
     # extract environment variables from the image
-    skopeo inspect docker://"$image" | setup/parse_env > "/usr/local/lib/ATO/env/$image_pathsafe"
+    skopeo inspect "$STORAGE_BACKEND$image" | setup/parse_env > "/usr/local/lib/ATO/env/$image_pathsafe"
 
-    rm -rf /var/cache/ATO/images/*
+    # set it up to be mounted
+    echo "$image" "$image_pathsafe" >> /usr/local/lib/ATO/to_mount
 
 done < images.txt
 
@@ -169,8 +165,6 @@ cd /
 rm -rf /var/cache/ATO
 
 echo Starting up services...
-# mount all overlayfs
-mount -a
 systemctl start nginx.service ATO.service
 
 echo Finished!

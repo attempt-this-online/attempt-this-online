@@ -40,6 +40,8 @@ A [msgpack]-encoded payload - a map with the following string keys:
 - `arguments`: an array of binaries - command-line arguments to be passed to the **program itself**
 - `timeout`: (optional) an integer which specifies the duration in seconds for which the program is allowed to run. Must
 be less than or equal to 60. If not specified, 60 is used.
+- `custom_runner`: (optional) a binary containing a Bash script to be run instead of invoking the language's compiler.
+(More explanation is given at https://ato.pxeger.com/run?1=m7O4qjjjwIKlpSVpuhZoFJQ-AAA)
 
 Typing is fairly lax; strings will be accepted in place of binaries (they will be encoded in UTF-8).
 
@@ -60,6 +62,9 @@ A [msgpack]-encoded payload - a map containing one key, `Done`, whose value is a
       limitations.
     - `core_dumped`: the number of the signal that caused the process to dump its core (see [`signal(7)`], [`core(5)`])
     - `unknown`: always `-1`
+- `stdout_truncated` and `stderr_truncated`: booleans which indicate if the program's output exceeded 128KiB and was
+  therefore truncated. Note that slightly more than 128KiB may sometimes still be accepted from the program and sent to
+  the client in stdout/stderr messages (see above)
 - `timed_out`: whether the process had to be killed because it overran its 60 second timeout. If this is the case, the
   process will have been killed by `SIGKILL` (ID 9)
 - `real`: real elapsed time in nanoseconds

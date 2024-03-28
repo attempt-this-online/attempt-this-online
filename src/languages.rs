@@ -3,12 +3,8 @@ use std::collections::hash_map::HashMap;
 
 #[derive(Deserialize)]
 pub struct Language {
-    pub name: String,
     pub image: String,
-    pub version: String,
-    pub url: String,
-    pub sbcs: bool,
-    pub se_class: Option<String>,
+    // serde silently ignores the extra fields, which we don't use
 }
 
 lazy_static::lazy_static! {

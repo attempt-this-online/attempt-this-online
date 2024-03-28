@@ -1,7 +1,8 @@
 {
     "05ab1e": {
         "name": "05AB1E",
-        "image": "attemptthisonline/05ab1e",
+        "hello_world": {"code": "\"Hello, World!\"", "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/05ab1e:latest",
         "version": "Latest",
         "url": "https://github.com/Adriandmen/05AB1E",
         "sbcs": true,
@@ -9,28 +10,47 @@
     },
     "alphuck": {
         "name": "Alphuck",
-        "image": "attemptthisonline/tio_brainfuck",
+        "hello_world": {"code": "eeeeeeeepaeeeepaeeaeeeaeeeaeccccisaea\neaiaaepcscisaajaiiijeeeeeeejjeeejaajcijcjeeej\niiiiiijiiiiiiiijaaejaeej", "output": "Hello World!\n"},
+        "image": "docker.io/attemptthisonline/tio_brainfuck:latest",
         "version": "Unknown",
         "url": "https://github.com/TryItOnline/brainfuck",
         "sbcs": false
     },
+    "aheui_rpaheui": {
+        "name": "Aheui (rpaheui)",
+        "hello_world": {"code": "밤밣따빠밣밟따뿌\n빠맣파빨받밤뚜뭏\n돋밬탕빠맣붏두붇\n볻뫃박발뚷투뭏붖\n뫃도뫃희멓뭏뭏붘\n뫃봌토범더벌뿌뚜\n뽑뽀멓멓더벓뻐뚠\n뽀덩벐멓뻐덕더벅", "output": "Hello, world!\n"},
+        "image": "docker.io/attemptthisonline/rpaheui:latest",
+        "version": "Latest",
+        "url": "https://github.com/aheui/rpaheui",
+        "sbcs": false
+    },
     "apl_dzaima": {
         "name": "APL (dzaima/APL)",
-        "image": "attemptthisonline/dzaima_apl",
+        "hello_world": {"code": "⎕←'Hello, World!'", "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/dzaima_apl:latest",
         "version": "Latest",
         "url": "https://github.com/dzaima/APL",
         "sbcs": true
     },
     "awk": {
         "name": "AWK",
-        "image": "attemptthisonline/base",
+        "hello_world": {"code": "BEGIN{print \"Hello, World!\"}", "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/base:latest",
         "version": "Latest",
         "url": "https://www.gnu.org/software/gawk/",
         "sbcs": false
     },
+    "backhand": {
+        "name": "Backhand",
+        "image": "docker.io/attemptthisonline/backhand:latest",
+        "version": "Latest",
+        "url": "https://github.com/GrayJoKing/Backhand",
+        "sbcs": false
+    },
     "bash": {
         "name": "Bash",
-        "image": "attemptthisonline/bash",
+        "hello_world": {"code": "echo \"Hello, World!\"", "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/bash:latest",
         "version": "Latest",
         "url": "https://www.gnu.org/software/bash/",
         "sbcs": false,
@@ -38,42 +58,64 @@
     },
     "bc": {
         "name": "bc",
-        "image": "attemptthisonline/bc",
+        "hello_world": {"code": "print \"Hello, World!\";\n", "output": "Hello, World!"},
+        "image": "docker.io/attemptthisonline/bc:latest",
         "version": "Latest",
         "url": "https://www.gnu.org/software/bc/",
         "sbcs": false
     },
     "bqn": {
         "name": "BQN (CBQN)",
-        "image": "attemptthisonline/cbqn",
+        "hello_world": {"code": "•Out \"Hello, World!\"", "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/cbqn:latest",
         "version": "Latest",
         "url": "https://mlochbaum.github.io/BQN/",
         "sbcs": false
     },
+    "bracmat": {
+        "name": "Bracmat",
+        "hello_world": {"code": "put$\"Hello, World!\"", "output": "Hello, World!"},
+        "image": "docker.io/attemptthisonline/bracmat:latest",
+        "version": "Latest",
+        "url": "http://jongejan.dk/bracmat.html",
+        "sbcs": false
+    },
     "brainbool": {
         "name": "Brainbool",
-        "image": "attemptthisonline/tio_brainfuck",
+        "hello_world": {"code": ".+.+..+.+....+..+..+.+.+.+.+..+.+..+...+..+.+..+...+..+.+....+..+.+.+..+....+.+......+.+.+.+.+...+.+..+.+....+.+...+..+.+..+..+.+..+...+..+..+.+....+.+....+.", "options": ["-B"], "output": "Hello, World!"},
+        "image": "docker.io/attemptthisonline/tio_brainfuck:latest",
         "version": "Unknown",
         "url": "https://github.com/TryItOnline/brainfuck",
         "sbcs": false
     },
+    "brainflak": {
+        "name": "Brain-Flak",
+        "hello_world": {"code": "(((((((((((()()()()){}){}){}()))){}{}())[][][][])[][])[[]]())[[][][][][]]())([([]([])[][]{})]()()()([[]](([()()()]([([][][])](((({}()){}))){}{})))))", "options": ["-A"], "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/brain-flak:latest",
+        "version": "Latest",
+        "url": "https://github.com/DJMcMayhem/Brain-Flak",
+        "sbcs": false
+    },
     "brainfuck": {
         "name": "Brainfuck",
-        "image": "attemptthisonline/tio_brainfuck",
+        "hello_world": {"code": "--->->->>+>+>>+[++++[>+++[>++++>-->+++<<<-]<-]<+++]>>>.>-->-.>..+>++++>+++.+>-->[>-.<<]", "output": "Hello, World!"},
+        "image": "docker.io/attemptthisonline/tio_brainfuck:latest",
         "version": "the only version",
         "url": "https://github.com/TryItOnline/brainfuck",
         "sbcs": false
     },
     "brainlove": {
         "name": "Brainlove",
-        "image": "attemptthisonline/tio_brainfuck",
+        "hello_world": {"code": "--<-<<+[+[<+>--->->->-<<<]>]<<--.<++++++.<<-..<<.<+.>>.>>.<<<.+++.>>.>>-.<<<+.", "output": "Hello, World!"},
+        "image": "docker.io/attemptthisonline/tio_brainfuck:latest",
         "version": "Unknown",
         "url": "https://github.com/TryItOnline/brainfuck",
         "sbcs": false
     },
     "c_gcc": {
         "name": "C (GCC)",
-        "image": "attemptthisonline/base",
+        "hello_world": {"code": "#include <stdio.h>\nint main(void) { puts(\"Hello, World!\"); }", "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/base:latest",
         "version": "11",
         "url": "https://gcc.gnu.org",
         "sbcs": false,
@@ -81,37 +123,41 @@
     },
     "chapel": {
         "name": "Chapel",
-        "image": "attemptthisonline/chapel",
+        "hello_world": {"code": "write(\"Hello, World!\");", "output": "Hello, World!"},
+        "image": "docker.io/attemptthisonline/chapel:latest",
         "version": "1.28.0",
         "url": "https://chapel-lang.org",
         "sbcs": false
     },
     "charcoal": {
         "name": "Charcoal",
-        "image": "attemptthisonline/charcoal",
+        "hello_world": {"code": "Hello, World!", "output": "Hello, World!"},
+        "image": "docker.io/attemptthisonline/charcoal:latest",
         "version": "Latest",
         "url": "https://github.com/somebody1234/Charcoal",
         "sbcs": true
     },
     "clang": {
         "name": "C (clang)",
-        "image": "attemptthisonline/clang",
+        "hello_world": {"code": "#include <stdio.h>\nint main(void) { puts(\"Hello, World!\"); }", "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/clang:latest",
         "version": "Latest",
         "url": "https://clang.llvm.org",
         "sbcs": false,
         "se_class": "c"
-
     },
     "cognate": {
         "name": "Cognate",
-        "image": "attemptthisonline/cognate",
+        "hello_world": {"code": "Print \"Hello, World!\"", "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/cognate:latest",
         "version": "Latest",
         "url": "https://cognate-lang.github.io",
         "sbcs": false
     },
     "cplusplus_gcc": {
         "name": "C++ (GCC)",
-        "image": "attemptthisonline/gcc",
+        "hello_world": {"code": "#include <stdio.h>\nint main(void) { puts(\"Hello, World!\"); }", "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/gcc:latest",
         "version": "11",
         "url": "https://gcc.gnu.org",
         "sbcs": false,
@@ -119,21 +165,40 @@
     },
     "crystal": {
         "name": "Crystal",
-        "image": "attemptthisonline/crystal",
+        "hello_world": {"code": "puts \"Hello, World!\"", "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/crystal:latest",
         "version": "Latest",
         "url": "https://crystal-lang.org/",
         "sbcs": false
     },
+    "curry_kics2": {
+        "name": "Curry (KiCS2)",
+        "hello_world": {"code": "main = putStr \"Hello, World!\"", "output": "Hello, World!"},
+        "image": "docker.io/attemptthisonline/curry_kics2:latest",
+        "version": "Latest",
+        "url": "https://www-ps.informatik.uni-kiel.de/kics2/index.html",
+        "sbcs": false
+    },
+    "curry_pakcs": {
+        "name": "Curry (PAKCS)",
+        "hello_world": {"code": "main = putStr \"Hello, World!\"", "output": "Hello, World!"},
+        "image": "docker.io/attemptthisonline/curry_pakcs:latest",
+        "version": "Latest",
+        "url": "https://www.informatik.uni-kiel.de/~pakcs/index.html",
+        "sbcs": false
+    },
     "dc": {
         "name": "dc",
-        "image": "attemptthisonline/bc",
+        "hello_world": {"code": "[Hello, World!]P", "output": "Hello, World!"},
+        "image": "docker.io/attemptthisonline/bc:latest",
         "version": "Latest",
         "url": "https://www.gnu.org/software/bc/",
         "sbcs": false
     },
     "deno": {
         "name": "TypeScript (Deno)",
-        "image": "attemptthisonline/deno",
+        "hello_world": {"code": "console.log('Hello, World!')", "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/deno:latest",
         "version": "Latest",
         "url": "https://deno.land",
         "sbcs": false,
@@ -141,28 +206,40 @@
     },
     "dirac": {
         "name": "dirac",
-        "image": "attemptthisonline/dirac",
+        "hello_world": {"code": "[[#0C!][I,]F#10I,]puts;\n\"Hello, World!\"puts:!", "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/dirac:latest",
         "version": "Latest",
         "url": "https://esolangs.org/wiki/Dirac",
         "sbcs": false
     },
     "dyalog_apl": {
         "name": "APL (Dyalog APL)",
-        "image": "dyalog/dyalog",
+        "hello_world": {"code": "⎕←'Hello, World!'", "output": "Hello, World!\r"},
+        "image": "docker.io/dyalog/dyalog:latest",
         "version": "Latest",
         "url": "https://www.dyalog.com/products.htm",
         "sbcs": false
     },
     "elixir": {
         "name": "Elixir",
-        "image": "attemptthisonline/elixir",
+        "hello_world": {"code": "IO.puts \"Hello, World!\"", "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/elixir:latest",
         "version": "Latest",
         "url": "https://elixir-lang.org",
         "sbcs": false
     },
+    "elm": {
+        "name": "Elm",
+        "hello_world": {"code": "main : Program () () ()\nmain = Platform.worker {init = \\_ -> ((), Interact.put \"hello\"), update = \\() () -> ((), Cmd.none), subscriptions = \\() -> Sub.none}", "output": "Hello, World!"},
+        "image": "docker.io/attemptthisonline/elm:latest",
+        "version": "Latest",
+        "url": "https://elm-lang.org/",
+        "sbcs": false
+    },
     "erlang": {
         "name": "Erlang",
-        "image": "attemptthisonline/erlang",
+        "hello_world": {"code": "\nmain([])->\nio:fwrite(\"Hello, World!\").", "output": "Hello, World!"},
+        "image": "docker.io/attemptthisonline/erlang:latest",
         "version": "Latest",
         "url": "https://www.erlang.org",
         "sbcs": false,
@@ -170,63 +247,80 @@
     },
     "exceptionally": {
         "name": "Exceptionally",
-        "image": "attemptthisonline/exceptionally",
+        "hello_world": {"code": "P\"Hello, World!\"/", "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/exceptionally:latest",
         "version": "Latest",
         "url": "https://github.com/dloscutoff/Esolangs/tree/master/Exceptionally",
         "sbcs": false
     },
     "extended_brainfuck_type_I": {
         "name": "Extended Brainfuck Type I",
-        "image": "attemptthisonline/tio_brainfuck",
+        "hello_world": {"code": "--<-<<+[+[<+>--->->->-<<<]>]<<--.<++++++.<<-..<<.<+.>>.>>.<<<.+++.>>.>>-.<<<+.", "output": "Hello, World!"},
+        "image": "docker.io/attemptthisonline/tio_brainfuck:latest",
         "version": "Unknown",
         "url": "https://github.com/TryItOnline/brainfuck",
         "sbcs": false
     },
     "factor": {
         "name": "Factor",
-        "image": "attemptthisonline/factor",
+        "hello_world": {"code": "USE: io \"Hello, World!\" print", "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/factor:latest",
         "version": "Latest",
         "url": "https://factorcode.org",
         "sbcs": false
     },
     "flax": {
         "name": "flax",
-        "image": "attemptthisonline/flax",
+        "hello_world": {"code": "\"Hello, World!", "options": ["c"], "output": "Hello, World!"},
+        "image": "docker.io/attemptthisonline/flax:latest",
         "version": "Latest",
         "url": "https://github.com/PyGamer0/flax",
         "sbcs": true
     },
+    "flip": {
+        "name": "Flip",
+        "hello_world": {"code": "\" H e l l o ,   W o r l d ! \" o #", "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/flip:latest",
+        "version": "Latest",
+        "url": "https://github.com/jfioasd/Flip",
+        "sbcs": false
+    },
     "funky2": {
         "name": "Funky2",
-        "image": "attemptthisonline/funky2",
+        "hello_world": {"code": "print(\"Hello, World!\")", "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/funky2:latest",
         "version": "Latest",
         "url": "https://funky2.a-ta.co/",
         "sbcs": false
     },
     "gdc": {
         "name": "D (GDC)",
-        "image": "attemptthisonline/gcc",
+        "hello_world": {"code": "import std.stdio; void main() { write(\"Hello, World!\"); }", "output": "Hello, World!"},
+        "image": "docker.io/attemptthisonline/gcc:latest",
         "version": "11",
         "url": "https://gdcproject.org",
         "sbcs": false
     },
     "gfortran": {
         "name": "Fortran (GFortran)",
-        "image": "attemptthisonline/gcc",
+        "hello_world": {"code": "print'(\"Hello, World!\")'\nend", "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/gcc:latest",
         "version": "11",
         "url": "https://gcc.gnu.org/fortran",
         "sbcs": false
     },
     "gnat": {
         "name": "Ada (GNAT)",
-        "image": "attemptthisonline/gcc",
+        "hello_world": {"code": "with Ada.Text_IO;\nuse Ada.Text_IO;\n\nprocedure Main is\nbegin\n  Put_Line (\"Hello, World!\");\nend Main;", "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/gcc:latest",
         "version": "11",
         "url": "https://en.wikipedia.org/wiki/GNAT",
         "sbcs": false
     },
     "go": {
         "name": "Go",
-        "image": "attemptthisonline/go",
+        "hello_world": {"code": "package main\nimport \"fmt\"\nfunc main() {\n\tfmt.Print(\"Hello, World!\")\n}", "output": "Hello, World!"},
+        "image": "docker.io/attemptthisonline/go:latest",
         "version": "Latest",
         "url": "https://go.dev",
         "sbcs": false,
@@ -234,7 +328,8 @@
     },
     "go_gcc": {
         "name": "Go (GCC)",
-        "image": "attemptthisonline/gcc",
+        "hello_world": {"code": "package main\nimport \"fmt\"\nfunc main() {\n\tfmt.Print(\"Hello, World!\")\n}", "output": "Hello, World!"},
+        "image": "docker.io/attemptthisonline/gcc:latest",
         "version": "11",
         "url": "https://gcc.gnu.org",
         "sbcs": false,
@@ -242,7 +337,8 @@
     },
     "guile": {
         "name": "Guile",
-        "image": "attemptthisonline/base",
+        "hello_world": {"code": "(display \"Hello, World!\")", "output": "Hello, World!"},
+        "image": "docker.io/attemptthisonline/base:latest",
         "version": "Latest",
         "url": "https://www.gnu.org/software/guile/",
         "sbcs": false,
@@ -250,7 +346,8 @@
     },
     "haskell": {
         "name": "Haskell",
-        "image": "attemptthisonline/haskell",
+        "hello_world": {"code": "main = putStr \"Hello, World!\"", "output": "Hello, World!"},
+        "image": "docker.io/attemptthisonline/haskell:latest",
         "version": "Latest",
         "url": "https://www.haskell.org",
         "sbcs": false,
@@ -258,28 +355,32 @@
     },
     "hops": {
         "name": "HOPS",
-        "image": "attemptthisonline/hops",
+        "hello_world": {"code": "f=1+(x+x^2)*f", "output": "{\"hops\":\"f=1+(x+x^2)*f\",\"seq\":[1,1,2,3,5,8,13,21,34,55,89,144,233,377,610]}\n"},
+        "image": "docker.io/attemptthisonline/hops:latest",
         "version": "Latest",
         "url": "https://akc.is/hops/",
         "sbcs": false
     },
     "husk": {
         "name": "Husk",
-        "image": "attemptthisonline/husk",
+        "hello_world": {"code": "¨H◄⁰,ω]!", "output": "Hello, World!"},
+        "image": "docker.io/attemptthisonline/husk:latest",
         "version": "Latest",
         "url": "https://github.com/barbuz/Husk",
         "sbcs": true
     },
     "j": {
         "name": "J",
-        "image": "attemptthisonline/j_but_longer",
+        "hello_world": {"code": "echo 'Hello, World!'", "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/j_but_longer:latest",
         "version": "Latest",
         "url": "https://www.jsoftware.com",
         "sbcs": false
     },
     "j_uby": {
         "name": "J-uby",
-        "image": "attemptthisonline/j_uby",
+        "hello_world": {"code": "put = :puts & $>\nput ^ \"Hello, World!\"", "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/j_uby:latest",
         "version": "Latest",
         "url": "https://github.com/cyoce/J-uby",
         "sbcs": false,
@@ -287,7 +388,8 @@
     },
     "java": {
         "name": "Java",
-        "image": "attemptthisonline/java",
+        "hello_world": {"code": "public class Main {\n\tpublic static void main(String[] args) {\n\t\tSystem.out.print(\"Hello, World!\");\n\t}\n}", "output": "Hello, World!"},
+        "image": "docker.io/attemptthisonline/java:latest",
         "version": "Latest",
         "url": "https://en.wikipedia.org/wiki/Java_(programming_language)",
         "sbcs": false,
@@ -295,100 +397,153 @@
     },
     "jelly": {
         "name": "Jelly",
-        "image": "attemptthisonline/jelly",
+        "hello_world": {"code": "“3ḅaė;œ»", "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/jelly:latest",
         "version": "70c9fd93",
         "url": "https://github.com/DennisMitchell/jellylanguage",
         "sbcs": true
     },
     "jq": {
         "name": "jq",
-        "image": "attemptthisonline/jq",
+        "hello_world": {"code": "\"Hello, World!\"", "options": ["-nr"], "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/jq:latest",
         "version": "Latest",
         "url": "https://stedolan.github.io/jq/",
         "sbcs": false
     },
     "julia": {
         "name": "Julia",
-        "image": "attemptthisonline/julia",
+        "hello_world": {"code": "print(\"Hello, World!\")", "output": "Hello, World!"},
+        "image": "docker.io/attemptthisonline/julia:latest",
         "version": "Latest",
         "url": "https://julialang.org",
         "sbcs": false
     },
+    "kamilalisp": {
+        "name": "Kamilalisp",
+        "hello_world": {"code": "(io:writeln \"Hello, World!\")", "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/kamilalisp:latest",
+        "version": "Latest",
+        "url": "https://github.com/kspalaiologos/kamilalisp",
+        "sbcs": false
+    },
     "k_ktye": {
         "name": "K (ktye/i)",
-        "image": "attemptthisonline/ktye_k",
+        "hello_world": {"code": "`0:\"Hello, World!\"", "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/ktye_k:latest",
         "version": "Latest",
         "url": "https://github.com/ktye/i",
         "sbcs": false
     },
     "k_ngn": {
         "name": "K (ngn/k)",
-        "image": "attemptthisonline/ngn_k",
+        "hello_world": {"code": "`0:\"Hello, World!\"", "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/ngn_k:latest",
         "version": "Latest",
         "url": "https://codeberg.org/ngn/k",
         "sbcs": false
     },
     "k_ok": {
         "name": "K (oK)",
-        "image": "attemptthisonline/ok",
+        "hello_world": {"code": "{}`0:\"Hello, World!\"", "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/ok:latest",
         "version": "Latest",
         "url": "https://github.com/JohnEarnest/ok",
         "sbcs": false
     },
     "knight": {
         "name": "Knight",
-        "image": "attemptthisonline/knight",
+        "hello_world": {"code": "O\"Hello, World!\"", "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/knight:latest",
         "version": "Latest",
         "url": "https://github.com/knight-lang/knight-lang",
         "sbcs": false
     },
     "kotlin": {
         "name": "Kotlin",
-        "image": "attemptthisonline/kotlin",
+        "hello_world": {"code": "print(\"Hello, World!\")", "output": "Hello, World!"},
+        "image": "docker.io/attemptthisonline/kotlin:latest",
         "version": "Latest",
         "url": "https://kotlinlang.org",
         "sbcs": false,
         "se_class": "kotlin"
     },
+    "koka": {
+        "name": "Koka",
+        "hello_world": {"code": "fun main()print(\"Hello, World!\")", "output": "Hello, World!"},
+        "image": "docker.io/attemptthisonline/koka:latest",
+        "version": "Latest",
+        "url": "https://koka-lang.github.io",
+        "sbcs": false
+    },
+    "labyrinth": {
+        "name": "Labyrinth",
+        "image": "docker.io/attemptthisonline/labyrinth:latest",
+        "version": "Latest",
+        "url": "https://github.com/m-ender/labyrinth",
+        "sbcs": false
+    },
     "lolcode": {
         "name": "LOLCODE",
-        "image": "attemptthisonline/lolcode",
+        "hello_world": {"code": "HAI 1.2\nVISIBLE \"Hello, World!\"\nKTHXBYE", "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/lolcode:latest",
         "version": "Latest",
         "url": "https://github.com/justinmeza/lci",
         "sbcs": false
     },
     "lua": {
         "name": "Lua",
-        "image": "attemptthisonline/lua",
+        "hello_world": {"code": "print \"Hello, World!\"", "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/lua:latest",
         "version": "Latest",
         "url": "https://www.lua.org",
         "sbcs": false,
         "se_class": "lua"
     },
+    "minigolf": {
+        "name": "minigolf",
+        "hello_world": {"code": "[Hello, World!]", "options": ["-c"], "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/minigolf:latest",
+        "version": "Latest",
+        "url": "https://github.com/jfioasd/minigolf/",
+        "sbcs": false
+    },
     "neko": {
         "name": "Neko",
-        "image": "attemptthisonline/neko",
+        "hello_world": {"code": "$print(\"Hello, World!\");", "output": "Hello, World!"},
+        "image": "docker.io/attemptthisonline/neko:latest",
         "version": "Latest",
         "url": "https://nekovm.org/",
         "sbcs": false
     },
+    "nekomata": {
+        "name": "Nekomata",
+        "hello_world": {"code": "\"Hello, World!\"", "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/nekomata:latest",
+        "version": "Latest",
+        "url": "https://github.com/AlephAlpha/Nekomata",
+        "sbcs": true
+    },
     "nibbles": {
         "name": "Nibbles",
-        "image": "attemptthisonline/nibbles",
+        "hello_world": {"code": "\"Hello, World!\"", "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/nibbles:latest",
         "version": "Latest",
         "url": "http://golfscript.com/nibbles/index.html",
         "sbcs": false
     },
     "nim": {
         "name": "Nim",
-        "image": "attemptthisonline/nim",
+        "hello_world": {"code": "echo \"Hello, World!\"", "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/nim:latest",
         "version": "Latest",
         "url": "https://nim-lang.org/",
         "sbcs": false
     },
     "node": {
         "name": "JavaScript (Node.js)",
-        "image": "attemptthisonline/node",
+        "hello_world": {"code": "console.log(\"Hello, World!\")", "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/node:latest",
         "version": "Latest",
         "url": "https://nodejs.org",
         "sbcs": false,
@@ -396,7 +551,8 @@
     },
     "objective_c_gcc": {
         "name": "Objective-C (GCC)",
-        "image": "attemptthisonline/gcc",
+        "hello_world": {"code": "#include <stdio.h>\nint main(void) { puts(\"Hello, World!\"); }", "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/gcc:latest",
         "version": "11",
         "url": "https://gcc.gnu.org",
         "sbcs": false,
@@ -404,7 +560,8 @@
     },
     "objective_cplusplus_gcc": {
         "name": "Objective-C++ (GCC)",
-        "image": "attemptthisonline/gcc",
+        "hello_world": {"code": "#include <stdio.h>\nint main(void) { puts(\"Hello, World!\"); }", "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/gcc:latest",
         "version": "11",
         "url": "https://gcc.gnu.org",
         "sbcs": false,
@@ -412,28 +569,32 @@
     },
     "ocaml": {
         "name": "OCaml",
-        "image": "attemptthisonline/ocaml",
+        "hello_world": {"code": "print_string \"Hello, World!\"", "output": "Hello, World!"},
+        "image": "docker.io/attemptthisonline/ocaml:latest",
         "version": "Latest",
         "url": "https://ocaml.org",
         "sbcs": false
     },
     "ooocode": {
         "name": "oOo CODE",
-        "image": "attemptthisonline/tio_brainfuck",
+        "hello_world": {"code": "OooOoooooOooooooooOoOoOoOoOoOooooOoOooOOooOooOooooOOooooOOooooOOooooooooooooOOooOoOOooooooOooOooOOooooOoOOoOOoOOoOOoOOoOOOoooooooOooOOoOOoooooooOOooooOoOOOoooOooOOOoooOooOOOooooooooooOOoOoOOoOOoOOOoooOooOOOoooOooOOooOOooooooooooOoOOOo", "output": "Hello, World!"},
+        "image": "docker.io/attemptthisonline/tio_brainfuck:latest",
         "version": "Unknown",
         "url": "https://github.com/TryItOnline/brainfuck",
         "sbcs": false
     },
     "pari_gp": {
         "name": "PARI/GP",
-        "image": "attemptthisonline/pari_gp",
+        "hello_world": {"code": "print1(\"Hello, World!\")", "output": "Hello, World!"},
+        "image": "docker.io/attemptthisonline/pari_gp:latest",
         "version": "Latest",
         "url": "https://pari.math.u-bordeaux.fr",
         "sbcs": false
     },
     "perl": {
         "name": "Perl",
-        "image": "attemptthisonline/perl",
+        "hello_world": {"code": "print \"Hello, World!\";", "output": "Hello, World!"},
+        "image": "docker.io/attemptthisonline/perl:latest",
         "version": "Latest",
         "url": "https://www.perl.org",
         "sbcs": false,
@@ -441,7 +602,8 @@
     },
     "php": {
         "name": "PHP",
-        "image": "attemptthisonline/php",
+        "hello_world": {"code": "<?php\necho \"Hello, World!\";\n?>", "output": "Hello, World!"},
+        "image": "docker.io/attemptthisonline/php:latest",
         "version": "Latest",
         "url": "https://www.php.net",
         "sbcs": false,
@@ -449,21 +611,41 @@
     },
     "pip": {
         "name": "Pip",
-        "image": "attemptthisonline/pip",
+        "hello_world": {"code": "\"Hello, World!\"", "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/pip:latest",
         "version": "Latest",
         "url": "https://github.com/dloscutoff/pip",
         "sbcs": false
     },
+    "powershell": {
+        "name": "PowerShell",
+        "hello_world": {"code": "'Hello, World!'", "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/powershell:latest",
+        "version": "Latest",
+        "url": "https://github.com/PowerShell/PowerShell",
+        "sbcs": false,
+        "se_class":"lang-powershell"
+    },
+    "prolog_swi": {
+        "name": "Prolog (SWI)",
+        "hello_world": {"code": "?-write('Hello, World!').", "output": "Hello, World!\n\n"},
+        "image": "docker.io/attemptthisonline/swi_prolog:latest",
+        "version": "Latest",
+        "url": "https://www.swi-prolog.org/",
+        "sbcs": false
+    },
     "pyth": {
         "name": "Pyth",
-        "image": "attemptthisonline/pyth",
+        "hello_world": {"code": "\"Hello, World!", "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/pyth:latest",
         "version": "Latest",
         "url": "https://github.com/isaacg1/pyth",
         "sbcs": false
     },
     "python": {
         "name": "Python",
-        "image": "attemptthisonline/python_with_common_libraries",
+        "hello_world": {"code": "print(\"Hello, World!\")", "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/python_with_common_libraries:latest",
         "version": "Latest",
         "url": "https://www.python.org",
         "sbcs": false,
@@ -471,7 +653,8 @@
     },
     "python2": {
         "name": "Python 2",
-        "image": "attemptthisonline/python2",
+        "hello_world": {"code": "print \"Hello, World!\"", "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/python2:latest",
         "version": "2",
         "url": "https://docs.python.org/2/",
         "sbcs": false,
@@ -479,36 +662,58 @@
     },
     "quipu": {
         "name": "Quipu",
-        "image": "attemptthisonline/quipu",
+        "hello_world": {"code": "' 'H[]\n'W'e/\\\n'o'l\n'r'l\n'l'o\n'd',\n'!/\\", "output": "Hello, World!"},
+        "image": "docker.io/attemptthisonline/quipu:latest",
         "version": "Latest",
         "url": "https://github.com/cgccuser/quipu",
         "sbcs": false
     },
     "r": {
         "name": "R",
-        "image": "attemptthisonline/r_but_longer",
+        "hello_world": {"code": "cat(\"Hello, World!\")", "output": "Hello, World!"},
+        "image": "docker.io/attemptthisonline/r_but_longer:latest",
         "version": "Latest",
         "url": "https://www.r-project.org",
         "sbcs": false,
         "se_class": "r"
     },
+    "raku": {
+        "name": "Raku (Perl 6) (rakudo)",
+        "hello_world": {"code": "print \"Hello, World!\"", "output": "Hello, World!"},
+        "image": "docker.io/attemptthisonline/raku:latest",
+        "version": "Latest",
+        "url": "https://raku.org",
+        "sbcs": false,
+        "se_class": "perl"
+    },
     "random_brainfuck": {
         "name": "Random Brainfuck",
-        "image": "attemptthisonline/tio_brainfuck",
+        "hello_world": {"code": "+[?]--<-<<+[+[<+>--->->->-<<<]>]<<--.<++++++.<<-..<<.<+.>>.>>.<<<.+++.>>.>>-.<<<+.", "output": "Hello, World!"},
+        "image": "docker.io/attemptthisonline/tio_brainfuck:latest",
         "version": "Unknown",
         "url": "https://github.com/TryItOnline/brainfuck",
         "sbcs": false
     },
     "regenerate": {
         "name": "Regenerate",
-        "image": "attemptthisonline/regenerate",
+        "hello_world": {"code": "Hello, World\\!", "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/regenerate:latest",
         "version": "Latest",
         "url": "https://github.com/dloscutoff/Esolangs/tree/master/Regenerate",
         "sbcs": false
     },
+    "retina": {
+        "name": "Retina",
+        "hello_world": {"code": "\nHello, World!", "output": "Hello, World!"},
+        "image": "docker.io/attemptthisonline/retina:latest",
+        "version": "Latest",
+        "url": "https://github.com/m-ender/retina",
+        "sbcs": true
+    },
     "ruby": {
         "name": "Ruby",
-        "image": "attemptthisonline/ruby",
+        "hello_world": {"code": "puts \"Hello, World!\"", "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/ruby:latest",
         "version": "Latest",
         "url": "https://www.ruby-lang.org/",
         "sbcs": false,
@@ -516,7 +721,8 @@
     },
     "rust": {
         "name": "Rust",
-        "image": "attemptthisonline/rust",
+        "hello_world": {"code": "fn main() { print!(\"Hello, World!\") }", "output": "Hello, World!"},
+        "image": "docker.io/attemptthisonline/rust:latest",
         "version": "Latest",
         "url": "https://www.rust-lang.org",
         "sbcs": false,
@@ -524,7 +730,8 @@
     },
     "sbcl": {
         "name": "Common Lisp (SBCL)",
-        "image": "attemptthisonline/sbcl",
+        "hello_world": {"code": "(princ\"Hello, World!\")", "output": "Hello, World!"},
+        "image": "docker.io/attemptthisonline/sbcl:latest",
         "version": "Latest",
         "url": "http://www.sbcl.org",
         "sbcs": false,
@@ -532,7 +739,8 @@
     },
     "scala2": {
         "name": "Scala 2",
-        "image": "attemptthisonline/scala2",
+        "hello_world": {"code": "print(\"Hello, World!\")", "output": "Hello, World!"},
+        "image": "docker.io/attemptthisonline/scala2:latest",
         "version": "2",
         "url": "https://www.scala-lang.org/",
         "sbcs": false,
@@ -540,7 +748,8 @@
     },
     "scala3": {
         "name": "Scala 3",
-        "image": "attemptthisonline/scala3",
+        "hello_world": {"code": "@main\ndef main = print(\"Hello, World!\")", "output": "Hello, World!"},
+        "image": "docker.io/attemptthisonline/scala3:latest",
         "version": "3",
         "url": "https://www.scala-lang.org/",
         "sbcs": false,
@@ -548,64 +757,81 @@
     },
     "sed": {
         "name": "sed",
-        "image": "attemptthisonline/base",
+        "hello_world": {"code": "cHello, World!", "input": "x", "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/base:latest",
         "version": "Latest",
         "url": "https://www.gnu.org/software/sed/",
         "sbcs": false
     },
     "slashes": {
         "name": "///",
-        "image": "attemptthisonline/slashes",
+        "hello_world": {"code": "Hello, World!", "output": "Hello, World!"},
+        "image": "docker.io/attemptthisonline/slashes:latest",
         "version": "Latest",
         "url": "https://esolangs.org/wiki////",
         "sbcs": false
     },
     "tcl": {
         "name": "Tcl",
-        "image": "attemptthisonline/tcl",
+        "hello_world": {"code": "puts \"Hello, World!\"", "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/tcl:latest",
         "version": "Latest",
         "url": "http://tcl.sourceforge.net",
         "sbcs": false
     },
     "tex": {
         "name": "TeX",
-        "image": "attemptthisonline/texlive",
+        "hello_world": {"code": "Hello, World!\\end", "output": "Hello, World!\n                                            1\n\n\n"},
+        "image": "docker.io/attemptthisonline/texlive:latest",
         "version": "Latest",
         "url": "https://tug.org/texlive/doc.html",
         "sbcs": false,
         "se_class": "tex"
     },
-    "tictac": {
-        "name": "Tictac",
-        "image": "attemptthisonline/tictac",
+    "thunno": {
+        "name": "Thunno",
+        "hello_world": {"code": "\"Hello, World!", "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/thunno:latest",
         "version": "Latest",
-        "url": "https://github.com/pxeger/tictac",
+        "url": "https://github.com/Thunno/Thunno",
+        "sbcs": false
+    },
+    "thunno2": {
+        "name": "Thunno 2",
+        "hello_world": {"code": "kH", "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/thunno2:latest",
+        "version": "Latest",
+        "url": "https://github.com/Thunno/Thunno2",
         "sbcs": true
     },
     "tinybf": {
         "name": "TinyBF",
-        "image": "attemptthisonline/tio_brainfuck",
+        "hello_world": {"code": "=++>+>>=+|+|=>+=>+++>+>+>+=>>>|=>=|>>++==>=++++++===>>+====>>==>=+==>>==>>===>>>===+++==>>==>>=+==>>>=+==", "output": "Hello, World!"},
+        "image": "docker.io/attemptthisonline/tio_brainfuck:latest",
         "version": "Unknown",
         "url": "https://github.com/TryItOnline/brainfuck",
         "sbcs": false
     },
     "vyxal": {
         "name": "Vyxal",
-        "image": "attemptthisonline/vyxal",
+        "hello_world": {"code": "kH", "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/vyxal:latest",
         "version": "2",
         "url": "https://github.com/Vyxal/Vyxal",
         "sbcs": true
     },
     "whitespace": {
         "name": "Whitespace",
-        "image": "attemptthisonline/whitespace",
+        "hello_world": {"code": "   \n  \t\t  \t \t \n  \t\t\t\t\n   \t\n   \t\t\t\n   \t  \n  \t\t \t  \n  \t\t  \t \t\t\n  \t\t\t\t\t\t\t\n   \t  \n   \t\n \n   \t\t\t \n  \t\t   \t\t\n\n  \n \n \n\t \t\n   \t\t \t \t\t\n\t   \t\n  \n \n\n\n  \t\n\n\n\n", "output": "Hello, World!"},
+        "image": "docker.io/attemptthisonline/whitespace:latest",
         "version": "Latest",
         "url": "https://web.archive.org/web/20150618184706/http://compsoc.dur.ac.uk/whitespace/tutorial.php",
         "sbcs": false
     },
     "whython": {
         "name": "Whython",
-        "image": "attemptthisonline/whython",
+        "hello_world": {"code": "print(\"Hello, World!\")", "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/whython:latest",
         "version": "Latest",
         "url": "https://github.com/pxeger/whython",
         "sbcs": false,
@@ -613,21 +839,24 @@
     },
     "yq": {
         "name": "yq",
-        "image": "attemptthisonline/jq",
+        "hello_world": {"code": "\"Hello, World!\"", "options": ["-rn"], "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/jq:latest",
         "version": "Latest",
         "url": "https://kislyuk.github.io/yq/",
         "sbcs": false
     },
     "zig": {
         "name": "Zig",
-        "image": "attemptthisonline/zig",
+        "hello_world": {"code": "pub fn main() !void { _ = try @import(\"std\").io.getStdOut().writer().write(\"Hello, World!\"); }", "output": "Hello, World!"},
+        "image": "docker.io/attemptthisonline/zig:latest",
         "version": "Latest",
         "url": "https://ziglang.org/",
         "sbcs": false
     },
     "zsh": {
         "name": "Zsh",
-        "image": "attemptthisonline/zsh",
+        "hello_world": {"code": "echo \"Hello, World!\"", "output": "Hello, World!\n"},
+        "image": "docker.io/attemptthisonline/zsh:latest",
         "version": "5",
         "url": "https://www.zsh.org/",
         "sbcs": false,

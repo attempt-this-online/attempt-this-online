@@ -16,8 +16,7 @@ cargo build --release
 gcc -Wall -Werror -static yargs.c -o dist/attempt_this_online/yargs
 
 echo Building tarball... >&2
-cp target/release/attempt-this-online dist/attempt_this_online/server 
-cp target/release/invoke dist/attempt_this_online/invoke
+cp target/release/attempt-this-online dist/attempt_this_online/server
 # list images
 jq -r '.[].image' < languages.json | sort -u > dist/attempt_this_online/images.txt
 cp -R frontend/out dist/attempt_this_online/public

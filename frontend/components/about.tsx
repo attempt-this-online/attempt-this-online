@@ -101,6 +101,29 @@ export default function About({ enableRedirect }: { enableRedirect: boolean }) {
             <a href="https://chat.stackexchange.com/rooms/122645/attempt-this-online" className="text-blue-500 underline">Stack Exchange chatroom</a>
             .
           </p>
+          <h2 className="mt-6 text-2xl font-bold">Support</h2>
+          <p className="my-4 text-justify">
+            I currently pay for ATO entirely myself (see the
+            {' '}
+            <a href="https://docs.google.com/spreadsheets/d/1IgJwUEbZIUjba0WjU64x2Y1mviseVYyIHSeMQBAgNTk/edit?usp=sharing" className="text-blue-500 underline">
+              finances spreadsheet
+            </a>
+            ). Your support using any the following methods will be greatly appreciated.
+          </p>
+          <ul className="list-disc ml-6 my-4">
+            <li className="text-justify">
+              Make a one-time or recurring-monthly donation
+              {' '}
+              <a href="https://github.com/sponsors/attempt-this-online" className="text-blue-500 underline">via GitHub Sponsors</a>
+            </li>
+            <li className="text-justify">
+              ATO runs on cloud servers from Hetzner. Sign up using
+              {' '}
+              <a href="https://hetzner.cloud/?ref=aGbm6DUCs4yY" className="text-blue-500 underline">my referral link</a>
+              {' '}
+              to get €20 free credit. If you spend €10 (excluding the free credit), I'll get €10 credit to cover ATO's costs.
+            </li>
+          </ul>
         </main>
         <Footer />
       </div>

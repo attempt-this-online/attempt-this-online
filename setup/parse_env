@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Put environment variables from `skopeo inspect` into a file for `invoke` to apply to processes using this image
+# Put environment variables from `skopeo inspect` into a file for `sandbox` to apply to processes using this image
 import json
 import sys
 
