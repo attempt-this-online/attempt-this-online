@@ -5,8 +5,9 @@ import subprocess
 from time import monotonic
 from websockets import connect, ConnectionClosed
 from msgpack import loads, dumps
-from pytest import mark, raises
+from pytest import mark, raises, xfail
 from pytest_asyncio import fixture
+import json
 
 KiB = 1024
 MiB = 1024 * KiB
@@ -21,7 +22,9 @@ url = environ["URL"]
 
 REMOTE = bool(environ.get("REMOTE"))
 
-slow = mark.skipif(bool(environ.get("FAST")), reason="takes too long and FAST option set")
+FAST = int(environ.get("FAST") or 0)
+slow = mark.skipif(FAST >= 2, reason="environment variable FAST set >= 2")
+very_slow = mark.skipif(FAST >= 1, reason="environment variable FAST set >= 1")
 
 
 # use only for simple tests which only need one connection and don't handle connection exceptions
@@ -31,14 +34,21 @@ async def c():
         yield conn
 
 
+def to_bytes(x: str | bytes):
+    if isinstance(x, str):
+        return x.encode()
+    else:
+        return x
+
+
 def req(code, *, custom_runner=None, input="", options=(), arguments=(), language="zsh", timeout=60, hook=None):
     d = {
         "language": language,
-        "code": code,
-        "custom_runner": custom_runner,
-        "input": input,
-        "arguments": arguments,
-        "options": options,
+        "code": to_bytes(code),
+        "custom_runner": to_bytes(custom_runner),
+        "input": to_bytes(input),
+        "arguments": [to_bytes(a) for a in arguments],
+        "options": [to_bytes(a) for a in options],
         "timeout": timeout,
     }
     if hook:
@@ -395,3 +405,35 @@ async def test_tmp(c):
 async def test_writeable_fs(c):
     await c.send(req("echo hi > /foo; cat /foo"))
     assert loads(await c.recv())["Stdout"] == b"hi\n"
+
+
+with open("../languages.json") as f:
+    hello_world_tests = [
+        (lang["hello_world"].pop("output"), lang_id, lang["hello_world"])
+        for lang_id, lang in json.load(f).items()
+        if "hello_world" in lang
+    ]
+
+
+@very_slow
+@mark.parametrize("expected,language,kwargs", hello_world_tests)
+async def test_hello_worlds(expected, language, kwargs, c):
+    if language in {"elm", "curry_kics2", "funky2", "k_ktye", "powershell"}:
+        xfail(f"known-broken language: {language}")
+
+    await c.send(req(**kwargs, language=language))
+    output = bytearray()
+    stderr = bytearray()
+    async for msg in c:
+        msg = loads(msg)
+        if "Stdout" in msg:
+            output += msg["Stdout"]
+        elif "Stderr" in msg:
+            stderr += msg["Stderr"]
+        elif "Done" in msg:
+            break
+        else:
+            assert False, msg
+    print(stderr)
+    # TODO: support invalid UTF-8 in output?
+    assert output.decode() == expected

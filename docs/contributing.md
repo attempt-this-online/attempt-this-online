@@ -33,8 +33,16 @@ guide](https://guides.github.com/introduction/flow/) on the matter.
    - URL (homepage of the language)
    - SBCS (set to `true` if the language's code uses a single-byte character set; this will change the behaviour of the
      byte counter in the frontend to assume all characters comprise one byte (rather than using UTF-8))
-   - se_class (provide this only if StackExchange has built-in syntax highlighting for the language; this will be added
+   - `se_class` (provide this only if StackExchange has built-in syntax highlighting for the language; this will be added
      when a CGCC post template is generated. See [here](https://meta.stackexchange.com/q/184108) for details)
+   - `hello_world`: an object containing a description of a simple "hello world"-type program in the language. It has
+     attributes:
+     - `code` (string, required)
+     - `input` (string, optional, defaults to empty)
+     - `options` and `arguments` (list of strings, defaulting to empty)
+     - `output` (string, required) - the expected stdout of the program (stderr is ignored)
+     - If your language cannot produce a simple hello world program fitting these criteria, write a comment on #127, and
+       leave this field undefined for now
 3. Create a runner script in `runners/`, named the same as the key in `languages.json`. Here is an example showing the
    general idea:
 
@@ -158,7 +166,9 @@ target/debug/attempt-this-online
 This will bind to localhost on port 8500 by default. You can override this with the `ATO_BIND` environment variable.
 
 ### Tests
-There are some basic sandbox functionality tests written in Python (make sure you have version 3.10 or higher installed).
+There are some basic tests written in Python (make sure you have version 3.10 or higher installed). These can test both
+the sandbox's functionality, and all the languages.
+
 The `test/run` helper script will set up the testing environment for you if needed (as well as running the tests).
 Pass it the URL to the API, like this:
 
@@ -166,12 +176,13 @@ Pass it the URL to the API, like this:
 URL='ws://localhost:8500/api/v1/ws/execute' test/run
 ```
 
-Some of the tests take a few seconds to run (because they test timing things). To skip these, set the `FAST` environment
-variable:
+To skip the tests which require all languages' images to be installed, set the `FAST` environment variable to 1.
 
 ```bash
 FAST=1 URL='...' test/run
 ```
+
+Some of the tests still take a few seconds to run (because they test timing things). To skip these too, set `FAST` to 2.
 
 In addition, some of the tests don't make sense if ATO is running on a remote server (different to the one the test are
 running on), as they check things like the timing or the state of the operating system after calling ATO. These can be
