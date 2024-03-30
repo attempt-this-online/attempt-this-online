@@ -1,0 +1,50 @@
+# INSECURE! for development use only
+services:
+  backend:
+    build:
+      dockerfile_inline: |
+        FROM archlinux
+
+        # with some care, we can skip re-downloading the attemptthisonline/zsh docker image by recreating it on the fly
+        RUN pacman -Syu --noconfirm base-devel zsh entr strace \
+            && mkdir -p /usr/local/lib/ATO/rootfs/docker.io+attemptthisonline+zsh+latest \
+            && tar --exclude /usr/local/lib/ATO --exclude /sys --exclude /proc --exclude /dev -c / \
+              | tar -xC /usr/local/lib/ATO/rootfs/docker.io+attemptthisonline+zsh+latest
+
+        COPY runners/zsh /usr/local/share/ATO/runners/
+        COPY yargs.c /tmp
+
+        RUN gcc -Wall -Werror -static /tmp/yargs.c -o /usr/local/lib/ATO/yargs && \
+            curl -Lo /usr/local/lib/ATO/bash "https://github.com/attempt-this-online/static-bash/releases/download/5.2.0(1)-rc2/bash" && \
+            chmod +x /usr/local/lib/ATO/bash
+
+        RUN mkdir -p \
+              /src \
+              /usr/local/lib/ATO/rootfs/docker.io+attemptthisonline+zsh+latest/{ATO,proc,sys,dev} \
+              /usr/local/share/ATO/overlayfs_upper \
+              /usr/local/share/ATO/runners \
+              /usr/local/lib/ATO/env \
+            && printf 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\0LANG=C.UTF-8\0' \
+              > /usr/local/lib/ATO/env/docker.io+attemptthisonline+zsh+latest
+      context: .
+    volumes:
+      - .:/src
+    ports:
+      - "127.0.0.1:8500:8500"
+    privileged: true
+    cgroup: private
+    command: 
+      - sh
+      - -c
+      - -e
+      - |
+        mkdir -p /run/ATO
+        # we can't control subtrees of cgroups which directly contain processes
+        # so we need to move ourselves into a new sub-cgroup (called "server")
+        mkdir /sys/fs/cgroup/server
+        # (note Docker Compose requires us to escape the dollars)
+        echo $$$$ >/sys/fs/cgroup/server/cgroup.procs
+        echo +memory >/sys/fs/cgroup/cgroup.subtree_control
+        export ATO_CGROUP_PATH=/sys/fs/cgroup/
+        export ATO_BIND=0.0.0.0:8500
+        ls /src/target/debug/attempt-this-online | entr -nr /_
