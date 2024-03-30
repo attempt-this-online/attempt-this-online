@@ -110,60 +110,34 @@ The backend is written in Rust. You'll need the nightly Rust compiler and cargo.
 
 See [Architecture](./architecture.md) for more details on how the overall system works.
 
-This sandbox uses features specific to the Linux kernel, so you'll need to be developing on Linux.
-You'll need to make sure unprivileged namespaces are enabled; instructions will vary by distribution.
+A development environment is provided using Docker, with the `docker-compose.yml` file.
+You'll still do all your development outside the container, but the server itself will run in one.
 
-### Environment
-To set up a minimal development environment:
+You'll need [Docker](https://docs.docker.com) and [Docker Compose](https://docs.docker.com/compose/). If using Docker
+Engine, your OS must also support unprivileged user namespaces and cgroup v2 (what systemd calls the "unified cgroup
+hierarchy").
 
-```bash
-sudo mkdir -p /usr/local/{lib,share}/ATO
-sudo chown $USER:$USER /usr/local/{lib,share}/ATO
-mkdir /usr/local/lib/ATO/{rootfs/attemptthisonline+zsh/{proc,sys,dev,ATO},env} /usr/local/share/ATO/{overlayfs_upper,runners}
-sudo docker run --rm -it attemptthisonline/zsh \
-    tar --exclude /sys --exclude /proc --exclude /dev -c / \
-    | tar -xC /usr/local/lib/ATO/rootfs/docker.io+attemptthisonline+zsh+latest
-printf 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\0LANG=C.UTF-8\0' > /usr/local/lib/ATO/env/docker.io+attemptthisonline+zsh+latest
-ln -s "$(pwd)/runners/zsh" /usr/local/share/ATO/runners/zsh
-ln -s "$(which bash)" /usr/local/lib/ATO/bash
-ln -s "$(pwd)/dist/attempt_this_online/yargs" /usr/local/lib/ATO/yargs
-mkdir -p dist/attempt_this_online
-gcc -Wall -Werror -static yargs.c -o dist/attempt_this_online/yargs
-cargo build --all-targets
-```
-
-The following steps need to be run every time you reboot:
-
-Set up the cgroup v2 pseudofilesystem. If systemd manages cgroup v2:
+To build the code, run:
 
 ```bash
-export ATO_CGROUP_PATH=/sys/fs/cgroup/user.slice/user-$(id -u).slice/user@$(id -u).service/ATO
-mkdir -p $ATO_CGROUP_PATH
-echo +memory > $ATO_CGROUP_PATH/cgroup.subtree_control
+cargo build
 ```
 
-If your distribution doesn't use systemd with cgroup v2 (the "unified cgroup hierarchy"), then you'll have to set it up
-manually.
-
-Finally create a temporary directory owned by your user:
+Then to run the Docker container:
 
 ```
-sudo mkdir /run/ATO
-sudo chown $USER:$USER /run/ATO
-chmod 755 /run/ATO
+sudo docker-compose up
 ```
 
-These last two steps (setting up the cgroup and `/run/ATO` directories) will need to be redone if you reboot.
+This will automatically restart each time you rebuild it. The API will then be available on `127.0.0.1:8500`.
 
-I'm working on Dockerising this (#105), because it's admittedly rather involved.
+> [!CAUTION]
+> The docker-compose file is **not secure**. It's fine for development if you don't expose the server to the network,
+> but it shouldn't be used in production.
 
-Now run the server:
-
-```bash
-target/debug/attempt-this-online
-```
-
-This will bind to localhost on port 8500 by default. You can override this with the `ATO_BIND` environment variable.
+> [!NOTE]
+> To save disk space and setup time, the docker-compose file only sets up one language, zsh.
+> All other languages will fail.
 
 ### Tests
 There are some basic tests written in Python (make sure you have version 3.10 or higher installed). These can test both
@@ -192,6 +166,8 @@ skipped by setting the `REMOTE` environment variable:
 REMOTE=1 URL='...' test/run
 ```
 
+**TODO**: separate timing-based tests (which only fail over slow network connections) from OS-state-based tests (which also fail when ATO runs in a virtual machine, e.g. with Docker Desktop)
+
 ### Automatic rebuilds
 You may find it useful to have your code automatically rebuilt. Install [`entr`](https://eradman.com/entrproject/),
 then run, in different shell instances:
@@ -200,10 +176,7 @@ then run, in different shell instances:
 ls src | entr -c cargo build --all-targets
 ```
 
-```bash
-export ATO_CGROUP_PATH=/sys/fs/cgroup/user.slice/user-$(id -u).slice/user@$(id -u).service/ATO
-ls target/debug/attempt-this-online | entr -rc target/debug/attempt-this-online
-```
+With the Docker Compose setup provided, the server will restart automatically when it is rebuilt.
 
 To rerun tests automatically as well:
 
