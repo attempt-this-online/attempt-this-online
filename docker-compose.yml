@@ -33,7 +33,7 @@ services:
       - "127.0.0.1:8500:8500"
     privileged: true
     cgroup: private
-    command: 
+    command:
       - sh
       - -c
       - -e
