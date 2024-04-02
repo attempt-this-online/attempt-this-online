@@ -614,7 +614,7 @@
         "hello_world": {"code": "main => printf(\"Hello, World!\").", "output": "Hello, World!\n"},
         "image": "registry.gitlab.pxeger.com/attempt-this-online/languages/picat:latest",
         "version": "Latest",
-        "url": "https://github.com/dloscutoff/pip",
+        "url": "http://picat-lang.org",
         "sbcs": false
     },
     "pip": {
