@@ -609,6 +609,14 @@
         "sbcs": false,
         "se_class": "php"
     },
+    "picat": {
+        "name": "Picat",
+        "hello_world": {"code": "main => printf(\"Hello, World!\").", "output": "Hello, World!\n"},
+        "image": "registry.gitlab.pxeger.com/attempt-this-online/languages/picat:latest",
+        "version": "Latest",
+        "url": "https://github.com/dloscutoff/pip",
+        "sbcs": false
+    },
     "pip": {
         "name": "Pip",
         "hello_world": {"code": "\"Hello, World!\"", "output": "Hello, World!\n"},
