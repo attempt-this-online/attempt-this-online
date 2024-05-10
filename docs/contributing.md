@@ -5,12 +5,12 @@ guide](https://guides.github.com/introduction/flow/) on the matter.
 
 1. Create a [Docker image](https://hub.docker.com) with the toolchain for the language, and submit it to the
    [languages](https://github.com/attempt-this-online/languages) repository, based on our common base image
-   `attemptthisonline/base` (which uses Arch Linux)
+   `registry.gitlab.pxeger.com/attempt-this-online/attempt-this-online/base` (which uses Arch Linux)
    - in rare cases (such as for non-open-source languages), an existing Docker image that isn't based on
-     `attemptthisonline/base` may be used
-   - for languages that require other languages, base the new language on an `attemptthisonline/` image for the required
+     `registry.gitlab.pxeger.com/attempt-this-online/attempt-this-online/base` may be used
+   - for languages that require other languages, base the new language on another ATO image for the required
      language. For example, Jelly's interpreter is written in Python, so Jelly's image is based on
-     `attemptthisonline/python`
+     `registry.gitlab.pxeger.com/attempt-this-online/attempt-this-online/python`
    - the build process of the Docker image should follow the general pattern of:
      - declare a Docker build argument corresponding to the language's version; this can be used as an evironment
        variable throughout the Dockerfile thereafter. This allows fast updating of the Docker images
@@ -23,7 +23,7 @@ guide](https://guides.github.com/introduction/flow/) on the matter.
    - a fairly easy-to-follow example of this is [Zsh](https://github.com/attempt-this-online/languages/blob/main/languages/zsh/Dockerfile)
    - if the language is particularly complex (or just slow) to build from source, a pre-built version can be used
      (example: [Java](https://github.com/attempt-this-online/languages/blob/main/languages/java/Dockerfile))
-   - make a pull request to add it to the repository (from where it will be built and pushed to Docker Hub automatically)
+   - make a pull request to add it to the repository (from where it will be built and pushed to my GitLab registry automatically)
 2. Add the language's metadata to `languages.json`; set the *key* to an identifier-safe name for the
    language (avoid special characters); in the value, set these fields:
    - name (should be human-readable - this is what will be presented to the user in the UI)
