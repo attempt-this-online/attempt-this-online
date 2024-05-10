@@ -1,7 +1,7 @@
 use crate::constants::*;
 use crate::languages::*;
 use crate::network::setup_network;
-use crate::{check, Error, Request, StreamResponse, Connection, ControlMessage};
+use crate::{check, Connection, ControlMessage, Error, Request, StreamResponse};
 
 use capctl::{caps, prctl};
 use clone3::Clone3;
@@ -10,7 +10,7 @@ use hex::ToHex;
 use nix::{
     fcntl::{fcntl, FcntlArg, OFlag},
     mount::{mount, MsFlags},
-    poll::{PollFd, PollFlags, poll},
+    poll::{poll, PollFd, PollFlags},
     sys::{
         eventfd::{eventfd, EfdFlags},
         resource::{getrusage, setrlimit, Resource, UsageWho::RUSAGE_CHILDREN},
@@ -18,7 +18,10 @@ use nix::{
         time::TimeValLike,
         wait::{self, waitid, WaitPidFlag, WaitStatus::*},
     },
-    unistd::{chdir, close, dup2, execve, Gid, mkdir, pipe, pivot_root, read, setresgid, setresuid, symlinkat, Uid},
+    unistd::{
+        chdir, close, dup2, execve, mkdir, pipe, pivot_root, read, setresgid, setresuid, symlinkat,
+        Gid, Uid,
+    },
 };
 use rand::Rng;
 use serde_bytes::ByteBuf;
@@ -45,7 +48,7 @@ macro_rules! check_continue {
 macro_rules! cstr {
     ($x:literal) => {
         unsafe { CStr::from_bytes_with_nul_unchecked(concat!($x, "\0").as_bytes()) }
-    }
+    };
 }
 
 const STDOUT_FD: std::os::unix::io::RawFd = 1;
@@ -60,7 +63,7 @@ impl Drop for Cgroup<'_> {
         // clean up this cgroup by killing all its processes and then removing it
         if let Err(e) = std::fs::write(self.cgroup.join("cgroup.kill"), "1") {
             eprintln!("error killing cgroup: {e}");
-            return
+            return;
         }
 
         const CGROUP_REMOVE_MAX_ATTEMPT_TIME: u128 = 100; // ms
@@ -90,11 +93,15 @@ impl Drop for Cgroup<'_> {
 
 fn create_cgroup() -> Result<PathBuf, Error> {
     use std::env::VarError::*;
-    let cgroup_path = std::env::var("ATO_CGROUP_PATH").map_err(|e| Error::InternalError(match e {
-            NotPresent => "error creating cgroup: $ATO_CGROUP_PATH not provided",
-            NotUnicode(_) => "error creating cgroup: $ATO_CGROUP_PATH is invalid Unicode",
-        }.to_string())
-    )?;
+    let cgroup_path = std::env::var("ATO_CGROUP_PATH").map_err(|e| {
+        Error::InternalError(
+            match e {
+                NotPresent => "error creating cgroup: $ATO_CGROUP_PATH not provided",
+                NotUnicode(_) => "error creating cgroup: $ATO_CGROUP_PATH is invalid Unicode",
+            }
+            .to_string(),
+        )
+    })?;
     let mut path = PathBuf::from(cgroup_path);
     path.push(random_id());
     check!(std::fs::create_dir(&path), "error creating cgroup dir: {}");
@@ -107,14 +114,19 @@ fn setup_cgroup(path: &PathBuf) -> Result<(), Error> {
     // const MEMORY_HIGH: u64 = 512 * MiB;
     // check!(std::fs::write(path.join("memory.high"), MEMORY_HIGH.to_string()), "error writing cgroup memory.high: {}");
     // disable swap
-    check!(std::fs::write(path.join("memory.swap.max"), "0"), "error writing cgroup memory.swap.max: {}");
+    check!(
+        std::fs::write(path.join("memory.swap.max"), "0"),
+        "error writing cgroup memory.swap.max: {}"
+    );
     Ok(())
 }
 
 const RANDOM_ID_SIZE: usize = 16;
 
 fn random_id() -> String {
-    rand::thread_rng().gen::<[u8; RANDOM_ID_SIZE]>().encode_hex::<String>()
+    rand::thread_rng()
+        .gen::<[u8; RANDOM_ID_SIZE]>()
+        .encode_hex::<String>()
 }
 
 pub fn invoke(
@@ -124,7 +136,7 @@ pub fn invoke(
     connection_fd: i32,
 ) -> Result<(), Error> {
     let cgroup = create_cgroup()?;
-    let cgroup_cleanup = Cgroup{ cgroup: &cgroup };
+    let cgroup_cleanup = Cgroup { cgroup: &cgroup };
     setup_cgroup(&cgroup)?;
     let cgroup_fd = check!(
         nix::fcntl::open(&cgroup, OFlag::O_DIRECTORY | OFlag::O_PATH, Mode::empty()),
@@ -149,11 +161,11 @@ pub fn invoke(
         .flag_newuser()
         .flag_newuts()
         .flag_pidfd(&mut pidfd)
-        .flag_into_cgroup(&cgroup_fd)
-        ;
+        .flag_into_cgroup(&cgroup_fd);
     let timer = std::time::Instant::now();
     // this is safe because we haven't used more than one thread so far in this program
-    if check!(unsafe { clone3.call() }, "error clone3ing main child: {}") == 0 { // in child
+    if check!(unsafe { clone3.call() }, "error clone3ing main child: {}") == 0 {
+        // in child
         // avoid suicide
         std::mem::forget(cgroup_cleanup);
 
@@ -165,12 +177,22 @@ pub fn invoke(
         run_child(&request, &language, stdout_w, stderr_w, uid, gid);
         // run_child should never return if successful, so we exit assuming failure
         std::process::exit(2);
-    } else { // in parent
+    } else {
+        // in parent
         // close unused pipe ends
         check!(close(stdout_w), "error closing stdout write end: {}");
         check!(close(stderr_w), "error closing stderr write end: {}");
 
-        run_parent(stdout_r, stderr_r, pidfd, cgroup_cleanup, timer, request.timeout, connection, connection_fd)
+        run_parent(
+            stdout_r,
+            stderr_r,
+            pidfd,
+            cgroup_cleanup,
+            timer,
+            request.timeout,
+            connection,
+            connection_fd,
+        )
     }
 }
 
@@ -179,7 +201,7 @@ fn wait_child(
     connection: Arc<Mutex<&mut Connection>>,
     connection_fd: i32,
     timeout: i32,
- ) -> Result<bool, Error> {
+) -> Result<bool, Error> {
     // use a poll to wait for either:
     // - timeout to expire
     // - child to exit
@@ -189,16 +211,27 @@ fn wait_child(
         PollFd::new(pidfd, PollFlags::POLLIN),
         PollFd::new(connection_fd, PollFlags::POLLIN),
     ];
-    let poll_result = check!(poll(&mut poll_args, timeout * 1000 /* ms */), "error polling: {}");
+    let poll_result = check!(
+        poll(&mut poll_args, timeout * 1000 /* ms */),
+        "error polling: {}"
+    );
     let [poll_child, poll_stdin] = poll_args;
     if poll_result == 0 {
         // timed out
         Ok(true)
-    } else if poll_child.revents().ok_or(Error::InternalError("poll returned unexpected event".into()))?.contains(PollFlags::POLLIN) {
+    } else if poll_child
+        .revents()
+        .ok_or(Error::InternalError(
+            "poll returned unexpected event".into(),
+        ))?
+        .contains(PollFlags::POLLIN)
+    {
         // child finished
         Ok(false)
     } else {
-        let stdin_events = poll_stdin.revents().ok_or(Error::InternalError("poll returned unexpected event".into()))?;
+        let stdin_events = poll_stdin.revents().ok_or(Error::InternalError(
+            "poll returned unexpected event".into(),
+        ))?;
         if stdin_events.contains(PollFlags::POLLIN) {
             // received control message via stdin
             use ControlMessage::*;
@@ -206,14 +239,15 @@ fn wait_child(
                 Kill => {
                     // continue to drop (i.e. kill), and set timed_out = false
                     Ok(false)
-                }
-                // Ok(_) => ...
+                } // Ok(_) => ...
             }
         } else if stdin_events.contains(PollFlags::POLLHUP) {
             // client disappeared: continue to kill
             Ok(false)
         } else {
-            return Err(Error::InternalError(format!("unexpected poll result: {poll_result}, {poll_args:?}")));
+            return Err(Error::InternalError(format!(
+                "unexpected poll result: {poll_result}, {poll_args:?}"
+            )));
         }
     }
 }
@@ -232,7 +266,10 @@ impl QuitEventFd {
 
 impl Drop for QuitEventFd {
     fn drop(&mut self) {
-        check_continue!(nix::unistd::write(self.fd, &1u64.to_ne_bytes()), "error writing to quit eventfd: {}");
+        check_continue!(
+            nix::unistd::write(self.fd, &1u64.to_ne_bytes()),
+            "error writing to quit eventfd: {}"
+        );
     }
 }
 
@@ -246,64 +283,69 @@ fn run_parent(
     connection: &mut Connection,
     connection_fd: i32,
 ) -> Result<(), Error> {
-    let (
-        timed_out,
-        connection,
-        [stdout_truncated, stderr_truncated],
-    ) = std::thread::scope(move |threads| {
-        let connection = Arc::new(Mutex::new(connection));
-        // there has to be a better way of doing this
-        let connection2 = connection.clone();
+    let (timed_out, connection, [stdout_truncated, stderr_truncated]) =
+        std::thread::scope(move |threads| {
+            let connection = Arc::new(Mutex::new(connection));
+            // there has to be a better way of doing this
+            let connection2 = connection.clone();
 
-        // RAII ensures that the quit eventfd is triggered when it's dropped, so that the
-        // output_handler doesn't get confused if the main thread encounters an error
-        let quit = QuitEventFd::new()?;
+            // RAII ensures that the quit eventfd is triggered when it's dropped, so that the
+            // output_handler doesn't get confused if the main thread encounters an error
+            let quit = QuitEventFd::new()?;
 
-        let output_handler = threads.spawn(move || handle_output(stdout_r, stderr_r, quit.fd, connection2));
+            let output_handler =
+                threads.spawn(move || handle_output(stdout_r, stderr_r, quit.fd, connection2));
 
-        // wait for child
-        let timed_out = wait_child(pidfd, connection.clone(), connection_fd, timeout)?;
+            // wait for child
+            let timed_out = wait_child(pidfd, connection.clone(), connection_fd, timeout)?;
 
-        // kill process
-        drop(cgroup_cleanup);
+            // kill process
+            drop(cgroup_cleanup);
 
-        // tell output_handler to quit
-        drop(quit);
+            // tell output_handler to quit
+            drop(quit);
 
-        let truncateds = match output_handler.join() {
-            // thread panicked, so do likewise
-            Err(panic) => std::panic::panic_any(panic),
-            // returned normally
-            Ok(Ok(truncateds)) => truncateds,
-            Ok(Err(e)) => return Err(e),
-        };
+            let truncateds = match output_handler.join() {
+                // thread panicked, so do likewise
+                Err(panic) => std::panic::panic_any(panic),
+                // returned normally
+                Ok(Ok(truncateds)) => truncateds,
+                Ok(Err(e)) => return Err(e),
+            };
 
-        let connection =
-            Arc::try_unwrap(connection)
-            .unwrap_or_else(|_| panic!("excess references to Arc<Connection>"))
-            .into_inner()
-            .unwrap();
-        Ok((timed_out, connection, truncateds))
-    })?;
+            let connection = Arc::try_unwrap(connection)
+                .unwrap_or_else(|_| panic!("excess references to Arc<Connection>"))
+                .into_inner()
+                .unwrap();
+            Ok((timed_out, connection, truncateds))
+        })?;
 
     // TODO: investigate why this reports ECHILD if the child errors and __WALL is not provided
     // something to do with the fact we use a second thread above which is a different kind of child process?
     // or the rust threading runtime doing strange things to signal handlers?
     // https://github.com/torvalds/linux/blob/a63f2e7cb1107ab124f80407e5eb8579c04eb7a9/kernel/exit.c#L968
-    let wait_result = check!(waitid(wait::Id::PIDFd(pidfd), WaitPidFlag::WEXITED | WaitPidFlag::__WALL), "error getting waitid result: {}");
+    let wait_result = check!(
+        waitid(
+            wait::Id::PIDFd(pidfd),
+            WaitPidFlag::WEXITED | WaitPidFlag::__WALL
+        ),
+        "error getting waitid result: {}"
+    );
 
-    let (status_type, status_value) =
-        match wait_result {
-            Exited(_, c) => ("exited", c),
-            Signaled(_, c, false) => ("killed", c as i32),
-            Signaled(_, c, true) => ("core_dumped", c as i32),
-            x => {
-                eprintln!("warning: unexpected waitid result: {x:?}");
-                ("unknown", -1)
-            }
-        };
+    let (status_type, status_value) = match wait_result {
+        Exited(_, c) => ("exited", c),
+        Signaled(_, c, false) => ("killed", c as i32),
+        Signaled(_, c, true) => ("core_dumped", c as i32),
+        x => {
+            eprintln!("warning: unexpected waitid result: {x:?}");
+            ("unknown", -1)
+        }
+    };
 
-    let stats = check!(getrusage(RUSAGE_CHILDREN), "error getting resource usage: {}");
+    let stats = check!(
+        getrusage(RUSAGE_CHILDREN),
+        "error getting resource usage: {}"
+    );
 
     connection.output_message(StreamResponse::Done {
         timed_out,
@@ -325,9 +367,18 @@ fn run_parent(
     Ok(())
 }
 
-fn handle_output(stdout_r: i32, stderr_r: i32, quit: i32, connection: Arc<Mutex<&mut Connection>>) -> Result<[bool; 2], Error> {
+fn handle_output(
+    stdout_r: i32,
+    stderr_r: i32,
+    quit: i32,
+    connection: Arc<Mutex<&mut Connection>>,
+) -> Result<[bool; 2], Error> {
     for (name, pipe) in [("stdout", stdout_r), ("stderr", stderr_r)] {
-        check!(fcntl(pipe, FcntlArg::F_SETFL(OFlag::O_NONBLOCK)), "error setting O_NONBLOCK on {} read end: {}", name);
+        check!(
+            fcntl(pipe, FcntlArg::F_SETFL(OFlag::O_NONBLOCK)),
+            "error setting O_NONBLOCK on {} read end: {}",
+            name
+        );
     }
 
     const OUTPUT_BUF_SIZE: usize = 16 * KiB as usize;
@@ -339,9 +390,7 @@ fn handle_output(stdout_r: i32, stderr_r: i32, quit: i32, connection: Arc<Mutex<
     type StreamId = fn(ByteBuf) -> StreamResponse;
 
     loop {
-        let mut poll_arg = vec![
-            PollFd::new(quit, PollFlags::POLLIN),
-        ];
+        let mut poll_arg = vec![PollFd::new(quit, PollFlags::POLLIN)];
         let mut poll_todo = vec![];
 
         if open[0] {
@@ -353,11 +402,16 @@ fn handle_output(stdout_r: i32, stderr_r: i32, quit: i32, connection: Arc<Mutex<
             poll_todo.push((1, "stderr", stderr_r, StreamResponse::Stderr as StreamId));
         }
 
-        check!(poll(&mut poll_arg, -1 /* infinite timeout */), "error polling for output: {}");
+        check!(
+            poll(&mut poll_arg, -1 /* infinite timeout */),
+            "error polling for output: {}"
+        );
         let poll_quit = poll_arg[0];
 
         for ((i, name, pipe, stream_id), poll) in poll_todo.into_iter().zip(&poll_arg[1..]) {
-            let revents = poll.revents().ok_or(Error::InternalError("poll returned unexpected event".into()))?;
+            let revents = poll.revents().ok_or(Error::InternalError(
+                "poll returned unexpected event".into(),
+            ))?;
             if revents.contains(PollFlags::POLLHUP) {
                 open[i] = false;
             } else if revents.contains(PollFlags::POLLIN) {
@@ -365,7 +419,10 @@ fn handle_output(stdout_r: i32, stderr_r: i32, quit: i32, connection: Arc<Mutex<
                 let len = check!(read(pipe, &mut buf), "error reading from {name}: {}");
                 totals[i] += len;
                 if totals[i] > MAX_SENSIBLE_OUTPUT_SIZE {
-                    check!(close(pipe), "error closing {name} (after too much output): {}");
+                    check!(
+                        close(pipe),
+                        "error closing {name} (after too much output): {}"
+                    );
                     open[i] = false;
                     truncated[i] = true;
                 }
@@ -374,9 +431,11 @@ fn handle_output(stdout_r: i32, stderr_r: i32, quit: i32, connection: Arc<Mutex<
             }
         }
 
-        let quit_revents = poll_quit.revents().ok_or(Error::InternalError("poll returned unexpected event".into()))?;
+        let quit_revents = poll_quit.revents().ok_or(Error::InternalError(
+            "poll returned unexpected event".into(),
+        ))?;
         if quit_revents.contains(PollFlags::POLLIN) {
-            return Ok(truncated)
+            return Ok(truncated);
         }
     }
 }
@@ -388,7 +447,7 @@ fn run_child(
     stderr_w: i32,
     outside_uid: Uid,
     outside_gid: Gid,
-) -> (/* never returns on success */) {
+) -> () {
     // to have reliable error reporting, the state of stdout and stderr must be managed carefully:
 
     // replace current stdout with the pipe we created for it
@@ -396,7 +455,7 @@ fn run_child(
         // all the possible causes for dup2 to error (see the manual page) should be impossible™
         // so this should never be reached
         eprintln!("error dup2ing stdout: {e}");
-        return
+        return;
     }
 
     macro_rules! log_error {
@@ -417,7 +476,7 @@ fn run_child(
             if let Error::InternalError(e) = e {
                 log_error!("{e}");
             }
-            return
+            return;
         }
     };
 
@@ -425,12 +484,12 @@ fn run_child(
         if let Error::InternalError(e) = e {
             log_error!("{e}");
         }
-        return
+        return;
     }
 
     if let Err(e) = dup2(stderr_w, STDERR_FD) {
         log_error!("error dup2ing stderr: {e}");
-        return
+        return;
     }
 
     // stderr now points to handle_output too; the web server's log is now inaccessible
@@ -441,7 +500,11 @@ fn run_child(
     // this is safe because it's right before an exec
     unsafe { close_open_fds(FIRST_NON_STDIO_FD, &[]) } // should never error
 
-    if let Err(e) = execve(cstr!("/ATO/bash"), &[cstr!("/ATO/bash"), cstr!("/ATO/runner")], &env) {
+    if let Err(e) = execve(
+        cstr!("/ATO/bash"),
+        &[cstr!("/ATO/bash"), cstr!("/ATO/runner")],
+        &env,
+    ) {
         eprintln!("ATO internal error: error running execve: {e}")
     } else {
         eprintln!("ATO internal error: execve should never return if successful")
@@ -466,7 +529,10 @@ fn setup_child(
 ) -> Result<(), Error> {
     const SIGKILL: i32 = 9;
     // set up to die if our parent dies
-    check!(prctl::set_pdeathsig(Some(SIGKILL)), "error setting parent death signal: {}");
+    check!(
+        prctl::set_pdeathsig(Some(SIGKILL)),
+        "error setting parent death signal: {}"
+    );
 
     set_ids(outside_uid, outside_gid)?;
     setup_network()?;
@@ -484,11 +550,20 @@ fn set_ids(outside_uid: Uid, outside_gid: Gid) -> Result<(), Error> {
     const ROOT_G: Gid = Gid::from_raw(0);
 
     let uid_map = format!("{ROOT_U} {outside_uid} 1\n");
-    check!(std::fs::write("/proc/self/uid_map", uid_map), "error writing uid_map: {}");
+    check!(
+        std::fs::write("/proc/self/uid_map", uid_map),
+        "error writing uid_map: {}"
+    );
     // we need to set this in order to be able to use gid_map
-    check!(std::fs::write("/proc/self/setgroups", "deny"), "error denying setgroups: {}");
+    check!(
+        std::fs::write("/proc/self/setgroups", "deny"),
+        "error denying setgroups: {}"
+    );
     let gid_map = format!("{ROOT_G} {outside_gid} 1\n");
-    check!(std::fs::write("/proc/self/gid_map", gid_map), "error writing gid_map: {}");
+    check!(
+        std::fs::write("/proc/self/gid_map", gid_map),
+        "error writing gid_map: {}"
+    );
 
     check!(setresuid(ROOT_U, ROOT_U, ROOT_U), "error setting UIDs: {}");
     check!(setresgid(ROOT_G, ROOT_G, ROOT_G), "error setting GIDs: {}");
@@ -513,7 +588,6 @@ macro_rules! mount {
         { mount_!(Some($src), $dest, Some($type), $($flag)|*, Some($options)) };
 }
 
-
 fn get_rootfs(language: &Language) -> String {
     const IMAGE_BASE_PATH: &str = "/usr/local/lib/ATO/rootfs/";
     String::from(IMAGE_BASE_PATH) + &language.image.replace("/", "+").replace(":", "+")
@@ -533,22 +607,28 @@ fn setup_filesystem(request: &Request, language: &Language) -> Result<(), Error>
     //    we don't want those to propogate to the parent namespace
     // 2. we don't want any potential mounts in the parent namespace to appear here and mess things up either
     // 3. pivot_root below requires . and its parent to be mounted private anyway
-    check!(mount::<str, str, str, str>(
-        None,
-        "/",
-        None,
-        MsFlags::MS_PRIVATE | MsFlags::MS_REC,
-        None,
-    ), "error setting / to MS_PRIVATE: {}");
+    check!(
+        mount::<str, str, str, str>(None, "/", None, MsFlags::MS_PRIVATE | MsFlags::MS_REC, None,),
+        "error setting / to MS_PRIVATE: {}"
+    );
 
     // mount a tmpfs to contain the data written to the container's root filesystem
     // (which will be discarded when the container exits)
     mount!("/run/ATO", "tmpfs", MS_NOSUID, "mode=755,size=655350k");
     // overlayfs requires separate "upper" and "work" directories, so create those
-    check!(mkdir("/run/ATO/upper", Mode::S_IRWXU), "error creating overlayfs upper directory: {}");
-    check!(mkdir("/run/ATO/work", Mode::S_IRWXU), "error creating overlayfs work directory: {}");
+    check!(
+        mkdir("/run/ATO/upper", Mode::S_IRWXU),
+        "error creating overlayfs upper directory: {}"
+    );
+    check!(
+        mkdir("/run/ATO/work", Mode::S_IRWXU),
+        "error creating overlayfs work directory: {}"
+    );
     // also create a place to mount the new merged writeable rootfs
-    check!(mkdir("/run/ATO/merged", Mode::S_IRWXU), "error creating overlayfs merged directory: {}");
+    check!(
+        mkdir("/run/ATO/merged", Mode::S_IRWXU),
+        "error creating overlayfs merged directory: {}"
+    );
 
     // mount writeable upper layer on top of rootfs using overlayfs
     // also, the kernel now considers it a mount point, which is required for pivot_root to work
@@ -560,7 +640,10 @@ fn setup_filesystem(request: &Request, language: &Language) -> Result<(), Error>
         Some(&format!("upperdir=/run/ATO/upper,lowerdir=/usr/local/share/ATO/overlayfs_upper:{rootfs},workdir=/run/ATO/work")),
     ), "error mounting new rootfs: {}");
 
-    check!(chdir::<str>("/run/ATO/merged"), "error changing directory to new rootfs: {}");
+    check!(
+        chdir::<str>("/run/ATO/merged"),
+        "error changing directory to new rootfs: {}"
+    );
     // now . points to the new rootfs
 
     setup_special_files(&request.language)?;
@@ -579,42 +662,113 @@ fn setup_filesystem(request: &Request, language: &Language) -> Result<(), Error>
 }
 
 fn setup_special_files(language_id: &String) -> Result<(), Error> {
-    mount!("./tmp", "tmpfs", MS_NOSUID | MS_NODEV, "mode=1755,size=655350k");
-    mount!("./ATO", "tmpfs", MS_NOSUID | MS_NODEV, "mode=755,size=655350k");
-    check!(mkdir("./ATO/context", Mode::S_IRWXU | Mode::S_IRGRP | Mode::S_IXGRP | Mode::S_IROTH | Mode::S_IXOTH), "error creating /ATO/context: {}");
+    mount!(
+        "./tmp",
+        "tmpfs",
+        MS_NOSUID | MS_NODEV,
+        "mode=1755,size=655350k"
+    );
+    mount!(
+        "./ATO",
+        "tmpfs",
+        MS_NOSUID | MS_NODEV,
+        "mode=755,size=655350k"
+    );
+    check!(
+        mkdir(
+            "./ATO/context",
+            Mode::S_IRWXU | Mode::S_IRGRP | Mode::S_IXGRP | Mode::S_IROTH | Mode::S_IXOTH
+        ),
+        "error creating /ATO/context: {}"
+    );
     mount!("./proc", "proc",);
-    mount!("./dev", "tmpfs", MS_NOSUID | MS_STRICTATIME, "mode=755,size=655350k");
-    check!(mkdir("./dev/pts", Mode::empty()), "error creating mount point for /dev/pts: {}");
-    mount!("./dev/pts", "devpts", MS_NOSUID | MS_NOEXEC, "newinstance,ptmxmode=0666,mode=0620");
-    check!(mkdir("./dev/shm", Mode::empty()), "error creating mount point for /dev/shm: {}");
-    mount!("shm", "./dev/shm", "tmpfs", MS_NOSUID | MS_NODEV | MS_NOEXEC, "mode=1777,size=655350k");
-    check!(mkdir("./dev/mqueue", Mode::empty()), "error creating mount point for /dev/mqueue: {}");
+    mount!(
+        "./dev",
+        "tmpfs",
+        MS_NOSUID | MS_STRICTATIME,
+        "mode=755,size=655350k"
+    );
+    check!(
+        mkdir("./dev/pts", Mode::empty()),
+        "error creating mount point for /dev/pts: {}"
+    );
+    mount!(
+        "./dev/pts",
+        "devpts",
+        MS_NOSUID | MS_NOEXEC,
+        "newinstance,ptmxmode=0666,mode=0620"
+    );
+    check!(
+        mkdir("./dev/shm", Mode::empty()),
+        "error creating mount point for /dev/shm: {}"
+    );
+    mount!(
+        "shm",
+        "./dev/shm",
+        "tmpfs",
+        MS_NOSUID | MS_NODEV | MS_NOEXEC,
+        "mode=1777,size=655350k"
+    );
+    check!(
+        mkdir("./dev/mqueue", Mode::empty()),
+        "error creating mount point for /dev/mqueue: {}"
+    );
     mount!("./dev/mqueue", "mqueue", MS_NOSUID | MS_NODEV | MS_NOEXEC);
     mount!("./sys", "sysfs", MS_NOSUID | MS_NODEV | MS_NOEXEC);
-    mount!("./sys/fs/cgroup", "cgroup2", MS_NOSUID | MS_NODEV | MS_NOEXEC | MS_RELATIME);
+    mount!(
+        "./sys/fs/cgroup",
+        "cgroup2",
+        MS_NOSUID | MS_NODEV | MS_NOEXEC | MS_RELATIME
+    );
 
     // create all the special device files expected on a "real" Linux system
 
     for dev in ["full", "null", "random", "tty", "urandom", "zero"] {
         let src = "/dev/".to_owned() + dev;
         let dest = "./dev/".to_owned() + dev;
-        drop(check!(File::create(&dest), "error creating mount point for /dev/{}: {}", dev));
+        drop(check!(
+            File::create(&dest),
+            "error creating mount point for /dev/{}: {}",
+            dev
+        ));
         mount!(&src, &dest, , MS_NOSUID | MS_NOEXEC | MS_BIND);
     }
 
-    check!(symlinkat("/proc/self/fd", None, "dev/fd"), "error creating /dev/fd: {}");
-    check!(symlinkat("/proc/self/fd/0", None, "dev/stdin"), "error creating /dev/stdin: {}");
-    check!(symlinkat("/proc/self/fd/1", None, "dev/stdout"), "error creating /dev/stdout: {}");
-    check!(symlinkat("/proc/self/fd/2", None, "dev/stderr"), "error creating /dev/stderr: {}");
-    check!(symlinkat("/proc/kcore", None, "dev/core"), "error creating /dev/core: {}");
-    check!(symlinkat("pts/ptmx", None, "dev/ptmx"), "error creating /dev/ptmx: {}");
+    check!(
+        symlinkat("/proc/self/fd", None, "dev/fd"),
+        "error creating /dev/fd: {}"
+    );
+    check!(
+        symlinkat("/proc/self/fd/0", None, "dev/stdin"),
+        "error creating /dev/stdin: {}"
+    );
+    check!(
+        symlinkat("/proc/self/fd/1", None, "dev/stdout"),
+        "error creating /dev/stdout: {}"
+    );
+    check!(
+        symlinkat("/proc/self/fd/2", None, "dev/stderr"),
+        "error creating /dev/stderr: {}"
+    );
+    check!(
+        symlinkat("/proc/kcore", None, "dev/core"),
+        "error creating /dev/core: {}"
+    );
+    check!(
+        symlinkat("pts/ptmx", None, "dev/ptmx"),
+        "error creating /dev/ptmx: {}"
+    );
 
     for (src, dest) in [
         ("/usr/local/lib/ATO/bash", "./ATO/bash"),
         ("/usr/local/lib/ATO/yargs", "./ATO/yargs"),
         (&get_default_runner(&language_id), "./ATO/default_runner"),
     ] {
-        drop(check!(File::create(&dest), "error creating mount point for {}: {}", dest));
+        drop(check!(
+            File::create(&dest),
+            "error creating mount point for {}: {}",
+            dest
+        ));
         mount!(&src, &dest, , MS_NOSUID | MS_BIND | MS_RDONLY);
     }
 
@@ -622,18 +776,39 @@ fn setup_special_files(language_id: &String) -> Result<(), Error> {
 }
 
 fn setup_request_files(request: &Request) -> Result<(), Error> {
-    check!(std::fs::write("/ATO/code", &request.code), "error writing /ATO/code: {}");
+    check!(
+        std::fs::write("/ATO/code", &request.code),
+        "error writing /ATO/code: {}"
+    );
     if let Some(custom_runner) = &request.custom_runner {
         use std::io::Write;
-        let mut file = check!(std::fs::File::create("/ATO/runner"), "error opening /ATO/runner: {}");
-        check!(file.write_all(&custom_runner), "error writing /ATO/runner: {}");
+        let mut file = check!(
+            std::fs::File::create("/ATO/runner"),
+            "error opening /ATO/runner: {}"
+        );
+        check!(
+            file.write_all(&custom_runner),
+            "error writing /ATO/runner: {}"
+        );
     } else {
-        check!(std::os::unix::fs::symlink("/ATO/default_runner", "/ATO/runner"), "error linking /ATO/runner: {}");
+        check!(
+            std::os::unix::fs::symlink("/ATO/default_runner", "/ATO/runner"),
+            "error linking /ATO/runner: {}"
+        );
     }
     // TODO: stream input in instead of writing it to a file?
-    check!(std::fs::write("/ATO/input", &request.input), "error writing /ATO/input: {}");
-    check!(std::fs::write("/ATO/arguments", join_args(&request.arguments)), "error writing /ATO/arguments: {}");
-    check!(std::fs::write("/ATO/options", join_args(&request.options)), "error writing /ATO/options: {}");
+    check!(
+        std::fs::write("/ATO/input", &request.input),
+        "error writing /ATO/input: {}"
+    );
+    check!(
+        std::fs::write("/ATO/arguments", join_args(&request.arguments)),
+        "error writing /ATO/arguments: {}"
+    );
+    check!(
+        std::fs::write("/ATO/options", join_args(&request.options)),
+        "error writing /ATO/options: {}"
+    );
     Ok(())
 }
 
@@ -654,12 +829,24 @@ fn drop_caps() -> Result<(), Error> {
     // know about at compile time because of a kernel version mismatch.
     // https://docs.rs/capctl/latest/capctl/#handling-of-newly-added-capabilities
 
-    check!(caps::bounding::clear(), "error dropping bounding capabilities: {}");
-    check!(caps::ambient::clear(), "error dropping ambient capabilities: {}");
+    check!(
+        caps::bounding::clear(),
+        "error dropping bounding capabilities: {}"
+    );
+    check!(
+        caps::ambient::clear(),
+        "error dropping ambient capabilities: {}"
+    );
     // CAP_SETPCAP is required to drop bounding caps, so we have to drop it last
-    check!(caps::CapState::empty().set_current(), "error dropping capabilities: {}");
+    check!(
+        caps::CapState::empty().set_current(),
+        "error dropping capabilities: {}"
+    );
     // ensure we can't get new privileges from files with set[ug]id or capability xattrs
-    check!(prctl::set_no_new_privs(), "error setting NO_NEW_PRIVS flag: {}");
+    check!(
+        prctl::set_no_new_privs(),
+        "error setting NO_NEW_PRIVS flag: {}"
+    );
     Ok(())
 }
 
@@ -673,19 +860,37 @@ fn set_resource_limits() -> Result<(), Error> {
     // if the process reaches the soft limit it will get a SIGXCPU warning signal
     // if it reaches the hard limit it will be forcibly killed
     // TODO: does setting a CPU-time rlimit even work?
-    check!(setrlimit(Resource::RLIMIT_CPU, 60, 61), "error setting CPU resource limit: {}");
+    check!(
+        setrlimit(Resource::RLIMIT_CPU, 60, 61),
+        "error setting CPU resource limit: {}"
+    );
     // number of processes/threads, to prevent exhaustion of kernel resources
-    check!(setrlimit(Resource::RLIMIT_NPROC, 100, 100), "error setting NPROC resource limit: {}");
+    check!(
+        setrlimit(Resource::RLIMIT_NPROC, 100, 100),
+        "error setting NPROC resource limit: {}"
+    );
     // written file size, to prevent memory exhaustion by filling up a tmpfs
-    check!(setrlimit(Resource::RLIMIT_FSIZE, 120 * MiB, 128 * MiB), "error setting FSIZE resource limit: {}");
+    check!(
+        setrlimit(Resource::RLIMIT_FSIZE, 120 * MiB, 128 * MiB),
+        "error setting FSIZE resource limit: {}"
+    );
 
     // these next resource limits are probably not particularly necessary:
 
     // pending signals
-    check!(setrlimit(Resource::RLIMIT_SIGPENDING, 100, 100), "error setting SIGPENDING resource limit: {}");
+    check!(
+        setrlimit(Resource::RLIMIT_SIGPENDING, 100, 100),
+        "error setting SIGPENDING resource limit: {}"
+    );
     // locked files
-    check!(setrlimit(Resource::RLIMIT_LOCKS, 100, 100), "error setting LOCKS resource limit: {}");
+    check!(
+        setrlimit(Resource::RLIMIT_LOCKS, 100, 100),
+        "error setting LOCKS resource limit: {}"
+    );
     // bytes in POSIX message queues
-    check!(setrlimit(Resource::RLIMIT_MSGQUEUE, 100, 100), "error setting MSGQUEUE resource limit: {}");
+    check!(
+        setrlimit(Resource::RLIMIT_MSGQUEUE, 100, 100),
+        "error setting MSGQUEUE resource limit: {}"
+    );
     Ok(())
 }

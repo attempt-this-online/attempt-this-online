@@ -3,48 +3,47 @@
     let_chains,
     exitcode_exit_method,
     anonymous_lifetime_in_impl_trait,
-    cursor_remaining,
+    cursor_remaining
 )]
 
 mod constants;
 mod languages;
-mod sandbox;
 mod network;
+mod sandbox;
 
 use crate::{constants::*, languages::*, sandbox::invoke};
-use nix::sys::signal::{signal, Signal, SigHandler};
-use std::process::Termination;
+use nix::sys::signal::{signal, SigHandler, Signal};
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use serde_bytes::ByteBuf;
 use std::net::{SocketAddr, TcpListener, TcpStream};
-use tungstenite::protocol::WebSocketConfig;
+use std::process::Termination;
+use tungstenite as ws;
 use tungstenite::handshake::server as http;
 use tungstenite::http::StatusCode;
-use tungstenite as ws;
-use serde::{Deserialize, de::DeserializeOwned, Serialize};
-use serde_bytes::ByteBuf;
+use tungstenite::protocol::WebSocketConfig;
 
 fn get_bind_address() -> SocketAddr {
     use std::str::FromStr;
-    SocketAddr::from_str(
-        &std::env::var("ATO_BIND").unwrap_or_else(|e| {
-            if let std::env::VarError::NotUnicode(_) = e {
-                panic!("$ATO_BIND is invalid Unicode")
-            }
-            "127.0.0.1:8500".to_string()
-        })
-    )
+    SocketAddr::from_str(&std::env::var("ATO_BIND").unwrap_or_else(|e| {
+        if let std::env::VarError::NotUnicode(_) = e {
+            panic!("$ATO_BIND is invalid Unicode")
+        }
+        "127.0.0.1:8500".to_string()
+    }))
     .expect("$ATO_BIND is not a valid address")
 }
 
 /// analogous to std::thread::spawn but forks a full new process instead of a thread
 fn fork_spawn<F, T>(f: F)
-where F: FnOnce() -> T,
-      F: 'static,
-      T: Termination,
+where
+    F: FnOnce() -> T,
+    F: 'static,
+    T: Termination,
 {
     use nix::unistd::{fork, ForkResult};
     // this is safe as long as the program only has one thread so far
     match unsafe { fork() }.unwrap() {
-        ForkResult::Parent{..} => {},
+        ForkResult::Parent { .. } => {}
         ForkResult::Child => {
             let termination = f();
             termination.report().exit_process();
@@ -80,18 +79,16 @@ fn handle_ws(connection: TcpStream) {
     let websocket =
         match tungstenite::accept_hdr_with_config(connection, handle_headers, Some(config)) {
             Ok(ws) => ws,
-            Err(tungstenite::HandshakeError::Failure(e)) => {
-                match e {
-                    _ => todo!("send 400 bad request error or something"),
-                }
-            }
+            Err(tungstenite::HandshakeError::Failure(e)) => match e {
+                _ => todo!("send 400 bad request error or something"),
+            },
             Err(e) => panic!("{}", e),
         };
     let mut connection = Connection(websocket);
 
     loop {
-        use tungstenite::protocol::frame::{CloseFrame, coding::CloseCode};
         use std::borrow::Cow;
+        use tungstenite::protocol::frame::{coding::CloseCode, CloseFrame};
 
         fn close(
             connection: &mut Connection,
@@ -108,14 +105,27 @@ fn handle_ws(connection: TcpStream) {
         let closed = match handle_request(&mut connection, connection_fd) {
             Ok(()) => continue, // don't close
             Err(Error::ClientWentAway) => connection.0.close(None),
-            Err(Error::TooLarge(size)) =>
-                close(&mut connection, CloseCode::Size, format!("received message of size {size}, greater than size limit {MAX_REQUEST_SIZE}")),
-            Err(Error::UnsupportedData) => close(&mut connection, CloseCode::Unsupported, "expected a binary message"),
-            Err(Error::PolicyViolation(e)) => close(&mut connection, CloseCode::Policy, format!("invalid request: {e}")),
+            Err(Error::TooLarge(size)) => close(
+                &mut connection,
+                CloseCode::Size,
+                format!(
+                    "received message of size {size}, greater than size limit {MAX_REQUEST_SIZE}"
+                ),
+            ),
+            Err(Error::UnsupportedData) => close(
+                &mut connection,
+                CloseCode::Unsupported,
+                "expected a binary message",
+            ),
+            Err(Error::PolicyViolation(e)) => close(
+                &mut connection,
+                CloseCode::Policy,
+                format!("invalid request: {e}"),
+            ),
             Err(Error::InternalError(e)) => {
                 eprintln!("{e}");
                 close(&mut connection, CloseCode::Error, e)
-            },
+            }
         };
         match closed {
             Ok(()) | Err(ws::Error::ConnectionClosed) => (),
@@ -124,7 +134,7 @@ fn handle_ws(connection: TcpStream) {
                 eprintln!("error closing websocket: {e}")
             }
         }
-        break
+        break;
     }
     /* loop {
         match connection.0.write_pending() {
@@ -135,18 +145,22 @@ fn handle_ws(connection: TcpStream) {
     } */
 }
 
-fn handle_headers(request: &http::Request, response: http::Response) -> Result<http::Response, http::ErrorResponse> {
+fn handle_headers(
+    request: &http::Request,
+    response: http::Response,
+) -> Result<http::Response, http::ErrorResponse> {
     if request.uri() != "/api/v1/ws/execute" {
         let response = http::Response::builder()
             .status(StatusCode::NOT_FOUND)
-            .body(Some("the only supported API URL is /api/v1/ws/execute".to_string()))
+            .body(Some(
+                "the only supported API URL is /api/v1/ws/execute".to_string(),
+            ))
             .unwrap();
         Err(response)
     } else {
         Ok(response)
     }
 }
-
 
 #[derive(Serialize)]
 enum StreamResponse {
@@ -168,7 +182,7 @@ enum StreamResponse {
         minor_page_faults: i64,
         input_ops: i64,
         output_ops: i64,
-    }
+    },
 }
 
 #[allow(dead_code)]
@@ -185,7 +199,9 @@ pub struct Request {
     pub timeout: i32,
 }
 
-fn default_timeout() -> i32 { 60 }
+fn default_timeout() -> i32 {
+    60
+}
 
 #[derive(Debug)]
 pub enum Error {
@@ -216,17 +232,25 @@ fn handle_request(connection: &mut Connection, connection_fd: i32) -> Result<(),
 
 fn validate(request: &Request) -> Result<&Language, Error> {
     if request.timeout < 1 || request.timeout > 60 {
-        return Err(Error::PolicyViolation(format!("timeout not in range 1-60: {}", request.timeout)));
+        return Err(Error::PolicyViolation(format!(
+            "timeout not in range 1-60: {}",
+            request.timeout
+        )));
     }
     for arg in request.options.iter().chain(request.arguments.iter()) {
         if arg.contains(&0) {
-            return Err(Error::PolicyViolation("argument contains null byte".to_string()));
+            return Err(Error::PolicyViolation(
+                "argument contains null byte".to_string(),
+            ));
         }
     }
     if let Some(l) = LANGUAGES.get(&request.language) {
         Ok(l)
     } else {
-        Err(Error::PolicyViolation(format!("no such language: {}", &request.language)))
+        Err(Error::PolicyViolation(format!(
+            "no such language: {}",
+            &request.language
+        )))
     }
 }
 
@@ -242,11 +266,13 @@ impl Connection {
     pub fn read_message<T: DeserializeOwned>(&mut self) -> Result<T, Error> {
         let message = match self.0.read_message() {
             Ok(ws::Message::Binary(b)) => b,
-            Ok(ws::Message::Close(_)) | Err(ws::Error::ConnectionClosed) =>
-                return Err(Error::ClientWentAway),
+            Ok(ws::Message::Close(_)) | Err(ws::Error::ConnectionClosed) => {
+                return Err(Error::ClientWentAway)
+            }
             Ok(_) => return Err(Error::UnsupportedData),
-            Err(ws::Error::Capacity(ws::error::CapacityError::MessageTooLong{size, ..})) =>
-                return Err(Error::TooLarge(size)),
+            Err(ws::Error::Capacity(ws::error::CapacityError::MessageTooLong { size, .. })) => {
+                return Err(Error::TooLarge(size))
+            }
             Err(e) => {
                 let e = format!("error reading request: {e}");
                 return Err(Error::InternalError(e));
@@ -261,19 +287,22 @@ impl Connection {
                 } else {
                     Ok(r)
                 }
-            },
-            Err(e) => {
-                Err(Error::PolicyViolation(e.to_string()))
             }
+            Err(e) => Err(Error::PolicyViolation(e.to_string())),
         }
     }
 
     pub fn output_message<T: Serialize>(&mut self, message: T) -> Result<(), Error> {
-        let encoded_message = check!(rmp_serde::to_vec_named(&message), "error encoding output message: {}");
+        let encoded_message = check!(
+            rmp_serde::to_vec_named(&message),
+            "error encoding output message: {}"
+        );
         match self.0.write_message(ws::Message::Binary(encoded_message)) {
             Ok(()) => Ok(()),
             Err(ws::Error::ConnectionClosed) => Err(Error::ClientWentAway),
-            Err(e) => Err(Error::InternalError(format!("error writing output message: {e}"))),
+            Err(e) => Err(Error::InternalError(format!(
+                "error writing output message: {e}"
+            ))),
         }
     }
 }
