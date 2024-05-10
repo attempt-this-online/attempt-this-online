@@ -118,31 +118,27 @@ See [Architecture](./architecture.md) for more details on how the overall system
 A development environment is provided using Docker, with the `docker-compose.yml` file.
 You'll still do all your development outside the container, but the server itself will run in one.
 
-You'll need [Docker](https://docs.docker.com) and [Docker Compose](https://docs.docker.com/compose/). If using Docker
-Engine, your OS must also support unprivileged user namespaces and cgroup v2 (what systemd calls the "unified cgroup
-hierarchy").
+You'll need [Docker](https://docs.docker.com) and [Docker Compose](https://docs.docker.com/compose/).
+Make sure your system also meets the [system requirements](./docker.md#system-requirements) for the Docker container.
 
-To build the code, run:
+By default, the docker-compose file will download the image for every language ATO supports.
+If you're just working on the sandbox, you probably don't want this, to save disk space and startup time.
+To reduce the set of languages downloaded, temporarily edit `languages.json` to remove all languages except `zsh`.
+(because `zsh` is required to run the [tests](#tests)).
+
+Before starting the Docker container, you need build the code by running:
 
 ```bash
 cargo build
 ```
 
-Then to run the Docker container:
+Then you can start the Docker container with:
 
 ```
-sudo docker-compose up
+sudo docker compose up
 ```
 
-This will automatically restart each time you rebuild it. The API will then be available on `127.0.0.1:8500`.
-
-> [!CAUTION]
-> The docker-compose file is **not secure**. It's fine for development if you don't expose the server to the network,
-> but it shouldn't be used in production.
-
-> [!NOTE]
-> To save disk space and setup time, the docker-compose file only sets up one language, zsh.
-> All other languages will fail.
+The API will be available via `ws://localhost:8500/api/v1/ws/execute`.
 
 ### Tests
 
@@ -173,24 +169,6 @@ REMOTE=1 URL='...' test/run
 ```
 
 **TODO**: separate timing-based tests (which only fail over slow network connections) from OS-state-based tests (which also fail when ATO runs in a virtual machine, e.g. with Docker Desktop)
-
-### Automatic rebuilds
-You may find it useful to have your code automatically rebuilt. Install [`entr`](https://eradman.com/entrproject/),
-then run, in different shell instances:
-
-```bash
-ls src | entr -c cargo build --all-targets
-```
-
-With the Docker Compose setup provided, the server will restart automatically when it is rebuilt.
-
-To rerun tests automatically as well:
-
-```bash
-export URL='ws://localhost:8500/api/v1/ws/execute'
-# export FAST=1
-ls target/debug/attempt-this-online test/test.py | entr -c test/run
-```
 
 ## Frontend developer instructions
 See [`frontend/README.md`](../frontend/README.md).
