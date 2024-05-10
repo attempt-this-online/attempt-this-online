@@ -11,7 +11,7 @@ repos:
   rev: v0.2.0
   hooks:
   - id: runners-executable
-- repo: https://github.com/Young-Naive-Simple/pre-commit-rust
-  rev: 3a8de64acc969112746489e5ec1f0b13e00d871e
+- repo: https://github.com/pxeger/pre-commit-rust
+  rev: v1.2.0
   hooks:
   - id: fmt
