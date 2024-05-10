@@ -1,7 +1,9 @@
 # Contributing
+
 ## Adding Languages
+
 If you're not familiar with the typical GitHub (fork-edit-PR) workflow, please read the [GitHub
-guide](https://guides.github.com/introduction/flow/) on the matter.
+guide](https://guides.github.com/introduction/flow/) about that.
 
 1. Create a [Docker image](https://hub.docker.com) with the toolchain for the language, and submit it to the
    [languages](https://github.com/attempt-this-online/languages) repository, based on our common base image
@@ -88,9 +90,11 @@ cd /ATO/context
 # Use two levels of yargs to substitute in multiple sets of arguments:
 /ATO/yargs %1 /ATO/options /ATO/yargs %2 /ATO/arguments python %1 /ATO/code %2 < /ATO/input
 ```
+
+Finally:
   - Make sure you've made the runner script executable (`chmod +x runners/path`)
-  - Test your runner! It's unhelpful if you submit a broken runner
-  - Make a [Pull Request](https://github.com/attempt-this-online/attempt-this-online/pulls) to add the runner for
+  - Test your runner if you can!
+  - Make a [Pull Request](https://github.com/attempt-this-online/attempt-this-online/pulls) adding your new runner
 
 ## Making Releases
 - Update version numbers in `frontend/package.json`, `Cargo.toml`, and `setup/setup`
@@ -103,6 +107,7 @@ cd /ATO/context
 - Set description etc. on GitHub release
 
 ## Backend developer instructions
+
 The backend is written in Rust. You'll need the nightly Rust compiler and cargo.
 
 - `src/main.rs` is the main entrypoint to the service and contains the websocket server handling code
@@ -140,6 +145,7 @@ This will automatically restart each time you rebuild it. The API will then be a
 > All other languages will fail.
 
 ### Tests
+
 There are some basic tests written in Python (make sure you have version 3.10 or higher installed). These can test both
 the sandbox's functionality, and all the languages.
 
