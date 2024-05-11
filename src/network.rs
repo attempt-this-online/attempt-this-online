@@ -27,11 +27,13 @@ fn read_nl_reply(netlink: &mut NlSocketHandle) -> Result<(), Error> {
         .iter::<'_, Nlmsg, IgnorePayload>(false /* wait until we receive a Done message */)
     {
         let message = check!(message, "error reading netlink reply: {}");
-        if message.nl_type == Nlmsg::Error && let NlPayload::Ack(Nlmsgerr {error: 0, ..}) = message.nl_payload {
+        if message.nl_type == Nlmsg::Error
+            && let NlPayload::Ack(Nlmsgerr { error: 0, .. }) = message.nl_payload
+        {
             return Ok(());
         } else {
             let e = format!("unknown reply from netlink:\n{message:?}");
-            return Err(Error::InternalError(e))
+            return Err(Error::InternalError(e));
         }
     }
     Ok(())
