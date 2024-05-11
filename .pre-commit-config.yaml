@@ -12,6 +12,6 @@ repos:
   hooks:
   - id: runners-executable
 - repo: https://github.com/pxeger/pre-commit-rust
-  rev: v1.2.0
+  rev: v1.3.0
   hooks:
   - id: fmt
