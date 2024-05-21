@@ -136,9 +136,11 @@ Note that ATO only runs on amd64 Linux. If you're not developing on that platfor
 
 Then you can start the Docker container with:
 
-```
+```bash
 sudo docker compose up
 ```
+
+(don't use sudo with Docker Desktop)
 
 The API will be available via `ws://localhost:8500/api/v1/ws/execute`.
 
