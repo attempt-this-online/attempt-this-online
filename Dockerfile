@@ -8,8 +8,9 @@ RUN gcc -Wall -Werror -static /tmp/yargs.c -o /yargs
 
 COPY languages.json Cargo.toml Cargo.lock /tmp/
 COPY src /tmp/src
+COPY .cargo /tmp/.cargo
 ARG CARGO_FLAGS=--release
-RUN cargo build $CARGO_FLAGS && mv target/*/attempt-this-online /
+RUN cargo build $CARGO_FLAGS && mv target/**/attempt-this-online /
 
 FROM archlinux
 
