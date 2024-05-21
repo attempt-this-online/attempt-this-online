@@ -108,7 +108,7 @@ Finally:
 
 ## Backend developer instructions
 
-The backend is written in Rust. You'll need the nightly Rust compiler and cargo.
+The backend is written in Rust. You'll need the nightly Rust compiler, with the `x86_64-unknown-linux-gnu` toolchain, and cargo.
 
 - `src/main.rs` is the main entrypoint to the service and contains the websocket server handling code
 - `src/sandbox.rs` contains the core sandbox and execution wrapper
@@ -131,6 +131,8 @@ Before starting the Docker container, you need build the code by running:
 ```bash
 cargo build
 ```
+
+Note that ATO only runs on amd64 Linux. If you're not developing on that platform, `cargo` will cross-compile.
 
 Then you can start the Docker container with:
 
