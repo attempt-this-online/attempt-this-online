@@ -126,7 +126,10 @@ If you're just working on the sandbox, you probably don't want this, to save dis
 To reduce the set of languages downloaded, temporarily edit `languages.json` to remove all languages except `zsh`.
 (because `zsh` is required to run the [tests](#tests)).
 
-Before starting the Docker container, you need build the code by running:
+The downloaded images for the languages are stored in a Docker volume. If you change the set of images needed for ATO,
+or you want to re-download fresh copies of the images, use `docker compose down -v` to clear this volume.
+
+Before starting the Docker container, you need to build the code by running:
 
 ```bash
 cargo build
