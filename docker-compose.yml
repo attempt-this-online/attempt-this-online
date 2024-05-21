@@ -3,6 +3,14 @@ volumes:
 services:
   backend:
     build: .
+    develop:
+      watch:
+        - path: ./target/x86_64-unknown-linux-gnu/debug/attempt-this-online
+          action: sync+restart
+          target: /usr/local/lib/ATO/server
+        - path: ./runners
+          action: sync
+          target: /usr/local/share/ATO/runners
     volumes:
       - images:/mnt
     ports:
