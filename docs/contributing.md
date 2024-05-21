@@ -174,5 +174,24 @@ REMOTE=1 URL='...' test/run
 
 **TODO**: separate timing-based tests (which only fail over slow network connections) from OS-state-based tests (which also fail when ATO runs in a virtual machine, e.g. with Docker Desktop)
 
+### Automatic rebuilds
+You may find it useful to have your code automatically rebuilt. Install [`entr`](https://eradman.com/entrproject/), then run:
+
+```bash
+ls src languages.json | entr -c cargo build
+```
+
+If you pass `--watch` to your `docker compose up` command,
+Docker compose will automatically update and restart the backend whenever you rebuild your code.
+This will also automatically update the runners in the container when you change them.
+
+To rerun the tests automatically as well:
+
+```bash
+export URL='ws://localhost:8500/api/v1/ws/execute'
+# export FAST=1
+ls target/debug/attempt-this-online test/test.py | entr -c test/run
+```
+
 ## Frontend developer instructions
 See [`frontend/README.md`](../frontend/README.md).
