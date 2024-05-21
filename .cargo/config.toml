@@ -1,0 +1,7 @@
+[build]
+# ATO only works on amd64 Linux.
+# We should specify this explicitly - even when also developing on amd64 Linux,
+# because it makes the path of the output binary consistent
+# (target/x86_64-unknown-linux-gnu/debug/attempt-this-online vs target/debug/attempt-this-online)
+# This makes ./build work better, and enables automatic reloading with Docker Compose Watch
+target = "x86_64-unknown-linux-gnu"
