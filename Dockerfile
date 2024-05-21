@@ -26,6 +26,9 @@ chmod +x /usr/local/bin/containers-storage
 
 curl -Lo /usr/local/lib/ATO/bash "https://github.com/attempt-this-online/static-bash/releases/download/5.2.0(1)-rc2/bash"
 chmod +x /usr/local/lib/ATO/bash
+
+curl -Lo /usr/local/bin/tini "https://github.com/krallin/tini/releases/download/v0.19.0/tini-amd64"
+chmod +x /usr/local/bin/tini
 EOF
 
 # cnfigure system
@@ -87,7 +90,7 @@ chown -R ato:ato "$ATO_CGROUP_PATH"
 
 mkdir -p /run/ATO
 
-exec "$@"
+exec tini -- "$@"
 EOF
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
