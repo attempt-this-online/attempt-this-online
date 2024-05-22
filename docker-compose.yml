@@ -2,6 +2,8 @@ volumes:
   images:
 services:
   backend:
+    # explicitly specify platform so this can work with Docker Desktop on ARM
+    platform: linux/amd64
     build: .
     develop:
       watch:
