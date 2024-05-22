@@ -17,21 +17,27 @@ FROM archlinux
 # install dependencies
 RUN <<"EOF"
 set -ex
-pacman -Syu --noconfirm base-devel jq skopeo entr strace
+pacman -Syu --noconfirm base-devel jq skopeo entr strace go
 
-mkdir -p /usr/local/lib/ATO
+SKOPEO_VERSION=$(pacman -Qe skopeo | cut -d' ' -f2 | cut -d- -f1)
+STORAGE_VERSION=$(curl -L "https://github.com/containers/skopeo/raw/v$SKOPEO_VERSION/go.mod" | grep -F "github.com/containers/storage v" | cut -d'v' -f2)
+curl -L "https://github.com/containers/storage/archive/v$STORAGE_VERSION.tar.gz" | tar -xz
+cd storage-*
+make -j binary
+mv containers-storage /usr/local/bin/
 
-curl -Lo /usr/local/bin/containers-storage "https://github.com/attempt-this-online/containers-storage/releases/download/v1.53.0/containers-storage.linux.amd64"
-chmod +x /usr/local/bin/containers-storage
-
-curl -Lo /usr/local/lib/ATO/bash "https://github.com/attempt-this-online/static-bash/releases/download/5.2.0(1)-rc2/bash"
-chmod +x /usr/local/lib/ATO/bash
+cd /tmp
+curl -Lo bash.deb "https://ftp.debian.org/debian/pool/main/b/bash/bash-static_5.2.15-2+b2_amd64.deb"
+ar -x bash.deb data.tar.xz
+tar -xJf data.tar.xz ./bin/bash-static
+mkdir /usr/local/lib/ATO
+mv bin/bash-static /usr/local/lib/ATO/bash
 
 curl -Lo /usr/local/bin/tini "https://github.com/krallin/tini/releases/download/v0.19.0/tini-amd64"
 chmod +x /usr/local/bin/tini
 EOF
 
-# cnfigure system
+# configure system
 RUN <<"EOF"
 mkdir -p /usr/local/share/ATO/overlayfs_upper/{ATO,proc,dev}
 mkdir -p /usr/local/share/ATO/runners
