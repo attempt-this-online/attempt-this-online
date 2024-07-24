@@ -40,21 +40,21 @@ export default function About({ enableRedirect }: { enableRedirect: boolean }) {
             To get started, click the button below to run some code.
           </p>
           <p className="my-4 text-center sm:text-left">
-            <Link href="/run">
-              <a>
-                <button type="button" className="rounded px-4 py-2 bg-blue-500 hover:bg-blue-400 text-white focus:outline-none focus:ring transition">
-                  Run
-                </button>
-              </a>
+            <Link href="/run" legacyBehavior>
+
+              <button type="button" className="rounded px-4 py-2 bg-blue-500 hover:bg-blue-400 text-white focus:outline-none focus:ring transition">
+                Run
+              </button>
+
             </Link>
           </p>
           <p className="my-4 text-justify">
             By using this website, you agree to be bound by our
             {' '}
-            <Link href="/legal">
-              <a className="underline text-blue-500">
-                Privacy Policy and Terms of Use
-              </a>
+            <Link href="/legal" className="underline text-blue-500">
+
+              Privacy Policy and Terms of Use
+
             </Link>
             .
           </p>
@@ -76,8 +76,8 @@ export default function About({ enableRedirect }: { enableRedirect: boolean }) {
             <li className="text-justify">
               The interface is customisable (see the
               {' '}
-              <Link href="/preferences">
-                <a className="underline text-blue-500">Preferences</a>
+              <Link href="/preferences" className="underline text-blue-500">
+                Preferences
               </Link>
               {' '}
               page)

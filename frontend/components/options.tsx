@@ -46,7 +46,7 @@ function Options({
           Instead, you write a custom runner script in Bash to invoke the compiler and run your code.
           This allows you maximum flexibility in how many times the code is run, with what options and inputs, and what you do with the outputs.
           {' '}
-          <a href={advancedModeExampleUrl} target="_blank" className="text-blue-500 underline">
+          <a href={advancedModeExampleUrl} target="_blank" className="text-blue-500 underline" rel="noreferrer">
             See an example
             {/* icon from heroicons.com, MIT licensed */}
             {/* TODO: once #130 is fixed, remove this! */}

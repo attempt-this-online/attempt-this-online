@@ -15,15 +15,20 @@ export default function Footer({ noLegalLink = false }: { noLegalLink?: boolean 
       </div>
       <div className="md:order-2 md:flex md:justify-center md:w-0 z-10">
         { noLegalLink ? null : (
-          <Link href="/legal">
-            <a className="underline text-blue-500 inline-flex flex-nowrap">
+          (
+            <Link
+              href="/legal"
+              className="underline text-blue-500 inline-flex flex-nowrap"
+              legacyBehavior
+            >
               Legal
               {/* <div className="inline-block rounded-full w-2 h-2 ml-1 self-center mt-1">
-                <span className="motion-safe:animate-ping absolute inline-flex h-2 w-2 rounded-full bg-red-500 opacity-75"></span>
-                <span className="absolute inline-flex h-2 w-2 rounded-full bg-red-600"></span>
-              </div> */}
-            </a>
-          </Link>
+              <span className="motion-safe:animate-ping absolute inline-flex h-2 w-2 rounded-full bg-red-500 opacity-75"></span>
+              <span className="absolute inline-flex h-2 w-2 rounded-full bg-red-600"></span>
+            </div> */}
+
+            </Link>
+          )
         )}
       </div>
       <div className="md:order-3 md:flex md:grow md:justify-center md:w-0">
