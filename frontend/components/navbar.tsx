@@ -7,21 +7,15 @@ export default function Navbar() {
       <Link
         href="/about"
         className="p-2 transition hover:bg-gray-300 dark:hover:bg-gray-600 rounded-full focus:ring"
-        legacyBehavior
       >
-
         <HomeIcon className="w-6 h-6" />
-
       </Link>
       <h2 className="hidden sm:block font-bold text-xl my-auto">Attempt This Online</h2>
       <Link
         href="/preferences"
         className="p-2 transition hover:bg-gray-300 dark:hover:bg-gray-600 rounded-full focus:ring"
-        legacyBehavior
       >
-
         <AdjustmentsIcon className="w-6 h-6" />
-
       </Link>
     </nav>
   );
