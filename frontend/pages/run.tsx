@@ -1,81 +1,83 @@
 // import localforage from 'localforage';
-import Head from "next/head";
-import { useRouter } from "next/router";
-import { connect } from "react-redux";
-import { SyntheticEvent, useEffect, useMemo, useRef, useState } from "react";
-import { throttle } from "lodash";
+import Head from 'next/head';
+import { useRouter } from 'next/router';
+import { connect } from 'react-redux';
+import {
+  SyntheticEvent, useEffect, useMemo, useRef, useState,
+} from 'react';
+import { throttle } from 'lodash';
 import {
   ClipboardCopyIcon,
   ExclamationCircleIcon,
   XIcon,
-} from "@heroicons/react/solid";
+} from '@heroicons/react/solid';
 
-import CollapsibleText from "components/collapsibleText";
-import ResizeableText from "components/resizeableText";
-import LanguageSelector from "components/languageSelector";
-import Footer from "components/footer";
-import Navbar from "components/navbar";
-import Options from "components/options";
-import Notification from "components/notification";
-import { ArgvList, parseList } from "components/argvList";
-import * as API from "lib/api";
-import { load, save } from "lib/urls";
-import { DECODERS, ENCODERS } from "lib/encoding";
-import stringLength from "lib/stringLength";
-import codeToMarkdown from "lib/codeToMarkdown";
-import concatUint8Array from "lib/concatUint8Array";
+import CollapsibleText from 'components/collapsibleText';
+import ResizeableText from 'components/resizeableText';
+import LanguageSelector from 'components/languageSelector';
+import Footer from 'components/footer';
+import Navbar from 'components/navbar';
+import Options from 'components/options';
+import Notification from 'components/notification';
+import { ArgvList, parseList } from 'components/argvList';
+import * as API from 'lib/api';
+import { load, save } from 'lib/urls';
+import { DECODERS, ENCODERS } from 'lib/encoding';
+import stringLength from 'lib/stringLength';
+import codeToMarkdown from 'lib/codeToMarkdown';
+import concatUint8Array from 'lib/concatUint8Array';
 
-const NEWLINE = "\n".charCodeAt(0);
+const NEWLINE = '\n'.charCodeAt(0);
 
 const EMPTY_BUFFER = new Uint8Array([]);
 
 const SIGNALS: Record<number, string> = {
-  1: "SIGHUP",
-  2: "SIGINT",
-  3: "SIGQUIT",
-  4: "SIGILL",
-  5: "SIGTRAP",
-  6: "SIGABRT",
-  7: "SIGBUS",
-  8: "SIGFPE",
-  9: "SIGKILL",
-  10: "SIGUSR1",
-  11: "SIGSEGV",
-  12: "SIGUSR2",
-  13: "SIGPIPE",
-  14: "SIGALRM",
-  15: "SIGTERM",
+  1: 'SIGHUP',
+  2: 'SIGINT',
+  3: 'SIGQUIT',
+  4: 'SIGILL',
+  5: 'SIGTRAP',
+  6: 'SIGABRT',
+  7: 'SIGBUS',
+  8: 'SIGFPE',
+  9: 'SIGKILL',
+  10: 'SIGUSR1',
+  11: 'SIGSEGV',
+  12: 'SIGUSR2',
+  13: 'SIGPIPE',
+  14: 'SIGALRM',
+  15: 'SIGTERM',
   // 16 unused
-  17: "SIGCHLD",
-  18: "SIGCONT",
-  19: "SIGSTOP",
-  20: "SIGTSTP",
-  21: "SIGTTIN",
-  22: "SIGTTOU",
-  23: "SIGURG",
-  24: "SIGXCPU",
-  25: "SIGXFSZ",
-  26: "SIGVTALRM",
-  27: "SIGPROF",
-  28: "SIGWINCH",
-  29: "SIGIO",
-  30: "SIGPWR",
-  31: "SIGSYS",
+  17: 'SIGCHLD',
+  18: 'SIGCONT',
+  19: 'SIGSTOP',
+  20: 'SIGTSTP',
+  21: 'SIGTTIN',
+  22: 'SIGTTOU',
+  23: 'SIGURG',
+  24: 'SIGXCPU',
+  25: 'SIGXFSZ',
+  26: 'SIGVTALRM',
+  27: 'SIGPROF',
+  28: 'SIGWINCH',
+  29: 'SIGIO',
+  30: 'SIGPWR',
+  31: 'SIGSYS',
 };
 
 const statusToString = (
-  type: "exited" | "killed" | "core_dumped" | "unknown",
+  type: 'exited' | 'killed' | 'core_dumped' | 'unknown',
   value: number,
 ) => {
   switch (type) {
-    case "exited":
+    case 'exited':
       return `Exited with status code ${value}`;
-    case "killed":
-      return `Killed by ${SIGNALS[value] || "unknown signal"}`;
-    case "core_dumped":
-      return `Killed by ${SIGNALS[value] || "unknown signal"} and dumped core`;
+    case 'killed':
+      return `Killed by ${SIGNALS[value] || 'unknown signal'}`;
+    case 'core_dumped':
+      return `Killed by ${SIGNALS[value] || 'unknown signal'} and dumped core`;
     default:
-      return "Unknown status";
+      return 'Unknown status';
   }
 };
 
@@ -95,50 +97,50 @@ function _Run(
   const codeBox = useRef<any>(null);
 
   let [language, setLanguage] = useState<string | null>(null);
-  const [header, setHeader] = useState("");
-  const [headerEncoding, setHeaderEncoding] = useState("utf-8");
-  const [code, setCode] = useState("");
+  const [header, setHeader] = useState('');
+  const [headerEncoding, setHeaderEncoding] = useState('utf-8');
+  const [code, setCode] = useState('');
   // default code encoding depends on language selected
   const [codeEncoding, setCodeEncoding] = useState<string | null>(null);
-  const [footer, setFooter] = useState("");
-  const [footerEncoding, setFooterEncoding] = useState("utf-8");
-  const [input, setInput] = useState("");
-  const [inputEncoding, setInputEncoding] = useState("utf-8");
+  const [footer, setFooter] = useState('');
+  const [footerEncoding, setFooterEncoding] = useState('utf-8');
+  const [input, setInput] = useState('');
+  const [inputEncoding, setInputEncoding] = useState('utf-8');
   const [stdout, setStdout] = useState(EMPTY_BUFFER);
-  const [stdoutEncoding, setStdoutEncoding] = useState("utf-8");
+  const [stdoutEncoding, setStdoutEncoding] = useState('utf-8');
   const [stderr, setStderr] = useState(EMPTY_BUFFER);
-  const [stderrEncoding, setStderrEncoding] = useState("utf-8");
+  const [stderrEncoding, setStderrEncoding] = useState('utf-8');
 
   const [statusType, setStatusType] = useState<
-    "exited" | "killed" | "core_dumped" | "unknown" | null
+  'exited' | 'killed' | 'core_dumped' | 'unknown' | null
   >(null);
   const [statusValue, setStatusValue] = useState<number | null>(null);
-  const [timing, setTiming] = useState("");
+  const [timing, setTiming] = useState('');
   const [timingOpen, setTimingOpen] = useState(false);
 
   const [languageSelectorOpen, setLanguageSelectorOpen] = useState(false);
 
   const [[optionsString, options], setOptions] = useState<
-    [string, string[] | null]
-  >(["", []]);
+  [string, string[] | null]
+  >(['', []]);
   const [[argsString, programArguments], setProgramArguments] = useState<
-    [string, string[] | null]
-  >(["", []]);
+  [string, string[] | null]
+  >(['', []]);
 
   const [isAdvanced, setIsAdvanced] = useState(false);
-  const [customRunner, setCustomRunner] = useState("");
-  const [customRunnerEncoding, setCustomRunnerEncoding] = useState("utf-8");
+  const [customRunner, setCustomRunner] = useState('');
+  const [customRunnerEncoding, setCustomRunnerEncoding] = useState('utf-8');
 
   const [submitting, setSubmitting] = useState(false);
   const [notifications, setNotifications] = useState<
-    { id: number; text: string }[]
+  { id: number; text: string }[]
   >([]);
   const dismissNotification = (target: number) => {
     setNotifications(notifications.filter(({ id }) => id !== target));
   };
   const notify = (text: string) => {
     // avoid double notifications
-    if (notifications.find((n) => n.text === text) === undefined) {
+    if (notifications.find(n => n.text === text) === undefined) {
       setNotifications([{ id: Math.random(), text }, ...notifications]);
     }
   };
@@ -153,7 +155,7 @@ function _Run(
       // not chosen yet
       return;
     }
-    setCodeEncoding(languages[language].sbcs ? "sbcs" : "utf-8");
+    setCodeEncoding(languages[language].sbcs ? 'sbcs' : 'utf-8');
   }, [language, languages]);
 
   const [killCallback, setKillCallback] = useState<(() => void) | null>(null);
@@ -192,7 +194,7 @@ function _Run(
       [killCallback1, pData] = await API.runWs(payload);
     } catch (e) {
       console.error(e);
-      notify("An error occurred; see the console for details");
+      notify('An error occurred; see the console for details');
       setSubmitting(false);
       return;
     }
@@ -209,11 +211,11 @@ function _Run(
       } catch (e) {
         setKillCallback(null);
         console.error(e);
-        notify("An error occurred; see the console for details");
+        notify('An error occurred; see the console for details');
         setSubmitting(false);
         return;
       }
-      if ("Done" in data) {
+      if ('Done' in data) {
         setKillCallback(null);
 
         setStatusType(data.Done.status_type);
@@ -231,26 +233,26 @@ function _Run(
           Major page faults: ${data.Done.major_page_faults}
           Input operations: ${data.Done.input_ops}
           Output operations: ${data.Done.output_ops}
-          `.trim().split("\n").map((s) => s.trim()).join("\n"),
+          `.trim().split('\n').map(s => s.trim()).join('\n'),
         );
 
         if (data.Done.timed_out) {
-          notify("The program ran for over 60 seconds and timed out");
+          notify('The program ran for over 60 seconds and timed out');
         }
         if (data.Done.stdout_truncated) {
-          notify("stdout exceeded 128KiB and was truncated");
+          notify('stdout exceeded 128KiB and was truncated');
         }
         if (data.Done.stderr_truncated) {
-          notify("stderr exceeded 128KiB and was truncated");
+          notify('stderr exceeded 128KiB and was truncated');
         }
       }
-      if ("Stdout" in data) {
+      if ('Stdout' in data) {
         const output = data.Stdout;
-        setStdout((current) => concatUint8Array(current, output));
+        setStdout(current => concatUint8Array(current, output));
       }
-      if ("Stderr" in data) {
+      if ('Stderr' in data) {
         const output = data.Stderr;
-        setStderr((current) => concatUint8Array(current, output));
+        setStderr(current => concatUint8Array(current, output));
       }
     } while (pData);
 
@@ -282,8 +284,8 @@ function _Run(
         setLanguageSelectorOpen(true);
       }
     } else {
-      const loadedLanguage = router.query.L || router.query.l ||
-        loadedData.language;
+      const loadedLanguage = router.query.L || router.query.l
+        || loadedData.language;
       setLanguage(loadedLanguage);
       if (loadedData.isAdvanced) {
         setCustomRunner(loadedData.customRunner);
@@ -330,16 +332,15 @@ function _Run(
     // - saving might take a while due to several layers of encoding and compression;
     //   we don't want it to block the main thread too much
     // - some browsers error on too many frequent history pushState/replaceState calls
-    () =>
-      throttle(
-        // the debounced function cannot have any closure variable dependencies because otherwise the
-        // function would have to be recreated every render and the debouncing wouldn't work properly,
-        // so what would otherwise be closure variables are passed as arguments upon call.
-        (router2, data) => {
-          router2.replace(`/run?${save(data)}`, null, { scroll: false });
-        },
-        200, // milliseconds
-      ),
+    () => throttle(
+      // the debounced function cannot have any closure variable dependencies because otherwise the
+      // function would have to be recreated every render and the debouncing wouldn't work properly,
+      // so what would otherwise be closure variables are passed as arguments upon call.
+      (router2, data) => {
+        router2.replace(`/run?${save(data)}`, null, { scroll: false });
+      },
+      200, // milliseconds
+    ),
     [],
   ));
 
@@ -347,7 +348,7 @@ function _Run(
 
   let byteLength: number = 0;
   if (codeEncoding !== null) {
-    if (codeEncoding === "sbcs") {
+    if (codeEncoding === 'sbcs') {
       byteLength = stringLength(code);
     } else {
       byteLength = ENCODERS[codeEncoding](code).length;
@@ -424,7 +425,7 @@ function _Run(
 
   const copyCGCCPost = () => {
     if (!language) {
-      notify("Please select a language first!");
+      notify('Please select a language first!');
       return;
     }
     setClipboardCopyModalOpen(false);
@@ -437,43 +438,43 @@ function _Run(
 
     const markdownCode = codeToMarkdown(code, languages[language].se_class);
     navigator.clipboard.writeText(
-      `# ${title}, ${byteLength} ${pluralise("byte", byteLength)}
+      `# ${title}, ${byteLength} ${pluralise('byte', byteLength)}
 
 ${markdownCode}
 
 [Attempt This Online!](${getCurrentURL()})`,
     );
 
-    notify("Copied to clipboard!");
+    notify('Copied to clipboard!');
   };
 
   const copyCMC = () => {
     if (!language) {
-      notify("Please select a language first!");
+      notify('Please select a language first!');
       return;
     }
     setClipboardCopyModalOpen(false);
     navigator.clipboard.writeText(
       `${languages[language].name}, ${byteLength} ${
-        pluralise("byte", byteLength)
-      }:` +
-        ` [\`${code}\`](${getCurrentURL()})`,
+        pluralise('byte', byteLength)
+      }:`
+        + ` [\`${code}\`](${getCurrentURL()})`,
     );
 
-    notify("Copied to clipboard!");
+    notify('Copied to clipboard!');
   };
 
-  const readyToSubmit = !submitting && language && codeEncoding &&
-    options !== null && programArguments !== null;
+  const readyToSubmit = !submitting && language && codeEncoding
+    && options !== null && programArguments !== null;
 
   const keyDownHandler = (e: any) => {
     if (
-      readyToSubmit && e.ctrlKey && !e.shiftKey && !e.metaKey && !e.altKey &&
-      e.key === "Enter"
+      readyToSubmit && e.ctrlKey && !e.shiftKey && !e.metaKey && !e.altKey
+      && e.key === 'Enter'
     ) {
       submit(e);
     } else if (
-      e.ctrlKey && !e.shiftKey && !e.metaKey && !e.altKey && e.key === "h"
+      e.ctrlKey && !e.shiftKey && !e.metaKey && !e.altKey && e.key === 'h'
     ) {
       e.preventDefault();
       setLanguageSelectorOpen(true);
@@ -483,7 +484,7 @@ ${markdownCode}
   const dummy = useRef<any>(null);
 
   const pageTitle = `${
-    language && languages ? languages[language].name : "Run"
+    language && languages ? languages[language].name : 'Run'
   } – Attempt This Online`;
   return (
     <>
@@ -509,7 +510,7 @@ ${markdownCode}
             : null}
           <div className="sticky h-0 top-4 z-20 pointer-events-none">
             {notifications.map(
-              (notification) => (
+              notification => (
                 <Notification
                   key={notification.id}
                   onClick={() => dismissNotification(notification.id)}
@@ -521,7 +522,7 @@ ${markdownCode}
           </div>
           <main
             className={`mb-3 px-4 -mt-4${
-              fullWidthMode ? "" : " md:container md:mx-auto"
+              fullWidthMode ? '' : ' md:container md:mx-auto'
             }`}
           >
             <form onSubmit={submit}>
@@ -530,7 +531,7 @@ ${markdownCode}
                   <span className="my-auto">
                     <span>
                       Language:
-                      {" "}
+                      {' '}
                     </span>
                     {languages && language && (
                       <a
@@ -553,9 +554,13 @@ ${markdownCode}
                 </div>
                 <div className="flex grow justify-between relative">
                   <code className="my-auto mr-4 font-mono bg-gray-200 dark:bg-gray-800 px-2 py-px rounded">
-                    {charLength} {pluralise("char", charLength)}
-                    {", "}
-                    {byteLength} {pluralise("byte", byteLength)}
+                    {charLength}
+                    {' '}
+                    {pluralise('char', charLength)}
+                    {', '}
+                    {byteLength}
+                    {' '}
+                    {pluralise('byte', byteLength)}
                   </code>
                   <button
                     type="button"
@@ -564,8 +569,8 @@ ${markdownCode}
                     }}
                     onBlur={(event: any) => {
                       if (
-                        clipboardCopyModal.current &&
-                        !clipboardCopyModal.current.contains(
+                        clipboardCopyModal.current
+                        && !clipboardCopyModal.current.contains(
                           event.relatedTarget,
                         )
                       ) {
@@ -582,8 +587,8 @@ ${markdownCode}
                       className="absolute top-14 right-0 bg-gray-200 dark:bg-gray-800 p-4 rounded ring-blue-500 ring-opacity-40 ring shadow-lg z-40 flex flex-col w-max"
                       onBlur={(event: any) => {
                         if (
-                          clipboardCopyButton.current &&
-                          !clipboardCopyButton.current.contains(
+                          clipboardCopyButton.current
+                          && !clipboardCopyButton.current.contains(
                             event.relatedTarget,
                           )
                         ) {
@@ -620,7 +625,8 @@ ${markdownCode}
                         >
                           <abbr title="Code Golf and Coding Challenges (Stack Exchange)">
                             CGCC
-                          </abbr>{" "}
+                          </abbr>
+                          {' '}
                           Post
                         </button>
                       </div>
@@ -645,7 +651,7 @@ ${markdownCode}
                 value={header}
                 setValue={setHeader}
                 encoding={headerEncoding}
-                onEncodingChange={(e) => setHeaderEncoding(e.target.value)}
+                onEncodingChange={e => setHeaderEncoding(e.target.value)}
                 id="header"
                 onKeyDown={keyDownHandler}
                 dummy={dummy}
@@ -655,8 +661,8 @@ ${markdownCode}
               <CollapsibleText
                 value={code}
                 setValue={setCode}
-                encoding={codeEncoding ?? "utf-8"}
-                onEncodingChange={(e) => setCodeEncoding(e.target.value)}
+                encoding={codeEncoding ?? 'utf-8'}
+                onEncodingChange={e => setCodeEncoding(e.target.value)}
                 id="code"
                 onKeyDown={keyDownHandler}
                 dummy={dummy}
@@ -668,7 +674,7 @@ ${markdownCode}
                 value={footer}
                 setValue={setFooter}
                 encoding={footerEncoding}
-                onEncodingChange={(e) => setFooterEncoding(e.target.value)}
+                onEncodingChange={e => setFooterEncoding(e.target.value)}
                 id="footer"
                 onKeyDown={keyDownHandler}
                 dummy={dummy}
@@ -689,7 +695,7 @@ ${markdownCode}
                 value={input}
                 setValue={setInput}
                 encoding={inputEncoding}
-                onEncodingChange={(e) => setInputEncoding(e.target.value)}
+                onEncodingChange={e => setInputEncoding(e.target.value)}
                 id="input"
                 onKeyDown={keyDownHandler}
                 dummy={dummy}
@@ -751,24 +757,28 @@ ${markdownCode}
             <CollapsibleText
               value={encodedStdout}
               encoding={stdoutEncoding}
-              onEncodingChange={(e) => setStdoutEncoding(e.target.value)}
+              onEncodingChange={e => setStdoutEncoding(e.target.value)}
               id="stdout"
               onKeyDown={keyDownHandler}
               readOnly
               dummy={dummy}
             >
-              <code>stdout</code> output
+              <code>stdout</code>
+              {' '}
+              output
             </CollapsibleText>
             <CollapsibleText
               value={encodedStderr}
               encoding={stderrEncoding}
-              onEncodingChange={(e) => setStderrEncoding(e.target.value)}
+              onEncodingChange={e => setStderrEncoding(e.target.value)}
               id="stderr"
               onKeyDown={keyDownHandler}
               readOnly
               dummy={dummy}
             >
-              <code>stderr</code> output
+              <code>stderr</code>
+              {' '}
+              output
             </CollapsibleText>
             <details open={timingOpen} className="my-6">
               <summary

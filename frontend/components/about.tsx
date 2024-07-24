@@ -1,21 +1,21 @@
-import localforage from "localforage";
-import Head from "next/head";
-import Link from "next/link";
-import { useRouter } from "next/router";
-import { useEffect } from "react";
+import localforage from 'localforage';
+import Head from 'next/head';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { useEffect } from 'react';
 
-import Footer from "components/footer";
+import Footer from 'components/footer';
 
 export default function About({ enableRedirect }: { enableRedirect: boolean }) {
   const router = useRouter();
   useEffect(() => {
-    localforage.getItem("ATO_greeted").then((greeted) => {
+    localforage.getItem('ATO_greeted').then(greeted => {
       if (!greeted) {
-        localforage.setItem("ATO_greeted", true);
+        localforage.setItem('ATO_greeted', true);
       }
       // if already used the site, and not explicitly on /about, send them to the run page
       if (enableRedirect && greeted) {
-        router.replace("/run");
+        router.replace('/run');
       }
     });
   }, []);
@@ -33,10 +33,12 @@ export default function About({ enableRedirect }: { enableRedirect: boolean }) {
             Attempt This Online is an online sandbox environment for running
             code in an ever-growing list of programming languages, both
             practical and recreational. ATO was originally conceived as a
-            replacement for the increasingly out-of-date{" "}
+            replacement for the increasingly out-of-date
+            {' '}
             <a href="https://tio.run" className="text-blue-500 underline">
               Try It Online
-            </a>{" "}
+            </a>
+            {' '}
             service.
           </p>
           <p className="my-4 text-justify">
@@ -53,7 +55,8 @@ export default function About({ enableRedirect }: { enableRedirect: boolean }) {
             </Link>
           </p>
           <p className="my-4 text-justify">
-            By using this website, you agree to be bound by our{" "}
+            By using this website, you agree to be bound by our
+            {' '}
             <Link href="/legal" className="underline text-blue-500">
               Privacy Policy and Terms of Use
             </Link>
@@ -65,14 +68,17 @@ export default function About({ enableRedirect }: { enableRedirect: boolean }) {
               It&apos;s completely free of charge
             </li>
             <li className="text-justify">
-              The software is{" "}
+              The software is
+              {' '}
               <a
                 href="https://github.com/attempt-this-online/attempt-this-online"
                 className="text-blue-500 underline"
               >
                 open-source
-              </a>{" "}
-              (available under the copyleft{" "}
+              </a>
+              {' '}
+              (available under the copyleft
+              {' '}
               <a
                 href="https://github.com/attempt-this-online/attempt-this-online/blob/main/LICENCE.txt"
                 className="text-blue-500 underline"
@@ -89,24 +95,28 @@ export default function About({ enableRedirect }: { enableRedirect: boolean }) {
               request all the time
             </li>
             <li className="text-justify">
-              The interface is customisable (see the{" "}
+              The interface is customisable (see the
+              {' '}
               <Link href="/preferences" className="underline text-blue-500">
                 Preferences
-              </Link>{" "}
+              </Link>
+              {' '}
               page)
             </li>
           </ul>
           <h2 className="mt-6 text-2xl font-bold">Give Feedback</h2>
           <p className="my-4 text-justify">
             If you have a feature suggestion, bug report, or request for a new
-            or updated language, open an issue in the{" "}
+            or updated language, open an issue in the
+            {' '}
             <a
               href="https://github.com/attempt-this-online/attempt-this-online/issues/new/choose"
               className="text-blue-500 underline"
             >
               GitHub repository
             </a>
-            . Feel free to implement it yourself and{" "}
+            . Feel free to implement it yourself and
+            {' '}
             <a
               href="https://github.com/attempt-this-online/attempt-this-online/compare"
               className="text-blue-500 underline"
@@ -116,7 +126,8 @@ export default function About({ enableRedirect }: { enableRedirect: boolean }) {
             !
           </p>
           <p className="my-4 text-justify">
-            You can also discuss ATO in the dedicated{" "}
+            You can also discuss ATO in the dedicated
+            {' '}
             <a
               href="https://chat.stackexchange.com/rooms/122645/attempt-this-online"
               className="text-blue-500 underline"
@@ -127,7 +138,8 @@ export default function About({ enableRedirect }: { enableRedirect: boolean }) {
           </p>
           <h2 className="mt-6 text-2xl font-bold">Support</h2>
           <p className="my-4 text-justify">
-            I currently pay for ATO entirely myself (see the{" "}
+            I currently pay for ATO entirely myself (see the
+            {' '}
             <a
               href="https://docs.google.com/spreadsheets/d/1IgJwUEbZIUjba0WjU64x2Y1mviseVYyIHSeMQBAgNTk/edit?usp=sharing"
               className="text-blue-500 underline"
@@ -139,7 +151,8 @@ export default function About({ enableRedirect }: { enableRedirect: boolean }) {
           </p>
           <ul className="list-disc ml-6 my-4">
             <li className="text-justify">
-              Make a one-time or recurring-monthly donation{" "}
+              Make a one-time or recurring-monthly donation
+              {' '}
               <a
                 href="https://github.com/sponsors/attempt-this-online"
                 className="text-blue-500 underline"
@@ -148,13 +161,15 @@ export default function About({ enableRedirect }: { enableRedirect: boolean }) {
               </a>
             </li>
             <li className="text-justify">
-              ATO runs on cloud servers from Hetzner. Sign up using{" "}
+              ATO runs on cloud servers from Hetzner. Sign up using
+              {' '}
               <a
                 href="https://hetzner.cloud/?ref=aGbm6DUCs4yY"
                 className="text-blue-500 underline"
               >
                 my referral link
-              </a>{" "}
+              </a>
+              {' '}
               to get €20 free credit. If you spend €10 (excluding the free
               credit), I'll get €10 credit to cover ATO's costs.
             </li>
