@@ -39,7 +39,7 @@ function resizeableText(
       event.preventDefault();
       const start = event.target.selectionStart;
       const end = event.target.selectionEnd;
-      const newValue = value.slice(0, start) + '\t' + value.slice(end);
+      const newValue = `${value.slice(0, start)}\t${value.slice(end)}`;
       event.target.value = newValue;
       event.target.selectionStart = start + 1;
       event.target.selectionEnd = start + 1;

@@ -3,10 +3,14 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { connect } from 'react-redux';
 import {
-  SyntheticEvent, useMemo, useRef, useState, useEffect,
+  SyntheticEvent, useEffect, useMemo, useRef, useState,
 } from 'react';
 import { throttle } from 'lodash';
-import { ExclamationCircleIcon, ClipboardCopyIcon, XIcon } from '@heroicons/react/solid';
+import {
+  ClipboardCopyIcon,
+  ExclamationCircleIcon,
+  XIcon,
+} from '@heroicons/react/solid';
 
 import CollapsibleText from 'components/collapsibleText';
 import ResizeableText from 'components/resizeableText';
@@ -17,8 +21,8 @@ import Options from 'components/options';
 import Notification from 'components/notification';
 import { ArgvList, parseList } from 'components/argvList';
 import * as API from 'lib/api';
-import { save, load } from 'lib/urls';
-import { ENCODERS, DECODERS } from 'lib/encoding';
+import { load, save } from 'lib/urls';
+import { DECODERS, ENCODERS } from 'lib/encoding';
 import stringLength from 'lib/stringLength';
 import codeToMarkdown from 'lib/codeToMarkdown';
 import concatUint8Array from 'lib/concatUint8Array';
@@ -61,7 +65,10 @@ const SIGNALS: Record<number, string> = {
   31: 'SIGSYS',
 };
 
-const statusToString = (type: 'exited' | 'killed' | 'core_dumped' | 'unknown', value: number) => {
+const statusToString = (
+  type: 'exited' | 'killed' | 'core_dumped' | 'unknown',
+  value: number,
+) => {
   switch (type) {
     case 'exited':
       return `Exited with status code ${value}`;
@@ -74,12 +81,15 @@ const statusToString = (type: 'exited' | 'killed' | 'core_dumped' | 'unknown', v
   }
 };
 
-const pluralise = (string: string, n: number) => (n === 1 ? string : `${string}s`);
+const pluralise = (
+  string: string,
+  n: number,
+) => (n === 1 ? string : `${string}s`);
 
 function _Run(
   { languages, fullWidthMode }: {
-    languages: Record<string, API.MetadataItem>,
-    fullWidthMode: boolean
+    languages: Record<string, API.MetadataItem>;
+    fullWidthMode: boolean;
   },
 ) {
   const router = useRouter();
@@ -101,22 +111,30 @@ function _Run(
   const [stderr, setStderr] = useState(EMPTY_BUFFER);
   const [stderrEncoding, setStderrEncoding] = useState('utf-8');
 
-  const [statusType, setStatusType] = useState<'exited' | 'killed' | 'core_dumped' | 'unknown' | null>(null);
+  const [statusType, setStatusType] = useState<
+  'exited' | 'killed' | 'core_dumped' | 'unknown' | null
+  >(null);
   const [statusValue, setStatusValue] = useState<number | null>(null);
   const [timing, setTiming] = useState('');
   const [timingOpen, setTimingOpen] = useState(false);
 
   const [languageSelectorOpen, setLanguageSelectorOpen] = useState(false);
 
-  const [[optionsString, options], setOptions] = useState<[string, string[] | null]>(['', []]);
-  const [[argsString, programArguments], setProgramArguments] = useState<[string, string[] | null]>(['', []]);
+  const [[optionsString, options], setOptions] = useState<
+  [string, string[] | null]
+  >(['', []]);
+  const [[argsString, programArguments], setProgramArguments] = useState<
+  [string, string[] | null]
+  >(['', []]);
 
   const [isAdvanced, setIsAdvanced] = useState(false);
   const [customRunner, setCustomRunner] = useState('');
   const [customRunnerEncoding, setCustomRunnerEncoding] = useState('utf-8');
 
   const [submitting, setSubmitting] = useState(false);
-  const [notifications, setNotifications] = useState<{ id: number, text: string }[]>([]);
+  const [notifications, setNotifications] = useState<
+  { id: number; text: string }[]
+  >([]);
   const dismissNotification = (target: number) => {
     setNotifications(notifications.filter(({ id }) => id !== target));
   };
@@ -132,7 +150,8 @@ function _Run(
     if (!languages) {
       // not loaded yet
       return;
-    } else if (!language) {
+    }
+    if (!language) {
       // not chosen yet
       return;
     }
@@ -168,7 +187,9 @@ function _Run(
         options: options!,
         programArguments: programArguments!,
         timeout: 60, // TODO
-        customRunner: isAdvanced ? ENCODERS[customRunnerEncoding](customRunner) : null,
+        customRunner: isAdvanced
+          ? ENCODERS[customRunnerEncoding](customRunner)
+          : null,
       };
       [killCallback1, pData] = await API.runWs(payload);
     } catch (e) {
@@ -238,8 +259,14 @@ function _Run(
     setSubmitting(false);
   };
 
-  const encodedStdout = useMemo(() => DECODERS[stdoutEncoding](stdout), [stdout, stdoutEncoding]);
-  const encodedStderr = useMemo(() => DECODERS[stderrEncoding](stderr), [stderr, stderrEncoding]);
+  const encodedStdout = useMemo(() => DECODERS[stdoutEncoding](stdout), [
+    stdout,
+    stdoutEncoding,
+  ]);
+  const encodedStderr = useMemo(() => DECODERS[stderrEncoding](stderr), [
+    stderr,
+    stderrEncoding,
+  ]);
 
   const [shouldLoad, setShouldLoad] = useState(true);
   useEffect(() => {
@@ -257,7 +284,8 @@ function _Run(
         setLanguageSelectorOpen(true);
       }
     } else {
-      const loadedLanguage = router.query.L || router.query.l || loadedData.language;
+      const loadedLanguage = router.query.L || router.query.l
+        || loadedData.language;
       setLanguage(loadedLanguage);
       if (loadedData.isAdvanced) {
         setCustomRunner(loadedData.customRunner);
@@ -276,7 +304,10 @@ function _Run(
       }
       setFooter(loadedData.footer);
       setFooterEncoding(loadedData.footerEncoding);
-      setProgramArguments([loadedData.programArguments, parseList(loadedData.programArguments)]);
+      setProgramArguments([
+        loadedData.programArguments,
+        parseList(loadedData.programArguments),
+      ]);
       setInput(loadedData.input);
       setInputEncoding(loadedData.inputEncoding);
       // further updates the router.query should not trigger updates
@@ -329,7 +360,8 @@ function _Run(
     () => {
       if (!router.isReady) {
         return;
-      } if (!language) {
+      }
+      if (!language) {
         // not chosen
         return;
       }
@@ -405,11 +437,13 @@ function _Run(
     }
 
     const markdownCode = codeToMarkdown(code, languages[language].se_class);
-    navigator.clipboard.writeText(`# ${title}, ${byteLength} ${pluralise('byte', byteLength)}
+    navigator.clipboard.writeText(
+      `# ${title}, ${byteLength} ${pluralise('byte', byteLength)}
 
 ${markdownCode}
 
-[Attempt This Online!](${getCurrentURL()})`);
+[Attempt This Online!](${getCurrentURL()})`,
+    );
 
     notify('Copied to clipboard!');
   };
@@ -421,51 +455,59 @@ ${markdownCode}
     }
     setClipboardCopyModalOpen(false);
     navigator.clipboard.writeText(
-      `${languages[language].name}, ${byteLength} ${pluralise('byte', byteLength)}:`
-      + ` [\`${code}\`](${getCurrentURL()})`,
+      `${languages[language].name}, ${byteLength} ${
+        pluralise('byte', byteLength)
+      }:`
+        + ` [\`${code}\`](${getCurrentURL()})`,
     );
 
     notify('Copied to clipboard!');
   };
 
-  const readyToSubmit = (
-    !submitting && language && codeEncoding && options !== null && programArguments !== null
-  );
+  const readyToSubmit = !submitting && language && codeEncoding
+    && options !== null && programArguments !== null;
 
   const keyDownHandler = (e: any) => {
-    if (readyToSubmit && e.ctrlKey && !e.shiftKey && !e.metaKey && !e.altKey && e.key === 'Enter') {
+    if (
+      readyToSubmit && e.ctrlKey && !e.shiftKey && !e.metaKey && !e.altKey
+      && e.key === 'Enter'
+    ) {
       submit(e);
-    } else if (e.ctrlKey && !e.shiftKey && !e.metaKey && !e.altKey && e.key === 'h') {
+    } else if (
+      e.ctrlKey && !e.shiftKey && !e.metaKey && !e.altKey && e.key === 'h'
+    ) {
       e.preventDefault();
       setLanguageSelectorOpen(true);
     }
   };
 
   const dummy = useRef<any>(null);
+
+  const pageTitle = `${
+    language && languages ? languages[language].name : 'Run'
+  } – Attempt This Online`;
   return (
     <>
       <Head>
-        <title>
-          {language && languages ? languages[language].name : 'Run'}
-          {' '}
-          &ndash; Attempt This Online
-        </title>
+        <title>{pageTitle}</title>
       </Head>
       <div className="min-h-screen bg-white dark:bg-gray-900 text-black dark:text-white relative flex flex-col">
         <Navbar />
         <div className="grow relative">
-          {languageSelectorOpen ? (
-            <LanguageSelector
-              {...{ language, languages }}
-              callback={(id: string) => {
-                if (id !== null) {
-                  setLanguage(id);
-                }
-                setLanguageSelectorOpen(false);
-                codeBox?.current?.focus();
-              }}
-            />
-          ) : null}
+          {languageSelectorOpen
+            ? (
+              <LanguageSelector
+                {...{ language, languages }}
+                callback={(id: string) => {
+                  if (id !== null) {
+                    setLanguage(id);
+                  }
+                  setLanguageSelectorOpen(false);
+                  codeBox?.current?.focus();
+                }}
+              />
+            )
+            : null}
           <div className="sticky h-0 top-4 z-20 pointer-events-none">
             {notifications.map(
               notification => (
@@ -479,7 +521,9 @@ ${markdownCode}
             )}
           </div>
           <main
-            className={`mb-3 px-4 -mt-4${fullWidthMode ? '' : ' md:container md:mx-auto'}`}
+            className={`mb-3 px-4 -mt-4${
+              fullWidthMode ? '' : ' md:container md:mx-auto'
+            }`}
           >
             <form onSubmit={submit}>
               <div className="flex flex-wrap justify-between mt-4 pb-1 gap-y-2">
@@ -489,11 +533,20 @@ ${markdownCode}
                       Language:
                       {' '}
                     </span>
-                    {languages && language && <a className="mx-2 text-blue-500 underline" href={languages[language].url}>{languages[language].name}</a>}
+                    {languages && language && (
+                      <a
+                        className="mx-2 text-blue-500 underline"
+                        href={languages[language].url}
+                      >
+                        {languages[language].name}
+                      </a>
+                    )}
                   </span>
                   <button
                     type="button"
-                    onClick={() => { setLanguageSelectorOpen(true); }}
+                    onClick={() => {
+                      setLanguageSelectorOpen(true);
+                    }}
                     className="ml-1 rounded px-2 py-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none focus:ring hover:bg-gray-300 transition"
                   >
                     Change
@@ -511,9 +564,16 @@ ${markdownCode}
                   </code>
                   <button
                     type="button"
-                    onClick={() => { setClipboardCopyModalOpen(!clipboardCopyModalOpen); }}
+                    onClick={() => {
+                      setClipboardCopyModalOpen(!clipboardCopyModalOpen);
+                    }}
                     onBlur={(event: any) => {
-                      if (clipboardCopyModal.current && !clipboardCopyModal.current.contains(event.relatedTarget)) {
+                      if (
+                        clipboardCopyModal.current
+                        && !clipboardCopyModal.current.contains(
+                          event.relatedTarget,
+                        )
+                      ) {
                         setClipboardCopyModalOpen(false);
                       }
                     }}
@@ -526,7 +586,12 @@ ${markdownCode}
                     <fieldset
                       className="absolute top-14 right-0 bg-gray-200 dark:bg-gray-800 p-4 rounded ring-blue-500 ring-opacity-40 ring shadow-lg z-40 flex flex-col w-max"
                       onBlur={(event: any) => {
-                        if (clipboardCopyButton.current && !clipboardCopyButton.current.contains(event.relatedTarget)) {
+                        if (
+                          clipboardCopyButton.current
+                          && !clipboardCopyButton.current.contains(
+                            event.relatedTarget,
+                          )
+                        ) {
                           setClipboardCopyModalOpen(false);
                         }
                       }}
@@ -537,7 +602,9 @@ ${markdownCode}
                         <legend>Copy to clipboard</legend>
                         <button
                           type="button"
-                          onClick={() => { setClipboardCopyModalOpen(false); }}
+                          onClick={() => {
+                            setClipboardCopyModalOpen(false);
+                          }}
                           className="absolute top-0 -right-1 bottom-0 p-1 rounded-full bg-transparent hover:bg-gray-300 dark:hover:bg-gray-700 transition flex"
                         >
                           <XIcon className="h-4 w-4" />
@@ -556,7 +623,9 @@ ${markdownCode}
                           onClick={copyCGCCPost}
                           className="rounded px-4 py-2 bg-gray-300 dark:bg-gray-700 dark:text-white hover:bg-gray-400 dark:hover:bg-gray-600 focus:outline-none focus:ring transition"
                         >
-                          <abbr title="Code Golf and Coding Challenges (Stack Exchange)">CGCC</abbr>
+                          <abbr title="Code Golf and Coding Challenges (Stack Exchange)">
+                            CGCC
+                          </abbr>
                           {' '}
                           Post
                         </button>
@@ -642,16 +711,30 @@ ${markdownCode}
                 >
                   <span>Execute</span>
                   {submitting && (
-                  /* this SVG is taken from https://git.io/JYHot, under the MIT licence https://git.io/JYHoh */
-                  <svg className="animate-spin my-auto -mr-1 ml-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
+                    /* this SVG is taken from https://git.io/JYHot, under the MIT licence https://git.io/JYHoh */
+                    <svg
+                      className="animate-spin my-auto -mr-1 ml-3 h-5 w-5"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      />
+                    </svg>
                   )}
                   {!readyToSubmit && !submitting && (
-                    <ExclamationCircleIcon
-                      className="text-red-500 h-6 w-6 my-auto -mr-2 ml-1"
-                    />
+                    <ExclamationCircleIcon className="text-red-500 h-6 w-6 my-auto -mr-2 ml-1" />
                   )}
                 </button>
                 {submitting && (
@@ -665,9 +748,9 @@ ${markdownCode}
                   </button>
                 )}
                 {statusType && (
-                <p className="ml-4">
-                  {statusToString(statusType, statusValue!)}
-                </p>
+                  <p className="ml-4">
+                    {statusToString(statusType, statusValue!)}
+                  </p>
                 )}
               </div>
             </form>
@@ -704,7 +787,9 @@ ${markdownCode}
               >
                 <button
                   type="button"
-                  onClick={() => { setTimingOpen(!timingOpen); }}
+                  onClick={() => {
+                    setTimingOpen(!timingOpen);
+                  }}
                   className="select-none focus:outline-none"
                 >
                   Timing details
@@ -716,7 +801,12 @@ ${markdownCode}
                 dummy={dummy}
               />
             </details>
-            <textarea ref={dummy} className="block w-full px-2 rounded font-mono text-base h-0 opacity-0" aria-hidden disabled />
+            <textarea
+              ref={dummy}
+              className="block w-full px-2 rounded font-mono text-base h-0 opacity-0"
+              aria-hidden
+              disabled
+            />
           </main>
         </div>
         <Footer />
