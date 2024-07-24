@@ -5,7 +5,8 @@ set -e
 VERSION="0.2.4"
 
 error() {
-    echo "$@" >&2; exit 2
+  echo "$@" >&2
+  exit 2
 }
 
 # make sure this is arch linux
@@ -29,15 +30,15 @@ whoami | grep -xFq root || error you must run this script as root
 # - python: helper scripts during installation
 # - skopeo: for docker image extraction
 [ -z "$ATO_NO_DEPS" ] && pacman -Syu --noconfirm --needed \
-    certbot \
-    cronie \
-    nginx \
-    sed \
-    python \
-    skopeo \
+  certbot \
+  cronie \
+  nginx \
+  sed \
+  python \
+  skopeo
 
-curl -sSL "https://github.com/attempt-this-online/containers-storage/releases/download/v1.51.0/containers-storage.linux.amd64" \
-    -o /usr/local/bin/containers-storage
+curl -sSL "https://github.com/attempt-this-online/containers-storage/releases/download/v1.53.0-2/containers-storage.linux.amd64" \
+  -o /usr/local/bin/containers-storage
 
 chmod 755 /usr/local/bin/containers-storage
 
@@ -45,17 +46,17 @@ chmod 755 /usr/local/bin/containers-storage
 mkdir -p /var/cache/ATO
 
 if [ "$ATO_MANUAL_PACKAGE" ]; then
-    tar -xf "$ATO_MANUAL_PACKAGE" -C /var/cache/ATO
+  tar -xf "$ATO_MANUAL_PACKAGE" -C /var/cache/ATO
 else
-    curl -sSL "https://github.com/attempt-this-online/attempt-this-online/releases/download/v$VERSION/attempt_this_online.tar.gz" \
-        | tar -xz -C /var/cache/ATO
+  curl -sSL "https://github.com/attempt-this-online/attempt-this-online/releases/download/v$VERSION/attempt_this_online.tar.gz" |
+    tar -xz -C /var/cache/ATO
 fi
 
 cd /var/cache/ATO/attempt_this_online
 
 mkdir -p \
-    /usr/local/lib/ATO \
-    /usr/local/share/ATO
+  /usr/local/lib/ATO \
+  /usr/local/share/ATO
 
 # configure ATO user
 useradd -rs /usr/bin/nologin -md /var/lib/ATO_home ato
@@ -74,12 +75,12 @@ chmod -R a+rX-w /usr/local/share/ATO/runners
 # install static files
 cp -RT public /usr/local/share/ATO/public
 for format in woff woff2 ttf; do
-    curl -sSL "https://raw.githubusercontent.com/tonsky/FiraCode/5.2/distr/$format/FiraCode-Regular.$format" -o "/usr/local/share/ATO/public/FiraCode-Regular.$format"
+  curl -sSL "https://raw.githubusercontent.com/tonsky/FiraCode/5.2/distr/$format/FiraCode-Regular.$format" -o "/usr/local/share/ATO/public/FiraCode-Regular.$format"
 done
 for format in woff woff2 otf; do
-    for variant in Bold Regular; do
-        curl -sSL "https://github.com/pxeger/Cantarell/raw/v0.301-2/Cantarell$variant.$format" -o "/usr/local/share/ATO/public/Cantarell-$variant.$format"
-    done
+  for variant in Bold Regular; do
+    curl -sSL "https://github.com/pxeger/Cantarell/raw/v0.301-2/Cantarell$variant.$format" -o "/usr/local/share/ATO/public/Cantarell-$variant.$format"
+  done
 done
 chown -R http:http /usr/local/share/ATO/public
 chmod -R a+rX-w /usr/local/share/ATO/public
@@ -99,14 +100,14 @@ install -dm 750 -o root -g http /var/www/_letsencrypt
 certbot certonly -n --standalone -d "$1" -d "www.$1" --agree-tos --register-unsafely-without-email
 # configure cronie to automatically renew certificates
 # (every day at 10:07)
-echo "7 10 * * * systemctl stop nginx && certbot renew && systemctl start nginx" >> /var/spool/cron/root
+echo "7 10 * * * systemctl stop nginx && certbot renew && systemctl start nginx" >>/var/spool/cron/root
 systemctl enable --now cronie.service
 
 # install yargs
 install -m 555 -o root -g root yargs /usr/local/lib/ATO/yargs
 
 # steal a statically linked bash from Debian
-curl -L "https://github.com/attempt-this-online/static-bash/releases/download/5.2.0(1)-rc2/bash" > /usr/local/lib/ATO/bash
+curl -L "https://github.com/attempt-this-online/static-bash/releases/download/5.2.0(1)-rc2/bash" >/usr/local/lib/ATO/bash
 chmod 555 /usr/local/lib/ATO/bash
 
 # configure service
@@ -117,10 +118,10 @@ systemctl enable ATO.service
 
 # generate flags to be used as proof of compromise
 flag() {
-    # shellcheck disable=SC2018
-    tr < /dev/urandom -dc a-z | head -c 32 > "$1"
-    chown "$2" "$1"
-    chmod 400 "$1"
+  # shellcheck disable=SC2018
+  tr </dev/urandom -dc a-z | head -c 32 >"$1"
+  chown "$2" "$1"
+  chmod 400 "$1"
 }
 flag /root/flag root:root
 flag /var/lib/ATO_home/flag ato:ato
@@ -136,9 +137,8 @@ chown -R ato:ato /usr/local/lib/ATO
 
 STORAGE_BACKEND='containers-storage:[/usr/local/lib/ATO/containers+/run/ATO/containers]'
 
-[ -z "$ATO_NO_IMAGES" ] && \
-while read -r image
-do
+[ -z "$ATO_NO_IMAGES" ] &&
+  while read -r image; do
     # ignore blank lines or comments
     [ -z "$image" ] || [ "$image" = "#" ] && continue
     echo "$image"
@@ -151,12 +151,12 @@ do
     image_pathsafe="$(echo "$image" | tr '/:' '+')"
 
     # extract environment variables from the image
-    skopeo inspect "$STORAGE_BACKEND$image" | setup/parse_env > "/usr/local/lib/ATO/env/$image_pathsafe"
+    skopeo inspect "$STORAGE_BACKEND$image" | setup/parse_env >"/usr/local/lib/ATO/env/$image_pathsafe"
 
     # set it up to be mounted
-    echo "$image" "$image_pathsafe" >> /usr/local/lib/ATO/to_mount
+    echo "$image" "$image_pathsafe" >>/usr/local/lib/ATO/to_mount
 
-done < images.txt
+  done <images.txt
 
 echo Finished extracting images.
 echo Clearing up...
