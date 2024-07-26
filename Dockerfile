@@ -27,7 +27,7 @@ make -j binary
 mv containers-storage /usr/local/bin/
 
 cd /tmp
-curl -Lo bash.deb "https://ftp.debian.org/debian/pool/main/b/bash/bash-static_5.2.15-2+b2_amd64.deb"
+curl -fLo bash.deb "https://ftp.debian.org/debian/pool/main/b/bash/bash-static_5.2.21-2.1_amd64.deb"
 ar -x bash.deb data.tar.xz
 tar -xJf data.tar.xz ./bin/bash-static
 mkdir /usr/local/lib/ATO
