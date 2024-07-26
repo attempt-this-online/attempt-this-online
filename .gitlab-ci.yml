@@ -1,5 +1,5 @@
 build container:
-  tags: [ato_buildox]
+  tags: [ato_buildbox]
   script:
     - |
       now=$(echo $CI_PIPELINE_CREATED_AT | tr T: - | head -c 19)
