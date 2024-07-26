@@ -29,9 +29,9 @@ mv containers-storage /usr/local/bin/
 cd /tmp
 curl -fLo bash.deb "https://ftp.debian.org/debian/pool/main/b/bash/bash-static_5.2.21-2.1_amd64.deb"
 ar -x bash.deb data.tar.xz
-tar -xJf data.tar.xz ./bin/bash-static
+tar -xJf data.tar.xz ./usr/bin/bash-static
 mkdir /usr/local/lib/ATO
-mv bin/bash-static /usr/local/lib/ATO/bash
+mv usr/bin/bash-static /usr/local/lib/ATO/bash
 
 curl -Lo /usr/local/bin/tini "https://github.com/krallin/tini/releases/download/v0.19.0/tini-amd64"
 chmod +x /usr/local/bin/tini
