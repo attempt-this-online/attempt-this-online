@@ -4,6 +4,6 @@ build container:
     - |
       now=$(echo $CI_PIPELINE_CREATED_AT | tr T: - | head -c 19)
       podman system prune -af
-      podman build -t registry.gitlab.pxeger.com/attempt-this-online/attempt-this-online{,:$now}
+      podman build -t registry.gitlab.pxeger.com/attempt-this-online/attempt-this-online -t registry.gitlab.pxeger.com/attempt-this-online/attempt-this-online:$now
       podman login "$CI_REGISTRY" -u "$CI_REGISTRY_USER" --password-stdin <<< "$CI_REGISTRY_PASSWORD"
-      podman push registry.gitlab.pxeger.com/attempt-this-online/attempt-this-online{,:$now}
+      podman push registry.gitlab.pxeger.com/attempt-this-online/attempt-this-online registry.gitlab.pxeger.com/attempt-this-online/attempt-this-online:$now
