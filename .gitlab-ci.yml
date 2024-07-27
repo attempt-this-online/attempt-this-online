@@ -12,7 +12,7 @@ run tests:
   tags: [ato_buildbox]
   script:
     - now=$(echo $CI_PIPELINE_CREATED_AT | tr :T - | head -c 19)
-    - sudo podman run --rm --detach --name ato -p 127.0.0.1:8500:8500 --privileged --cgroupns private -v ato_images:/mnt runner.gitlab.pxeger.com/attempt-this-online/attempt-this-online:$now
+    - sudo podman run --rm --detach --name ato -p 127.0.0.1:8500:8500 --privileged --cgroupns private -v ato_images:/mnt registry.gitlab.pxeger.com/attempt-this-online/attempt-this-online:$now
     - URL='ws://localhost:8500/api/v1/ws/execute' test/run
   after_script:
     - sudo podman stop ato
