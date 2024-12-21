@@ -335,6 +335,14 @@
         "sbcs": false,
         "se_class": "go"
     },
+    "goal": {
+        "name": "Goal",
+        "hello_world": {"code": "say\"Hello, World!\"", "output": "Hello, World!\n"},
+        "image": "registry.gitlab.pxeger.com/attempt-this-online/languages/goal:latest",
+        "version": "Latest",
+        "url": "https://codeberg.org/anaseto/goal",
+        "sbcs": false
+    },
     "guile": {
         "name": "Guile",
         "hello_world": {"code": "(display \"Hello, World!\")", "output": "Hello, World!"},
