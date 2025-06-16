@@ -3,7 +3,7 @@
     let_chains,
     exitcode_exit_method,
     anonymous_lifetime_in_impl_trait,
-    cursor_remaining
+    cursor_split
 )]
 
 mod constants;
@@ -282,7 +282,7 @@ impl Connection {
         let mut de = rmp_serde::Deserializer::new(cursor);
         match <T as Deserialize>::deserialize(&mut de) {
             Ok(r) => {
-                if !de.get_ref().is_empty() {
+                if !de.get_ref().split().1.is_empty() {
                     Err(Error::PolicyViolation("found extra data".to_string()))
                 } else {
                     Ok(r)

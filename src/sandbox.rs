@@ -500,15 +500,12 @@ fn run_child(
     // this is safe because it's right before an exec
     unsafe { close_open_fds(FIRST_NON_STDIO_FD, &[]) } // should never error
 
-    if let Err(e) = execve(
+    let Err(e) = execve(
         cstr!("/ATO/bash"),
         &[cstr!("/ATO/bash"), cstr!("/ATO/runner")],
         &env,
-    ) {
-        eprintln!("ATO internal error: error running execve: {e}")
-    } else {
-        eprintln!("ATO internal error: execve should never return if successful")
-    }
+    );
+    eprintln!("ATO internal error: error running execve: {e}")
 }
 
 fn load_env(language: &Language) -> Result<Vec<CString>, Error> {
