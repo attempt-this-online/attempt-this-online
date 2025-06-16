@@ -50,7 +50,7 @@
     "bash": {
         "name": "Bash",
         "hello_world": {"code": "echo \"Hello, World!\"", "output": "Hello, World!\n"},
-        "image": "registry.gitlab.pxeger.com/attempt-this-online/languages/bash:latest",
+        "image": "registry.gitlab.pxeger.com/attempt-this-online/languages/base:latest",
         "version": "Latest",
         "url": "https://www.gnu.org/software/bash/",
         "sbcs": false,
