@@ -1,41 +1,50 @@
-FROM archlinux as build
-
+# we need to ensure we have the same skopeo and containers-storage versions,
+# but we want to build containers-storage in an independent stage from the final image.
+# Adding a third "prep" stage breaks the cyclic dependency so the containers-storage build knows which version to use
+FROM archlinux AS pin_skopeo
+RUN pacman -Syu --noconfirm skopeo
+FROM pin_skopeo AS build_deps
 WORKDIR /tmp
-RUN pacman -Syu --noconfirm base-devel rustup && rustup install nightly
+RUN pacman -Syu --noconfirm go base-devel
+RUN <<"EOF"
+set -ex
+SKOPEO_VERSION=$(pacman -Qe skopeo | cut -d' ' -f2 | cut -d- -f1)
+STORAGE_VERSION=$(curl -L "https://github.com/containers/skopeo/raw/v$SKOPEO_VERSION/go.mod" | grep -F "go.podman.io/storage v" | cut -d'v' -f2)
+curl -L "https://github.com/containers/container-libs/archive/storage/v$STORAGE_VERSION.tar.gz" | tar -xz
+cd container-libs-storage-*/storage
+make -j binary
+mv containers-storage /
 
+cd /tmp
+curl -Lo bash.deb "https://ftp.debian.org/debian/pool/main/b/bash/bash-static_5.3-1_amd64.deb"
+ar -x bash.deb data.tar.xz
+tar -xJf data.tar.xz ./usr/bin/bash-static
+mv usr/bin/bash-static /
+EOF
+
+FROM archlinux AS build
+WORKDIR /tmp
+RUN pacman -Syu --noconfirm base-devel go rustup && rustup install nightly
 COPY yargs.c /tmp/
 RUN gcc -Wall -Werror -static /tmp/yargs.c -o /yargs
-
 COPY languages.json Cargo.toml Cargo.lock /tmp/
 COPY src /tmp/src
 COPY .cargo /tmp/.cargo
 ARG CARGO_FLAGS=--release
 RUN cargo build $CARGO_FLAGS && mv target/x86_64-unknown-linux-gnu/*/attempt-this-online /
 
-FROM archlinux
+FROM pin_skopeo
 
 # install dependencies
 RUN <<"EOF"
 set -ex
-pacman -Syu --noconfirm base-devel jq skopeo entr strace go
-
-SKOPEO_VERSION=$(pacman -Qe skopeo | cut -d' ' -f2 | cut -d- -f1)
-STORAGE_VERSION=$(curl -L "https://github.com/containers/skopeo/raw/v$SKOPEO_VERSION/go.mod" | grep -F "github.com/containers/storage v" | cut -d'v' -f2)
-curl -L "https://github.com/containers/storage/archive/v$STORAGE_VERSION.tar.gz" | tar -xz
-cd storage-*
-make -j binary
-mv containers-storage /usr/local/bin/
-
-cd /tmp
-curl -Lo bash.deb "https://ftp.debian.org/debian/pool/main/b/bash/bash-static_5.2.15-2+b2_amd64.deb"
-ar -x bash.deb data.tar.xz
-tar -xJf data.tar.xz ./bin/bash-static
-mkdir /usr/local/lib/ATO
-mv bin/bash-static /usr/local/lib/ATO/bash
-
+pacman -Syu --noconfirm jq entr strace
 curl -Lo /usr/local/bin/tini "https://github.com/krallin/tini/releases/download/v0.19.0/tini-amd64"
 chmod +x /usr/local/bin/tini
+mkdir /usr/local/lib/ATO
 EOF
+COPY --from=build_deps /bash-static /usr/local/lib/ATO/bash
+COPY --from=build_deps /containers-storage /usr/local/bin/
 
 # configure system
 RUN <<"EOF"
