@@ -1,26 +1,26 @@
 use crate::constants::*;
 use crate::languages::*;
 use crate::network::setup_network;
-use crate::{check, Connection, ControlMessage, Error, Request, StreamResponse};
+use crate::{Connection, ControlMessage, Error, Request, StreamResponse, check};
 
 use capctl::{caps, prctl};
 use clone3::Clone3;
 use close_fds::close_open_fds;
 use hex::ToHex;
 use nix::{
-    fcntl::{fcntl, FcntlArg, OFlag},
-    mount::{mount, MsFlags},
-    poll::{poll, PollFd, PollFlags},
+    fcntl::{FcntlArg, OFlag, fcntl},
+    mount::{MsFlags, mount},
+    poll::{PollFd, PollFlags, poll},
     sys::{
-        eventfd::{eventfd, EfdFlags},
-        resource::{getrusage, setrlimit, Resource, UsageWho::RUSAGE_CHILDREN},
+        eventfd::{EfdFlags, eventfd},
+        resource::{Resource, UsageWho::RUSAGE_CHILDREN, getrusage, setrlimit},
         stat::Mode,
         time::TimeValLike,
-        wait::{self, waitid, WaitPidFlag, WaitStatus::*},
+        wait::{self, WaitPidFlag, WaitStatus::*, waitid},
     },
     unistd::{
-        chdir, close, dup2, execve, mkdir, pipe, pivot_root, read, setresgid, setresuid, symlinkat,
-        Gid, Uid,
+        Gid, Uid, chdir, close, dup2, execve, mkdir, pipe, pivot_root, read, setresgid, setresuid,
+        symlinkat,
     },
 };
 use rand::Rng;
@@ -81,7 +81,9 @@ impl Drop for Cgroup<'_> {
                     std::thread::yield_now();
                     continue;
                 } else {
-                    eprintln!("giving up removing cgroup after {elapsed}ms and {attempt_counter} attempts");
+                    eprintln!(
+                        "giving up removing cgroup after {elapsed}ms and {attempt_counter} attempts"
+                    );
                 }
             } else {
                 eprintln!("error removing cgroup: {e}");
@@ -125,7 +127,7 @@ const RANDOM_ID_SIZE: usize = 16;
 
 fn random_id() -> String {
     rand::thread_rng()
-        .gen::<[u8; RANDOM_ID_SIZE]>()
+        .r#gen::<[u8; RANDOM_ID_SIZE]>()
         .encode_hex::<String>()
 }
 
@@ -629,13 +631,18 @@ fn setup_filesystem(request: &Request, language: &Language) -> Result<(), Error>
 
     // mount writeable upper layer on top of rootfs using overlayfs
     // also, the kernel now considers it a mount point, which is required for pivot_root to work
-    check!(mount::<str, str, str, str>(
-        None,
-        "/run/ATO/merged",
-        Some("overlay"),
-        MsFlags::empty(),
-        Some(&format!("upperdir=/run/ATO/upper,lowerdir=/usr/local/share/ATO/overlayfs_upper:{rootfs},workdir=/run/ATO/work")),
-    ), "error mounting new rootfs: {}");
+    check!(
+        mount::<str, str, str, str>(
+            None,
+            "/run/ATO/merged",
+            Some("overlay"),
+            MsFlags::empty(),
+            Some(&format!(
+                "upperdir=/run/ATO/upper,lowerdir=/usr/local/share/ATO/overlayfs_upper:{rootfs},workdir=/run/ATO/work"
+            )),
+        ),
+        "error mounting new rootfs: {}"
+    );
 
     check!(
         chdir::<str>("/run/ATO/merged"),

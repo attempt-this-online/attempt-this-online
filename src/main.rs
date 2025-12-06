@@ -1,6 +1,5 @@
 #![feature(
     io_error_more,
-    let_chains,
     exitcode_exit_method,
     anonymous_lifetime_in_impl_trait,
     cursor_split
@@ -12,8 +11,8 @@ mod network;
 mod sandbox;
 
 use crate::{constants::*, languages::*, sandbox::invoke};
-use nix::sys::signal::{signal, SigHandler, Signal};
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use nix::sys::signal::{SigHandler, Signal, signal};
+use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use serde_bytes::ByteBuf;
 use std::net::{SocketAddr, TcpListener, TcpStream};
 use std::process::Termination;
@@ -40,7 +39,7 @@ where
     F: 'static,
     T: Termination,
 {
-    use nix::unistd::{fork, ForkResult};
+    use nix::unistd::{ForkResult, fork};
     // this is safe as long as the program only has one thread so far
     match unsafe { fork() }.unwrap() {
         ForkResult::Parent { .. } => {}
@@ -88,7 +87,7 @@ fn handle_ws(connection: TcpStream) {
 
     loop {
         use std::borrow::Cow;
-        use tungstenite::protocol::frame::{coding::CloseCode, CloseFrame};
+        use tungstenite::protocol::frame::{CloseFrame, coding::CloseCode};
 
         fn close(
             connection: &mut Connection,
@@ -267,11 +266,11 @@ impl Connection {
         let message = match self.0.read_message() {
             Ok(ws::Message::Binary(b)) => b,
             Ok(ws::Message::Close(_)) | Err(ws::Error::ConnectionClosed) => {
-                return Err(Error::ClientWentAway)
+                return Err(Error::ClientWentAway);
             }
             Ok(_) => return Err(Error::UnsupportedData),
             Err(ws::Error::Capacity(ws::error::CapacityError::MessageTooLong { size, .. })) => {
-                return Err(Error::TooLarge(size))
+                return Err(Error::TooLarge(size));
             }
             Err(e) => {
                 let e = format!("error reading request: {e}");

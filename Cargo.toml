@@ -1,7 +1,7 @@
 [package]
 name = "attempt-this-online"
 version = "0.2.4"
-edition = "2021"
+edition = "2024"
 
 [dependencies]
 tungstenite = "0.18.0"
