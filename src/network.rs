@@ -1,4 +1,4 @@
-use crate::{check, Error};
+use crate::{Error, check};
 use neli::{
     consts::nl::*, consts::rtnl::*, consts::socket::*, err::*, nl::*, rtnl::*, socket::*, types::*,
 };
