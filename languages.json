@@ -377,6 +377,14 @@
         "url": "https://github.com/barbuz/Husk",
         "sbcs": true
     },
+    "iogii": {
+        "name": "iogii",
+        "hello_world": {"code": "\"Hello, World!", "output": "Hello, World!"},
+        "image": "registry.gitlab.pxeger.com/attempt-this-online/languages/iogii:latest",
+        "version": "Latest",
+        "url": "https://golfscript.com/iogii/index.html",
+        "sbcs": false
+    },
     "j": {
         "name": "J",
         "hello_world": {"code": "echo 'Hello, World!'", "output": "Hello, World!\n"},
