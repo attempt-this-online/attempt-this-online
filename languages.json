@@ -8,6 +8,14 @@
         "sbcs": true,
         "se_class": ""
     },
+    "actually": {
+        "name": "Actually",
+        "hello_world": {"code": "H", "output": "Hello, World!\n"},
+        "image": "registry.gitlab.pxeger.com/attempt-this-online/languages/actually:latest",
+        "version": "2.1.31",
+        "url": "https://github.com/Mego/seriously",
+        "sbcs": true
+    },
     "alphuck": {
         "name": "Alphuck",
         "hello_world": {"code": "eeeeeeeepaeeeepaeeaeeeaeeeaeccccisaea\neaiaaepcscisaajaiiijeeeeeeejjeeejaajcijcjeeej\niiiiiijiiiiiiiijaaejaeej", "output": "Hello World!\n"},
