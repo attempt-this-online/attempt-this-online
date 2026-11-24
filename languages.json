@@ -633,6 +633,14 @@
         "url": "https://github.com/dloscutoff/pip",
         "sbcs": false
     },
+    "plumlang": {
+        "name": "Plumlang",
+        "hello_world": {"code": "drop(\"Hello, World!\")", "output": "Hello, World!\n"},
+        "image": "registry.gitlab.pxeger.com/attempt-this-online/languages/plumlang:latest",
+        "version": "Latest",
+        "url": "https://plum.elixpo.com",
+        "sbcs": false
+    },
     "powershell": {
         "name": "PowerShell",
         "hello_world": {"code": "'Hello, World!'", "output": "Hello, World!\n"},
